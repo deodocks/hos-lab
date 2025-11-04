@@ -2,7 +2,8 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<title>보일의 법칙 가상 실험실</title>
+<title>보일의 법칙: 기체의 압력과 부피</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   * { box-sizing: border-box; }
   body {
@@ -62,8 +63,8 @@
 </head>
 <body>
 <div class="wrapper">
-  <h1>기체의 압력과 부피 가상 실험</h1>
-  <p class="sub">고무패킹을 마우스로 눌러 주사기 속 공기를 압축해 보세요.</p>
+  <h1>보일의 법칙: 기체의 압력과 부피</h1>
+  <p class="sub">고무패킹을 마우스로(또는 손가락으로) 눌러 주사기 속 공기를 압축해 보세요.</p>
 
   <!-- 주사기 + 압력계 그림 -->
   <svg id="scene" viewBox="0 0 900 220">
@@ -109,7 +110,7 @@
     <rect x="575" y="78" width="6" height="64"
           fill="#e5e7ed" stroke="#a0a7b5" stroke-width="2"/>
 
-    <!-- 플런저 막대(몸통) - 길이 늘려서 고정 -->
+    <!-- 플런저 막대(몸통) - 길이 고정 -->
     <rect id="plungerBody" x="571" y="92" width="260" height="36"
           fill="#f7f8fb" stroke="#c0c7d5" stroke-width="2"/>
 
@@ -117,7 +118,7 @@
     <rect id="plungerHandle" x="831" y="80" width="22" height="60"
           fill="#f7f8fb" stroke="#c0c7d5" stroke-width="2"/>
 
-    <!-- 넓은 드래그 가능 영역 (고무패킹 + 막대 + 손잡이 전체) -->
+    <!-- 넓은 드래그/터치 가능 영역 (고무패킹 + 막대 + 손잡이 전체) -->
     <rect id="dragArea" x="540" y="60" width="280" height="100"
           fill="transparent" cursor="grab"/>
 
@@ -151,8 +152,8 @@
   // 부피 범위 (mL)
   const V_MIN = 10;
   const V_MAX = 60;
-  const P_AT_VMAX = 100;
-  const PV_CONST = V_MAX * P_AT_VMAX; // 6000
+  const P_AT_VMAX = 100;      // 60 mL에서 100 kPa (1기압)
+  const PV_CONST = V_MAX * P_AT_VMAX; // 보일의 법칙 상수 6000
 
   const piston = document.getElementById("piston");
   const plungerBody = document.getElementById("plungerBody");
@@ -165,11 +166,11 @@
   const scaleText = document.getElementById("scaleText");
 
   // 플런저 x 위치 범위 (SVG 좌표)
-  const MIN_X = 305;   // 10 mL 위치
-  const MAX_X = 545;   // 60 mL 위치
+  const MIN_X = 305;   // 10 mL
+  const MAX_X = 545;   // 60 mL
 
   const PISTON_WIDTH = 26;
-  const ROD_WIDTH = 260;  // 막대 길이 고정 (길게)
+  const ROD_WIDTH = 260;  // 막대 길이 고정
 
   let currentX = MAX_X;
   let isDragging = false;
@@ -184,7 +185,7 @@
     return MIN_X + (MAX_X - MIN_X) * ratio;
   }
 
-  // 눈금: 1 mL마다 짧은 선, 10 mL마다 긴 선
+  // 눈금: 1 mL마다 짧은 선, 10 mL마다 긴 선 + 숫자
   function createScale() {
     const barrelTop = 82;
     const shortLen = 8;
@@ -221,14 +222,14 @@
     piston.setAttribute("x", currentX);
 
     // 막대(몸통)는 고정 길이로, 고무패킹 뒤에 붙어서 같이 이동
-    const bodyX = currentX + PISTON_WIDTH;
+    const bodyX = currentX + PISTON_WIDTH; // 고무패킹 오른쪽 끝
     plungerBody.setAttribute("x", bodyX);
     plungerBody.setAttribute("width", ROD_WIDTH);
 
     // 손잡이는 막대 끝에 고정
     plungerHandle.setAttribute("x", bodyX + ROD_WIDTH);
 
-    // 부피·압력 계산 (보일 법칙)
+    // 부피·압력 계산 (보일의 법칙)
     const V = xToVolume(currentX);
     const P = PV_CONST / V;
 
@@ -237,6 +238,7 @@
     pressureText.textContent = `${P.toFixed(1)} kPa`;
   }
 
+  // ----- 마우스 이벤트 -----
   function startDrag(e) {
     e.preventDefault();
     isDragging = true;
@@ -250,15 +252,44 @@
     updateFromX(mouseX);
   }
 
-  function endDrag() { isDragging = false; }
+  function endDrag() {
+    isDragging = false;
+  }
 
-  // 고무패킹 + 막대 + 손잡이 전체를 드래그 가능하게
   [dragArea, piston, plungerBody, plungerHandle].forEach(el => {
     el.addEventListener("mousedown", startDrag);
   });
   window.addEventListener("mousemove", moveDrag);
   window.addEventListener("mouseup", endDrag);
 
+  // ----- 모바일 터치 이벤트 -----
+  [dragArea, piston, plungerBody, plungerHandle].forEach(el => {
+    el.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      isDragging = true;
+      const touch = e.touches[0];
+      const svg = document.getElementById("scene");
+      const rect = svg.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      updateFromX(x);
+    }, { passive: false });
+  });
+
+  window.addEventListener("touchmove", (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const svg = document.getElementById("scene");
+    const rect = svg.getBoundingClientRect();
+    const x = touch.clientX - rect.left;
+    updateFromX(x);
+  }, { passive: false });
+
+  window.addEventListener("touchend", () => {
+    isDragging = false;
+  });
+
+  // 초기 설정
   createScale();
   updateFromX(MAX_X);
 </script>
