@@ -112,7 +112,7 @@
 
     <!-- 실린더 오른쪽 테두리 -->
     <rect x="575" y="78" width="6" height="64"
-          fill="#e5e7ed" stroke="#a0a7b5" stroke-width="2"/>
+          fill="#e5e7ed" stroke="#a6b2b5" stroke-width="2"/>
 
     <!-- 플런저 막대(몸통) - 길이 고정 -->
     <rect id="plungerBody" x="571" y="92" width="260" height="36"
@@ -190,6 +190,14 @@
     return MIN_X + (MAX_X - MIN_X) * ratio;
   }
 
+  // 화면 픽셀 → SVG(viewBox) 좌표 변환
+  function getSvgX(e) {
+    const rect = scene.getBoundingClientRect();
+    const viewBox = scene.viewBox.baseVal; // (0,0,900,220)
+    const scaleX = viewBox.width / rect.width;
+    return (e.clientX - rect.left) * scaleX + viewBox.x;
+  }
+
   // 눈금: 1 mL마다 짧은 선, 10 mL마다 긴 선 + 숫자
   function createScale() {
     const barrelTop = 82;
@@ -221,14 +229,13 @@
   }
 
   function updateFromX(x) {
-    // clamp
     currentX = Math.max(MIN_X, Math.min(x, MAX_X));
 
     // 고무패킹 위치
     piston.setAttribute("x", currentX);
 
     // 막대(몸통)는 고정 길이로, 고무패킹 뒤에 붙어서 같이 이동
-    const bodyX = currentX + PISTON_WIDTH; // 고무패킹 오른쪽 끝
+    const bodyX = currentX + PISTON_WIDTH;
     plungerBody.setAttribute("x", bodyX);
     plungerBody.setAttribute("width", ROD_WIDTH);
 
@@ -248,23 +255,21 @@
   function pointerDown(e) {
     e.preventDefault();
     isDragging = true;
-    scene.setPointerCapture?.(e.pointerId);
-    const rect = scene.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    if (scene.setPointerCapture) scene.setPointerCapture(e.pointerId);
+    const x = getSvgX(e);
     updateFromX(x);
   }
 
   function pointerMove(e) {
     if (!isDragging) return;
     e.preventDefault();
-    const rect = scene.getBoundingClientRect();
-    const x = e.clientX - rect.left;
+    const x = getSvgX(e);
     updateFromX(x);
   }
 
   function pointerUp(e) {
     isDragging = false;
-    scene.releasePointerCapture?.(e.pointerId);
+    if (scene.releasePointerCapture) scene.releasePointerCapture(e.pointerId);
   }
 
   [dragArea, piston, plungerBody, plungerHandle].forEach(el => {
