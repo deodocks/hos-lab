@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>호쌤의 과학 가상실험실</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: #f4f6fb;
+      color: #222;
+    }
+    header {
+      padding: 16px 24px;
+      background: #3165ff;
+      color: #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    header p {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+    main {
+      max-width: 960px;
+      margin: 16px auto;
+      padding: 0 16px 24px;
+    }
+    .intro {
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+      color: #555;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e5edff;
+      color: #3150aa;
+      font-size: 0.7rem;
+      margin-bottom: 8px;
+    }
+    .card p {
+      margin: 0 0 10px;
+      font-size: 0.85rem;
+      color: #555;
+    }
+    .card a {
+      align-self: flex-start;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      text-decoration: none;
+      font-size: 0.8rem;
+      background: #3165ff;
+      color: #fff;
+    }
+    footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: #888;
+      margin-top: 8px;
+      padding-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>호쌤의 과학 가상실험실</h1>
+    <p>중학생을 위한 개념기반 과학 시뮬레이션 모음</p>
+  </header>
+
+  <main>
+    <p class="intro">
+      아래 실험을 클릭하면 바로 가상 실험실이 열립니다.
+      그래프는 직접 그리고, 입자 모형은 스스로 그려보세요 🙂
+    </p>
+
+    <div class="grid">
+      <!-- 보일의 법칙 실험 카드 -->
+      <article class="card">
+        <span class="tag">기체의 성질</span>
+        <h2>보일의 법칙: 압력과 부피</h2>
+        <p>
+          주사기와 디지털 압력계를 이용해 기체의 압력과 부피 사이의
+          관계를 탐구합니다. 고무패킹을 눌러 부피를 바꿔 보세요.
+        </p>
+        <a href="boyle.html">실험하러 가기</a>
+      </article>
+
+      <!-- 나중에 새 실험이 생기면 이런 식으로 카드만 하나 더 추가하면 됨 -->
+      <!--
+      <article class="card">
+        <span class="tag">역학</span>
+        <h2>평면거울 상의 위치</h2>
+        <p>예시 텍스트. 나중에 다른 시뮬레이션이 생기면 여기에 추가하세요.</p>
+        <a href="mirror.html">실험하러 가기</a>
+      </article>
+      -->
+    </div>
+
+    <footer>
+      © 2025 호쌤의 과학 가상실험실 | 제작 및 업로드: 이호
+    </footer>
+  </main>
+</body>
+</html>
