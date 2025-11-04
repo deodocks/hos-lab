@@ -37,6 +37,10 @@
   svg {
     width: 100%;
     display: block;
+    touch-action: none; /* 터치 드래그 시 화면 스크롤 방지 */
+  }
+  #dragArea {
+    touch-action: none;
   }
   #panel {
     margin-top: 8px;
@@ -64,7 +68,7 @@
 <body>
 <div class="wrapper">
   <h1>보일의 법칙: 기체의 압력과 부피</h1>
-  <p class="sub">고무패킹을 마우스로(또는 손가락으로) 눌러 주사기 속 공기를 압축해 보세요.</p>
+  <p class="sub">고무패킹을 마우스로(또는 손가락으로) 눌러 드래그하여 주사기 속 공기를 압축해 보세요.</p>
 
   <!-- 주사기 + 압력계 그림 -->
   <svg id="scene" viewBox="0 0 900 220">
@@ -164,6 +168,7 @@
   const volumeDisplay = document.getElementById("volumeDisplay");
   const scaleLines = document.getElementById("scaleLines");
   const scaleText = document.getElementById("scaleText");
+  const scene = document.getElementById("scene");
 
   // 플런저 x 위치 범위 (SVG 좌표)
   const MIN_X = 305;   // 10 mL
@@ -216,6 +221,7 @@
   }
 
   function updateFromX(x) {
+    // clamp
     currentX = Math.max(MIN_X, Math.min(x, MAX_X));
 
     // 고무패킹 위치
@@ -238,56 +244,35 @@
     pressureText.textContent = `${P.toFixed(1)} kPa`;
   }
 
-  // ----- 마우스 이벤트 -----
-  function startDrag(e) {
+  // ----- Pointer 이벤트 (마우스 + 터치 통합) -----
+  function pointerDown(e) {
     e.preventDefault();
     isDragging = true;
+    scene.setPointerCapture?.(e.pointerId);
+    const rect = scene.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    updateFromX(x);
   }
 
-  function moveDrag(e) {
-    if (!isDragging) return;
-    const svg = document.getElementById("scene");
-    const rect = svg.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    updateFromX(mouseX);
-  }
-
-  function endDrag() {
-    isDragging = false;
-  }
-
-  [dragArea, piston, plungerBody, plungerHandle].forEach(el => {
-    el.addEventListener("mousedown", startDrag);
-  });
-  window.addEventListener("mousemove", moveDrag);
-  window.addEventListener("mouseup", endDrag);
-
-  // ----- 모바일 터치 이벤트 -----
-  [dragArea, piston, plungerBody, plungerHandle].forEach(el => {
-    el.addEventListener("touchstart", (e) => {
-      e.preventDefault();
-      isDragging = true;
-      const touch = e.touches[0];
-      const svg = document.getElementById("scene");
-      const rect = svg.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      updateFromX(x);
-    }, { passive: false });
-  });
-
-  window.addEventListener("touchmove", (e) => {
+  function pointerMove(e) {
     if (!isDragging) return;
     e.preventDefault();
-    const touch = e.touches[0];
-    const svg = document.getElementById("scene");
-    const rect = svg.getBoundingClientRect();
-    const x = touch.clientX - rect.left;
+    const rect = scene.getBoundingClientRect();
+    const x = e.clientX - rect.left;
     updateFromX(x);
-  }, { passive: false });
+  }
 
-  window.addEventListener("touchend", () => {
+  function pointerUp(e) {
     isDragging = false;
+    scene.releasePointerCapture?.(e.pointerId);
+  }
+
+  [dragArea, piston, plungerBody, plungerHandle].forEach(el => {
+    el.addEventListener("pointerdown", pointerDown);
   });
+  window.addEventListener("pointermove", pointerMove);
+  window.addEventListener("pointerup", pointerUp);
+  window.addEventListener("pointercancel", pointerUp);
 
   // 초기 설정
   createScale();
