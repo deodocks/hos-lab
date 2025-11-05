@@ -1,205 +1,52 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>보일의 법칙 가상 실험실</title>
-<style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f5f5f5;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-  }
-  .wrapper {
-    background: #ffffff;
-    padding: 16px 24px;
-    border-radius: 14px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-    max-width: 900px;
-    width: 100%;
-  }
-  h1 {
-    margin: 0 0 4px;
-    font-size: 1.25rem;
-    text-align: center;
-  }
-  .sub {
-    text-align: center;
-    font-size: 0.8rem;
-    color: #666;
-    margin-bottom: 8px;
-  }
-  svg {
-    width: 100%;
-    display: block;
-  }
-  #panel {
-    margin-top: 8px;
-    font-size: 0.85rem;
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .panel-item {
-    flex: 1;
-    min-width: 140px;
-  }
-  .panel-item span.value {
-    font-weight: 700;
-    margin-left: 4px;
-  }
-  .panel-note {
-    text-align: right;
-    white-space: nowrap;
-    font-size: 0.78rem;
-  }
-</style>
-</head>
-<body>
-<div class="wrapper">
-  <h1>기체의 압력과 부피 가상 실험</h1>
-  <p class="sub">고무패킹을 드래그하여 주사기 속 공기를 압축해 보세요. (마우스 / 터치)</p>
-
-  <!-- 주사기 + 압력계 그림 -->
-  <svg id="scene" viewBox="0 0 900 220">
-    <!-- 디지털 압력계 본체 -->
-    <rect x="40" y="60" width="150" height="95" rx="18" ry="18"
-          fill="#f8fcff" stroke="#cfd8e3" stroke-width="3"/>
-    <!-- 디스플레이 배경 -->
-    <rect x="55" y="75" width="110" height="50" rx="8" ry="8"
-          fill="#e2f5ff" stroke="#9ec4dd" stroke-width="2"/>
-    <!-- 디지털 숫자 + 단위 -->
-    <text id="pressureText" x="110" y="105"
-          text-anchor="middle" dominant-baseline="middle"
-          font-family="Consolas, monospace" font-size="20" fill="#222">
-      100.0 kPa
-    </text>
-
-    <!-- 본체 장식 버튼 -->
-    <circle cx="135" cy="138" r="9" fill="#ffffff" stroke="#b0c0d0" stroke-width="2"/>
-    <path d="M132 138 L138 138 M135 135 L135 141"
-          stroke="#8aa0b5" stroke-width="1.5" stroke-linecap="round"/>
-
-    <!-- 압력계와 주사기 연결 관 -->
-    <rect x="190" y="104" width="40" height="12" rx="4" ry="4"
-          fill="#d5dde5" stroke="#a6b2c0" stroke-width="2"/>
-
-    <!-- 주사기 앞쪽 (팁) -->
-    <rect x="230" y="100" width="25" height="20" rx="6" ry="6"
-          fill="#f3f6fb" stroke="#a6b2c0" stroke-width="2"/>
-
-    <!-- 주사기 실린더 외곽 -->
-    <rect x="255" y="80" width="320" height="60" rx="25" ry="25"
-          fill="url(#barrelGrad)" stroke="#9099a8" stroke-width="2"/>
-
-    <!-- 눈금 -->
-    <g id="scaleLines"></g>
-    <g id="scaleText"></g>
-
-    <!-- 고무패킹 -->
-    <rect id="piston" x="545" y="84" width="26" height="52"
-          fill="#60656f" stroke="#454b54" stroke-width="2" />
-
-    <!-- 실린더 오른쪽 테두리 -->
-    <rect x="575" y="78" width="6" height="64"
-          fill="#e5e7ed" stroke="#a0a7b5" stroke-width="2"/>
-
-    <!-- 플런저 막대(몸통) -->
-    <rect id="plungerBody" x="571" y="92" width="260" height="36"
-          fill="#f7f8fb" stroke="#c0c7d5" stroke-width="2"/>
-
-    <!-- 플런저 손잡이 -->
-    <rect id="plungerHandle" x="831" y="80" width="22" height="60"
-          fill="#f7f8fb" stroke="#c0c7d5" stroke-width="2"/>
-
-    <!-- 넓은 드래그 가능 영역 -->
-    <rect id="dragArea" x="540" y="60" width="280" height="100"
-          fill="transparent" />
-
-    <!-- 그라디언트 -->
-    <defs>
-      <linearGradient id="barrelGrad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#fdfefe"/>
-        <stop offset="50%" stop-color="#f4f7fb"/>
-        <stop offset="100%" stop-color="#eef2f7"/>
-      </linearGradient>
-    </defs>
-  </svg>
-
-  <!-- 아래 정보 패널 -->
-  <div id="panel">
-    <div class="panel-item">
-      현재 부피 V :
-      <span id="volumeDisplay" class="value">60.0</span> mL
-    </div>
-    <div class="panel-item">
-      현재 압력 P :
-      <span id="pressureDisplay" class="value">100.0</span> kPa
-    </div>
-    <div class="panel-item panel-note">
-      온도와 기체의 양은 일정하다고 가정합니다.
-    </div>
-  </div>
-</div>
-
 <script>
-  // ===== 기본 상수 및 요소 =====
-  var V_MIN = 10;
-  var V_MAX = 60;
-  var P_AT_VMAX = 100;
-  var PV_CONST = V_MAX * P_AT_VMAX; // 6000
+  // 부피 범위 (mL)
+  const V_MIN = 10;
+  const V_MAX = 60;
+  const P_AT_VMAX = 100;
+  const PV_CONST = V_MAX * P_AT_VMAX; // 6000
 
-  var piston = document.getElementById("piston");
-  var plungerBody = document.getElementById("plungerBody");
-  var plungerHandle = document.getElementById("plungerHandle");
-  var dragArea = document.getElementById("dragArea");
-  var pressureText = document.getElementById("pressureText");
-  var pressureDisplay = document.getElementById("pressureDisplay");
-  var volumeDisplay = document.getElementById("volumeDisplay");
-  var scaleLines = document.getElementById("scaleLines");
-  var scaleText = document.getElementById("scaleText");
-  var svg = document.getElementById("scene");
+  const piston = document.getElementById("piston");
+  const plungerBody = document.getElementById("plungerBody");
+  const plungerHandle = document.getElementById("plungerHandle");
+  const dragArea = document.getElementById("dragArea");
+  const pressureText = document.getElementById("pressureText");
+  const pressureDisplay = document.getElementById("pressureDisplay");
+  const volumeDisplay = document.getElementById("volumeDisplay");
+  const scaleLines = document.getElementById("scaleLines");
+  const scaleText = document.getElementById("scaleText");
+  const svg = document.getElementById("scene");
 
   // 플런저 x 위치 범위 (SVG 좌표)
-  var MIN_X = 305;    // 10 mL 위치
-  var MAX_X = 545;    // 60 mL 위치 (원래 모양)
-  var REST_X = MAX_X; // 손을 떼면 돌아갈 위치
+  const MIN_X = 305;   // 10 mL 위치
+  const MAX_X = 545;   // 60 mL 위치
+  const REST_X = MAX_X; // 손을 떼면 돌아갈 위치 (원래 60 mL)
 
-  var PISTON_WIDTH = 26;
-  var ROD_WIDTH = 260;  // 막대 길이 고정
+  const PISTON_WIDTH = 26;
+  const ROD_WIDTH = 260;  // 막대 길이 고정 (길게)
 
-  var currentX = MAX_X;
-  var isDragging = false;
-  var returnAnimationId = null;
+  let currentX = MAX_X;
+  let isDragging = false;
+  let returnAnimationId = null;
 
-  // ===== 유틸 함수 =====
   function xToVolume(x) {
-    var ratio = (x - MIN_X) / (MAX_X - MIN_X);
+    const ratio = (x - MIN_X) / (MAX_X - MIN_X); // 0~1
     return V_MIN + (V_MAX - V_MIN) * ratio;
   }
 
   function volumeToX(V) {
-    var ratio = (V - V_MIN) / (V_MAX - V_MIN);
+    const ratio = (V - V_MIN) / (V_MAX - V_MIN);
     return MIN_X + (MAX_X - MIN_X) * ratio;
   }
 
-  // 눈금 생성
+  // 눈금: 1 mL마다 짧은 선, 10 mL마다 긴 선
   function createScale() {
-    var barrelTop = 82;
-    var shortLen = 8;
-    var longLen = 14;
-
-    for (var v = V_MIN; v <= V_MAX; v += 1) {
-      var x = volumeToX(v);
-      var isMajor10 = (v % 10 === 0);
-
-      var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    const barrelTop = 82;
+    const shortLen = 8;
+    const longLen = 14;
+    for (let v = V_MIN; v <= V_MAX; v += 1) {
+      const x = volumeToX(v);
+      const isMajor10 = (v % 10 === 0);
+      const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
       line.setAttribute("x1", x);
       line.setAttribute("x2", x);
       line.setAttribute("y1", barrelTop);
@@ -209,47 +56,47 @@
       scaleLines.appendChild(line);
 
       if (isMajor10) {
-        var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+        const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
         text.setAttribute("x", x);
         text.setAttribute("y", barrelTop - 6);
         text.setAttribute("text-anchor", "middle");
         text.setAttribute("font-size", "10");
         text.setAttribute("fill", "#333");
-        text.textContent = (v === V_MAX) ? (v + " (mL)") : String(v);
+        text.textContent = (v === V_MAX) ? `${v} (mL)` : `${v}`;
         scaleText.appendChild(text);
       }
     }
   }
 
   function updateFromX(x) {
-    if (x < MIN_X) x = MIN_X;
-    if (x > MAX_X) x = MAX_X;
-    currentX = x;
+    currentX = Math.max(MIN_X, Math.min(x, MAX_X));
 
     // 고무패킹 위치
     piston.setAttribute("x", currentX);
 
-    // 막대(몸통)
-    var bodyX = currentX + PISTON_WIDTH;
+    // 막대(몸통)는 고정 길이로, 고무패킹 뒤에 붙어서 같이 이동
+    const bodyX = currentX + PISTON_WIDTH;
     plungerBody.setAttribute("x", bodyX);
     plungerBody.setAttribute("width", ROD_WIDTH);
 
-    // 손잡이
+    // 손잡이는 막대 끝에 고정
     plungerHandle.setAttribute("x", bodyX + ROD_WIDTH);
 
-    // 부피·압력 계산
-    var V = xToVolume(currentX);
-    var P = PV_CONST / V;
+    // 부피·압력 계산 (보일 법칙)
+    const V = xToVolume(currentX);
+    const P = PV_CONST / V;
 
     volumeDisplay.textContent = V.toFixed(1);
     pressureDisplay.textContent = P.toFixed(1);
-    pressureText.textContent = P.toFixed(1) + " kPa";
+    pressureText.textContent = `${P.toFixed(1)} kPa`;
   }
 
-  // ===== 되돌아가는 애니메이션 =====
+  // -------------------------
+  //  되돌아가는 애니메이션
+  // -------------------------
   function stepReturn() {
-    var targetX = REST_X;
-    var dx = targetX - currentX;
+    const targetX = REST_X;
+    const dx = targetX - currentX;
 
     if (Math.abs(dx) < 0.2) {
       updateFromX(targetX);
@@ -257,87 +104,97 @@
       return;
     }
 
-    var newX = currentX + dx * 0.08;
+    const newX = currentX + dx * 0.08;
     updateFromX(newX);
 
-    returnAnimationId = window.requestAnimationFrame(stepReturn);
+    returnAnimationId = requestAnimationFrame(stepReturn);
   }
 
   function startReturnAnimation() {
-    if (returnAnimationId !== null) {
-      window.cancelAnimationFrame(returnAnimationId);
+    if (returnAnimationId) {
+      cancelAnimationFrame(returnAnimationId);
       returnAnimationId = null;
     }
-    returnAnimationId = window.requestAnimationFrame(stepReturn);
+    returnAnimationId = requestAnimationFrame(stepReturn);
   }
 
-  // ===== 입력 위치 공통 처리 (마우스 + 터치) =====
-  function getClientX(evt) {
-    if (evt.touches && evt.touches.length > 0) {
-      return evt.touches[0].clientX;
+  // -------------------------
+  //  공통 좌표 추출 (마우스 + 터치 → SVG 좌표)
+  // -------------------------
+  function getClientX(e) {
+    if (e.touches && e.touches.length > 0) {
+      return e.touches[0].clientX;
     }
-    if (evt.changedTouches && evt.changedTouches.length > 0) {
-      return evt.changedTouches[0].clientX;
+    if (e.changedTouches && e.changedTouches.length > 0) {
+      return e.changedTouches[0].clientX;
     }
-    return evt.clientX;
+    return e.clientX;
   }
 
-  // ===== 드래그 처리 =====
-  function startDrag(evt) {
-    evt.preventDefault();
+  function getSvgXFromEvent(e) {
+    const rect = svg.getBoundingClientRect();
+    const clientX = getClientX(e);
 
-    if (returnAnimationId !== null) {
-      window.cancelAnimationFrame(returnAnimationId);
+    // viewBox 기준으로 스케일 변환
+    const viewBox = svg.viewBox.baseVal;
+    const scaleX = viewBox.width / rect.width;  // 화면폭 -> SVG폭 비율
+
+    const svgX = viewBox.x + (clientX - rect.left) * scaleX;
+    return svgX;
+  }
+
+  // -------------------------
+  //  드래그 처리
+  // -------------------------
+  function startDrag(e) {
+    e.preventDefault();
+
+    // 되돌아가는 중이면 중단
+    if (returnAnimationId) {
+      cancelAnimationFrame(returnAnimationId);
       returnAnimationId = null;
     }
 
     isDragging = true;
-    moveDrag(evt); // 시작 시점에 위치 갱신
+    // 시작 시점에도 위치를 한 번 반영 (터치에서도 자연스럽게)
+    const svgX = getSvgXFromEvent(e);
+    updateFromX(svgX);
   }
 
-  function moveDrag(evt) {
+  function moveDrag(e) {
     if (!isDragging) return;
-    evt.preventDefault();
+    e.preventDefault();
 
-    var rect = svg.getBoundingClientRect();
-    var clientX = getClientX(evt);
-    var xInSvg = clientX - rect.left;
-
-    updateFromX(xInSvg);
+    const svgX = getSvgXFromEvent(e);
+    updateFromX(svgX);
   }
 
-  function endDrag(evt) {
+  function endDrag(e) {
     if (!isDragging) return;
-    evt.preventDefault();
+    e.preventDefault();
 
     isDragging = false;
 
+    // 원래 위치(REST_X)와 차이가 있으면, 스르르 되돌아가게
     if (Math.abs(currentX - REST_X) > 0.2) {
       startReturnAnimation();
     }
   }
 
-  // ===== 이벤트 등록 =====
-  function addDragListeners(el) {
-    el.addEventListener("mousedown", startDrag, false);
-    el.addEventListener("touchstart", startDrag, false);
-  }
+  // 고무패킹 + 막대 + 손잡이 전체를 드래그 가능하게 (마우스 + 터치)
+  [dragArea, piston, plungerBody, plungerHandle].forEach(el => {
+    el.addEventListener("mousedown", startDrag);
+    el.addEventListener("touchstart", startDrag);
+  });
 
-  addDragListeners(dragArea);
-  addDragListeners(piston);
-  addDragListeners(plungerBody);
-  addDragListeners(plungerHandle);
+  // 전역에서 움직임/끝 감지 (마우스 + 터치)
+  window.addEventListener("mousemove", moveDrag);
+  window.addEventListener("mouseup", endDrag);
 
-  window.addEventListener("mousemove", moveDrag, false);
-  window.addEventListener("mouseup", endDrag, false);
+  window.addEventListener("touchmove", moveDrag, { passive: false });
+  window.addEventListener("touchend", endDrag, { passive: false });
+  window.addEventListener("touchcancel", endDrag, { passive: false });
 
-  window.addEventListener("touchmove", moveDrag, false);
-  window.addEventListener("touchend", endDrag, false);
-  window.addEventListener("touchcancel", endDrag, false);
-
-  // 초기 설정
   createScale();
   updateFromX(MAX_X);
 </script>
-</body>
-</html>
