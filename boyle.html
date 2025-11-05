@@ -22,13 +22,13 @@
   var REST_X = MAX_X; // 손을 떼면 돌아갈 위치(60 mL)
 
   var PISTON_WIDTH = 26;
-  var ROD_WIDTH = 260;  // 막대 길이 고정
-  var VIEWBOX_WIDTH = 900; // viewBox="0 0 900 220" 기준
+  var ROD_WIDTH = 260;        // 막대 길이 고정
+  var VIEWBOX_WIDTH = 900;    // viewBox="0 0 900 220"
   var VIEWBOX_X = 0;
 
   var currentX = MAX_X;
   var isDragging = false;
-  var activeTouchId = null; // 어떤 손가락인지 추적
+  var activeTouchId = null;   // 어떤 손가락인지 추적
   var returnAnimationId = null;
 
   // ====== 부피/압력 계산 ======
@@ -88,7 +88,7 @@
             break;
           }
         }
-        // 손가락을 잃어버린 경우: 그냥 현재 위치 유지
+        // 손가락을 못 찾으면 현재 위치 유지
         if (typeof clientX === "undefined") {
           return currentX;
         }
