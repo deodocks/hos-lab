@@ -1,131 +1,804 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>호쌤의 과학 가상실험실</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
-      background: #f4f6fb;
-      color: #222;
-    }
-    header {
-      padding: 16px 24px;
-      background: #3165ff;
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.4rem;
-    }
-    header p {
-      margin: 4px 0 0;
-      font-size: 0.9rem;
-      opacity: 0.9;
-    }
-    main {
-      max-width: 960px;
-      margin: 16px auto;
-      padding: 0 16px 24px;
-    }
-    .intro {
-      font-size: 0.9rem;
-      margin-bottom: 16px;
-      color: #555;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 14px 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .card h2 {
-      margin: 0 0 6px;
-      font-size: 1rem;
-    }
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: #e5edff;
-      color: #3150aa;
-      font-size: 0.7rem;
-      margin-bottom: 8px;
-    }
-    .card p {
-      margin: 0 0 10px;
-      font-size: 0.85rem;
-      color: #555;
-    }
-    .card a {
-      align-self: flex-start;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: none;
-      text-decoration: none;
-      font-size: 0.8rem;
-      background: #3165ff;
-      color: #fff;
-    }
-    footer {
-      text-align: center;
-      font-size: 0.7rem;
-      color: #888;
-      margin-top: 8px;
-      padding-bottom: 4px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>기체 법칙 가상 실험실</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  .wrapper {
+    background: #ffffff;
+    padding: 16px 24px;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    max-width: 900px;
+    width: 100%;
+  }
+
+  /* 탭 버튼 */
+  .tab-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .tab-button {
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    border-radius: 999px;
+    border: 1px solid #ccd3dd;
+    background: #f5f8ff;
+    cursor: pointer;
+  }
+  .tab-button.active {
+    background: #3b82f6;
+    border-color: #2563eb;
+    color: #fff;
+  }
+
+  .experiment {
+    display: none;
+  }
+  .experiment.active {
+    display: block;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 1.25rem;
+    text-align: center;
+  }
+  .sub {
+    text-align: center;
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  svg {
+    width: 100%;
+    display: block;
+  }
+
+  .panel {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .panel-item {
+    flex: 1;
+    min-width: 140px;
+  }
+  .panel-item span.value {
+    font-weight: 700;
+    margin-left: 4px;
+  }
+  .panel-note {
+    flex: 1 1 100%;
+    text-align: left;
+    white-space: normal;
+    font-size: 0.78rem;
+  }
+
+  /* 모바일에서 드래그할 때 화면이 스크롤되지 않도록 */
+  #dragArea, #piston, #plungerBody, #plungerHandle {
+    touch-action: none;
+    cursor: grab;
+  }
+
+  /* 상단 오른쪽 버튼 */
+  .top-right {
+    text-align: right;
+    margin-bottom: 4px;
+  }
+  #toggleParticlesBtn {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    border-radius: 12px;
+    border: 1px solid #ccd3dd;
+    background: #f5f8ff;
+    cursor: pointer;
+  }
+  #toggleParticlesBtn:hover {
+    background: #e7f0ff;
+  }
+
+  /* 샤를 법칙 온도 슬라이더 */
+  .slider-row {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .slider-row label {
+    white-space: nowrap;
+  }
+  .slider-row input[type="range"] {
+    flex: 1;
+  }
+</style>
 </head>
 <body>
-  <header>
-    <h1>호쌤의 과학 가상실험실</h1>
-    <p>중학생을 위한 개념기반 과학 시뮬레이션 모음</p>
-  </header>
+<div class="wrapper">
 
-  <main>
-    <p class="intro">
-      아래 실험을 클릭하면 바로 가상 실험실이 열립니다.
-      그래프는 직접 그리고, 입자 모형은 스스로 그려보세요 🙂
-    </p>
+  <!-- 보일 / 샤를 탭 -->
+  <div class="tab-buttons">
+    <button class="tab-button active" data-target="boyleExp">보일 법칙 (P–V)</button>
+    <button class="tab-button" data-target="charlesExp">샤를 법칙 (V–T)</button>
+  </div>
 
-    <div class="grid">
-      <!-- 보일의 법칙 실험 카드 -->
-      <article class="card">
-        <span class="tag">기체의 성질</span>
-        <h2>보일의 법칙: 압력과 부피</h2>
-        <p>
-          주사기와 디지털 압력계를 이용해 기체의 압력과 부피 사이의
-          관계를 탐구합니다. 고무패킹을 눌러 부피를 바꿔 보세요.
-        </p>
-        <a href="boyle.html">실험하러 가기</a>
-      </article>
-
-      <!-- 나중에 새 실험이 생기면 이런 식으로 카드만 하나 더 추가하면 됨 -->
-      <!--
-      <article class="card">
-        <span class="tag">역학</span>
-        <h2>평면거울 상의 위치</h2>
-        <p>예시 텍스트. 나중에 다른 시뮬레이션이 생기면 여기에 추가하세요.</p>
-        <a href="mirror.html">실험하러 가기</a>
-      </article>
-      -->
+  <!-- 보일 법칙 실험 -->
+  <div id="boyleExp" class="experiment active">
+    <div class="top-right">
+      <button id="toggleParticlesBtn">입자 운동 보기: OFF</button>
     </div>
 
-    <footer>
-      © 2025 호쌤의 과학 가상실험실 | 제작 및 업로드: 이호
-    </footer>
-  </main>
+    <h1>기체의 압력과 부피 가상 실험 (보일 법칙)</h1>
+    <p class="sub">고무패킹을 드래그하여 주사기 속 공기를 압축해 보세요. (마우스 / 터치)</p>
+
+    <!-- 주사기 + 압력계 그림 -->
+    <svg id="scene" viewBox="0 0 900 220">
+      <!-- 디지털 압력계 본체 -->
+      <rect x="40" y="60" width="150" height="95" rx="18" ry="18"
+            fill="#f8fcff" stroke="#cfd8e3" stroke-width="3"/>
+      <!-- 디스플레이 배경 -->
+      <rect x="55" y="75" width="110" height="50" rx="8" ry="8"
+            fill="#e2f5ff" stroke="#9ec4dd" stroke-width="2"/>
+      <!-- 디지털 숫자 + 단위 -->
+      <text id="pressureText" x="110" y="105"
+            text-anchor="middle" dominant-baseline="middle"
+            font-family="Consolas, monospace" font-size="20" fill="#222">
+        100.0 kPa
+      </text>
+
+      <!-- 본체 장식 버튼 -->
+      <circle cx="135" cy="138" r="9" fill="#ffffff" stroke="#b0c0d0" stroke-width="2"/>
+      <path d="M132 138 L138 138 M135 135 L135 141"
+            stroke="#8aa0b5" stroke-width="1.5" stroke-linecap="round"/>
+
+      <!-- 압력계와 주사기 연결 관 -->
+      <rect x="190" y="104" width="40" height="12" rx="4" ry="4"
+            fill="#d5dde5" stroke="#a6b2c0" stroke-width="2"/>
+
+      <!-- 주사기 앞쪽 (팁) -->
+      <rect x="230" y="100" width="25" height="20" rx="6" ry="6"
+            fill="#f3f6fb" stroke="#a6b2c0" stroke-width="2"/>
+
+      <!-- 주사기 실린더 외곽 -->
+      <rect x="255" y="80" width="320" height="60" rx="25" ry="25"
+            fill="url(#barrelGrad)" stroke="#9099a8" stroke-width="2"/>
+
+      <!-- 눈금 -->
+      <g id="scaleLines"></g>
+      <g id="scaleText"></g>
+
+      <!-- 고무패킹 -->
+      <rect id="piston" x="545" y="84" width="26" height="52"
+            fill="#60656f" stroke="#454b54" stroke-width="2" />
+
+      <!-- 실린더 오른쪽 테두리 -->
+      <rect x="575" y="78" width="6" height="64"
+            fill="#e5e7ed" stroke="#a0a7b5" stroke-width="2"/>
+
+      <!-- 플런저 막대(몸통) -->
+      <rect id="plungerBody" x="571" y="92" width="260" height="36"
+            fill="#f7f8fb" stroke="#c0c7d5" stroke-width="2"/>
+
+      <!-- 플런저 손잡이 -->
+      <rect id="plungerHandle" x="831" y="80" width="22" height="60"
+            fill="#f7f8fb" stroke="#c0c7d5" stroke-width="2"/>
+
+      <!-- 넓은 드래그 가능 영역 -->
+      <rect id="dragArea" x="540" y="60" width="280" height="100"
+            fill="transparent" />
+
+      <!-- 그라디언트 -->
+      <defs>
+        <linearGradient id="barrelGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fdfefe"/>
+          <stop offset="50%" stop-color="#f4f7fb"/>
+          <stop offset="100%" stop-color="#eef2f7"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <!-- 아래 정보 패널 -->
+    <div class="panel">
+      <div class="panel-item">
+        현재 부피 V :
+        <span id="volumeDisplay" class="value">60.0</span> mL
+      </div>
+      <div class="panel-item">
+        현재 압력 P :
+        <span id="pressureDisplay" class="value">100.0</span> kPa
+      </div>
+      <div class="panel-item">
+        피스톤 충돌 빈도 :
+        <span id="collisionRate" class="value">-</span> 회/s
+      </div>
+      <div class="panel-item panel-note">
+        온도와 기체의 양은 일정하다고 가정합니다.
+      </div>
+    </div>
+  </div>
+
+  <!-- 샤를 법칙 실험 -->
+  <div id="charlesExp" class="experiment">
+    <h1>기체의 부피와 온도 가상 실험 (샤를 법칙)</h1>
+    <p class="sub">온도 슬라이더를 움직여 온도를 바꾸면 부피가 어떻게 변하는지 살펴보세요. (압력과 기체의 양은 일정)</p>
+
+    <svg id="charlesScene" viewBox="0 0 900 260">
+      <!-- 물이 담긴 비커 -->
+      <rect x="320" y="180" width="260" height="50" rx="10" ry="10"
+            fill="#e3f2ff" stroke="#9ec4dd" stroke-width="2"/>
+      <rect x="330" y="170" width="240" height="10"
+            fill="#c0e0ff" stroke="#9ec4dd" stroke-width="2"/>
+
+      <!-- 실린더 외곽 -->
+      <rect x="400" y="50" width="100" height="140" rx="20" ry="20"
+            fill="url(#charlesBarrelGrad)" stroke="#9099a8" stroke-width="2"/>
+
+      <!-- 기체(파란색) 영역 -->
+      <rect id="charlesGas" x="405" y="120" width="90" height="60"
+            fill="#cfe6ff" stroke="#9ec5ff" stroke-width="1.2" opacity="0.9"/>
+
+      <!-- 피스톤 -->
+      <rect id="charlesPiston" x="405" y="110" width="90" height="10"
+            fill="#60656f" stroke="#454b54" stroke-width="2"/>
+
+      <!-- 피스톤 손잡이 막대 -->
+      <rect x="440" y="30" width="20" height="30"
+            fill="#f7f8fb" stroke="#c0c7d5" stroke-width="2"/>
+
+      <!-- 온도계 -->
+      <rect x="670" y="60" width="30" height="140" rx="15" ry="15"
+            fill="#f5f5f5" stroke="#cfd8e3" stroke-width="2"/>
+      <rect x="682" y="170" width="6" height="20"
+            fill="#cfd8e3"/>
+      <!-- 수은 기둥 -->
+      <rect id="thermoMercury" x="682" y="150" width="6" height="40"
+            fill="#ff5c5c"/>
+
+      <!-- 온도계 눈금 -->
+      <g font-size="9" fill="#555">
+        <line x1="675" y1="70" x2="685" y2="70" stroke="#777" stroke-width="1"/>
+        <text x="670" y="72" text-anchor="end">600K</text>
+
+        <line x1="675" y1="110" x2="685" y2="110" stroke="#777" stroke-width="1"/>
+        <text x="670" y="112" text-anchor="end">400K</text>
+
+        <line x1="675" y1="150" x2="685" y2="150" stroke="#777" stroke-width="1"/>
+        <text x="670" y="152" text-anchor="end">200K</text>
+
+        <line x1="675" y1="190" x2="685" y2="190" stroke="#777" stroke-width="1"/>
+        <text x="670" y="192" text-anchor="end">0K</text>
+      </g>
+
+      <!-- 설명 텍스트 -->
+      <text x="450" y="235" text-anchor="middle" font-size="12" fill="#444">
+        T가 증가하면 V가 비례하여 커집니다. (샤를 법칙: V ∝ T)
+      </text>
+
+      <defs>
+        <linearGradient id="charlesBarrelGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#fdfefe"/>
+          <stop offset="50%" stop-color="#f4f7fb"/>
+          <stop offset="100%" stop-color="#eef2f7"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <div class="slider-row">
+      <label for="tempSlider">온도 조절 (K)</label>
+      <input type="range" id="tempSlider" min="0" max="600" step="10" value="300" />
+    </div>
+
+    <div class="panel charles-panel">
+      <div class="panel-item">
+        현재 온도 T :
+        <span id="tempDisplay" class="value">300</span> K
+      </div>
+      <div class="panel-item">
+        현재 부피 V :
+        <span id="charlesVolumeDisplay" class="value">60.0</span> mL
+      </div>
+      <div class="panel-item panel-note">
+        압력과 기체의 양은 일정하다고 가정합니다. (샤를 법칙: V ∝ T)
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  /* ===== 탭 전환 ===== */
+  (function () {
+    var buttons = document.querySelectorAll(".tab-button");
+    var exps = document.querySelectorAll(".experiment");
+
+    buttons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var targetId = btn.getAttribute("data-target");
+
+        exps.forEach(function (exp) {
+          exp.classList.toggle("active", exp.id === targetId);
+        });
+
+        buttons.forEach(function (b) {
+          b.classList.toggle("active", b === btn);
+        });
+      });
+    });
+  })();
+
+  /* ===== 보일의 법칙 시뮬레이션 (기존 코드) ===== */
+  (function () {
+    // ====== 보일의 법칙 설정 ======
+    var V_MIN = 10;
+    var V_MAX = 60;
+    var P_AT_VMAX = 100;
+    var PV_CONST = V_MAX * P_AT_VMAX; // 6000
+
+    var piston = document.getElementById("piston");
+    var plungerBody = document.getElementById("plungerBody");
+    var plungerHandle = document.getElementById("plungerHandle");
+    var dragArea = document.getElementById("dragArea");
+    var pressureText = document.getElementById("pressureText");
+    var pressureDisplay = document.getElementById("pressureDisplay");
+    var volumeDisplay = document.getElementById("volumeDisplay");
+    var scaleLines = document.getElementById("scaleLines");
+    var scaleText = document.getElementById("scaleText");
+    var svg = document.getElementById("scene");
+    var toggleBtn = document.getElementById("toggleParticlesBtn");
+    var collisionRateDisplay = document.getElementById("collisionRate");
+
+    // 플런저 x 위치 범위 (SVG viewBox 좌표)
+    var MIN_X = 305;    // 10 mL 위치
+    var MAX_X = 545;    // 60 mL 위치
+    var REST_X = MAX_X; // 손을 떼면 돌아갈 위치(60 mL)
+
+    var PISTON_WIDTH = 26;
+    var ROD_WIDTH = 260;        // 막대 길이 고정
+    var VIEWBOX_WIDTH = 900;    // viewBox="0 0 900 220"
+    var VIEWBOX_X = 0;
+
+    var currentX = MAX_X;
+    var isDragging = false;
+    var returnAnimationId = null;
+
+    // ====== 입자 시뮬레이션 설정 ======
+    var particles = [];
+    var NUM_PARTICLES = 40;
+    var PARTICLE_RADIUS = 3; // 조금 더 작게
+
+    // 기체가 있는 영역(실린더 내부)
+    var GAS_LEFT_X = 270;
+    var GAS_TOP_Y = 86;
+    var GAS_BOTTOM_Y = 136;
+
+    var particlesEnabled = false;
+    var particleAnimationId = null;
+
+    // 시뮬레이션 시간 간격 (초) – 대략 60fps 기준
+    var DT_SIM_S = 0.016; // ≈ 1/60 s
+
+    // 충돌 횟수 및 시간(초) 누적 → 초당 충돌률
+    var collisionWindowCount = 0;
+    var windowTimeS = 0;
+    var collisionRate = 0;
+
+    // ====== 부피/압력 계산 ======
+    function xToVolume(x) {
+      var ratio = (x - MIN_X) / (MAX_X - MIN_X); // 0~1
+      return V_MIN + (V_MAX - V_MIN) * ratio;
+    }
+
+    function volumeToX(V) {
+      var ratio = (V - V_MIN) / (V_MAX - V_MIN);
+      return MIN_X + (MAX_X - MIN_X) * ratio;
+    }
+
+    // 눈금 생성
+    function createScale() {
+      var barrelTop = 82;
+      var shortLen = 8;
+      var longLen = 14;
+
+      for (var v = V_MIN; v <= V_MAX; v += 1) {
+        var x = volumeToX(v);
+        var isMajor10 = (v % 10 === 0);
+
+        var line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", x);
+        line.setAttribute("x2", x);
+        line.setAttribute("y1", barrelTop);
+        line.setAttribute("y2", barrelTop + (isMajor10 ? longLen : shortLen));
+        line.setAttribute("stroke", "#555");
+        line.setAttribute("stroke-width", isMajor10 ? "1.4" : "1");
+        scaleLines.appendChild(line);
+
+        if (isMajor10) {
+          var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+          text.setAttribute("x", x);
+          text.setAttribute("y", barrelTop - 6);
+          text.setAttribute("text-anchor", "middle");
+          text.setAttribute("font-size", "10");
+          text.setAttribute("fill", "#333");
+          text.textContent = (v === V_MAX) ? (v + " (mL)") : String(v);
+          scaleText.appendChild(text);
+        }
+      }
+    }
+
+    // 화면 좌표 → SVG viewBox 좌표(x) 변환
+    function getSvgXFromEvent(evt) {
+      var rect = svg.getBoundingClientRect();
+      var clientX;
+
+      if (evt.touches && evt.touches.length > 0) {
+        clientX = evt.touches[0].clientX;
+      } else if (evt.changedTouches && evt.changedTouches.length > 0) {
+        clientX = evt.changedTouches[0].clientX;
+      } else {
+        clientX = evt.clientX;
+      }
+
+      var scaleX = VIEWBOX_WIDTH / rect.width;
+      var svgX = VIEWBOX_X + (clientX - rect.left) * scaleX;
+      return svgX;
+    }
+
+    function updateFromX(x) {
+      // 1) x를 범위 내로 제한
+      if (x < MIN_X) x = MIN_X;
+      if (x > MAX_X) x = MAX_X;
+      currentX = x;
+
+      // 2) 피스톤/플런저 위치 업데이트
+      piston.setAttribute("x", currentX);
+
+      var bodyX = currentX + PISTON_WIDTH;
+      plungerBody.setAttribute("x", bodyX);
+      plungerBody.setAttribute("width", ROD_WIDTH);
+      plungerHandle.setAttribute("x", bodyX + ROD_WIDTH);
+
+      // 3) 부피 계산 후, 0.1 mL 단위로 반올림
+      var V_raw = xToVolume(currentX);
+      var V = Math.round(V_raw * 10) / 10;
+
+      // 4) 반올림된 부피로 압력 재계산 (P * V = 6000 유지)
+      var P = PV_CONST / V;
+
+      // 5) 화면 표시
+      volumeDisplay.textContent = V.toFixed(1);
+      pressureDisplay.textContent = P.toFixed(1);
+      pressureText.textContent = P.toFixed(1) + " kPa";
+    }
+
+    // ====== 되돌아가는 애니메이션 ======
+    function stepReturn() {
+      var targetX = REST_X;
+      var dx = targetX - currentX;
+
+      if (Math.abs(dx) < 0.2) {
+        updateFromX(targetX);
+        returnAnimationId = null;
+        return;
+      }
+
+      var newX = currentX + dx * 0.08; // 부드럽게 근사
+      updateFromX(newX);
+
+      returnAnimationId = window.requestAnimationFrame(stepReturn);
+    }
+
+    function startReturnAnimation() {
+      if (returnAnimationId !== null) {
+        window.cancelAnimationFrame(returnAnimationId);
+        returnAnimationId = null;
+      }
+      returnAnimationId = window.requestAnimationFrame(stepReturn);
+    }
+
+    // ====== 입자 생성 (옅은 파란색, 작은 크기) ======
+    function createParticles() {
+      // 기존 입자 삭제
+      var olds = svg.querySelectorAll(".gas-particle");
+      for (var i = 0; i < olds.length; i++) {
+        svg.removeChild(olds[i]);
+      }
+
+      particles = [];
+
+      var xMin = GAS_LEFT_X + PARTICLE_RADIUS;
+      var xMax = currentX - PARTICLE_RADIUS - 6;  // 피스톤과 약간 여유
+
+      if (xMax < xMin + 5) {
+        xMax = xMin + 5;
+      }
+
+      var yMin = GAS_TOP_Y + PARTICLE_RADIUS;
+      var yMax = GAS_BOTTOM_Y - PARTICLE_RADIUS;
+
+      for (var i = 0; i < NUM_PARTICLES; i++) {
+        var cx = xMin + Math.random() * (xMax - xMin);
+        var cy = yMin + Math.random() * (yMax - yMin);
+
+        var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("class", "gas-particle");
+        circle.setAttribute("r", PARTICLE_RADIUS);
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        // 옅은 파란색 + 살짝 테두리 느낌
+        circle.setAttribute("fill", "#cfe6ff");
+        circle.setAttribute("stroke", "#9ec5ff");
+        circle.setAttribute("stroke-width", "0.6");
+        circle.setAttribute("opacity", "0.8");
+
+        svg.appendChild(circle);
+
+        // 속도 (느리게) : 40~80 px/s 범위
+        var speed = 40 + Math.random() * 40;
+        var angle = Math.random() * Math.PI * 2;
+        var vx = speed * Math.cos(angle);
+        var vy = speed * Math.sin(angle);
+
+        particles.push({
+          el: circle,
+          x: cx,
+          y: cy,
+          vx: vx,
+          vy: vy
+        });
+      }
+    }
+
+    // ====== 입자 애니메이션 1프레임 ======
+    function stepParticles() {
+      if (!particlesEnabled) {
+        particleAnimationId = null;
+        return;
+      }
+
+      var pistonX = currentX;
+      var i, p;
+
+      for (i = 0; i < particles.length; i++) {
+        p = particles[i];
+
+        var newX = p.x + p.vx * DT_SIM_S;
+        var newY = p.y + p.vy * DT_SIM_S;
+
+        // 좌측 벽 충돌
+        if (newX - PARTICLE_RADIUS < GAS_LEFT_X) {
+          newX = GAS_LEFT_X + PARTICLE_RADIUS;
+          p.vx *= -1;
+        }
+
+        // 피스톤(오른쪽) 충돌
+        if (newX + PARTICLE_RADIUS > pistonX) {
+          newX = pistonX - PARTICLE_RADIUS;
+          p.vx *= -1;
+          collisionWindowCount++;
+        }
+
+        // 위/아래 벽 충돌
+        if (newY - PARTICLE_RADIUS < GAS_TOP_Y) {
+          newY = GAS_TOP_Y + PARTICLE_RADIUS;
+          p.vy *= -1;
+        }
+        if (newY + PARTICLE_RADIUS > GAS_BOTTOM_Y) {
+          newY = GAS_BOTTOM_Y - PARTICLE_RADIUS;
+          p.vy *= -1;
+        }
+
+        p.x = newX;
+        p.y = newY;
+        p.el.setAttribute("cx", newX);
+        p.el.setAttribute("cy", newY);
+      }
+
+      // 충돌 빈도 계산용 시간 누적 (초 단위)
+      windowTimeS += DT_SIM_S;
+      if (windowTimeS >= 1.0) { // 1초마다 샘플링
+        collisionRate = collisionWindowCount / windowTimeS; // 회/s
+        if (collisionRateDisplay) {
+          collisionRateDisplay.textContent = collisionRate.toFixed(1);
+        }
+        windowTimeS = 0;
+        collisionWindowCount = 0;
+      }
+
+      particleAnimationId = window.requestAnimationFrame(stepParticles);
+    }
+
+    function startParticles() {
+      if (particlesEnabled) return;
+      particlesEnabled = true;
+
+      collisionWindowCount = 0;
+      windowTimeS = 0;
+      if (collisionRateDisplay) {
+        collisionRateDisplay.textContent = "0.0"; // ON을 눌렀을 때부터 표시 시작
+      }
+
+      createParticles();
+
+      if (toggleBtn) {
+        toggleBtn.textContent = "입자 운동 보기: ON";
+      }
+
+      particleAnimationId = window.requestAnimationFrame(stepParticles);
+    }
+
+    function stopParticles() {
+      particlesEnabled = false;
+      if (particleAnimationId) {
+        window.cancelAnimationFrame(particleAnimationId);
+        particleAnimationId = null;
+      }
+
+      // 입자들을 화면에서 제거
+      var olds = svg.querySelectorAll(".gas-particle");
+      for (var i = 0; i < olds.length; i++) {
+        svg.removeChild(olds[i]);
+      }
+      particles = [];
+
+      // 충돌 빈도도 다시 숨김 상태 느낌으로
+      if (collisionRateDisplay) {
+        collisionRateDisplay.textContent = "-";
+      }
+
+      if (toggleBtn) {
+        toggleBtn.textContent = "입자 운동 보기: OFF";
+      }
+    }
+
+    // ====== 드래그 처리 (마우스 + 터치) ======
+    function startDrag(evt) {
+      evt.preventDefault();
+
+      // 복원 애니메이션 중이면 정지
+      if (returnAnimationId !== null) {
+        window.cancelAnimationFrame(returnAnimationId);
+        returnAnimationId = null;
+      }
+
+      isDragging = true;
+
+      var svgX = getSvgXFromEvent(evt);
+      updateFromX(svgX);
+    }
+
+    function moveDrag(evt) {
+      if (!isDragging) return;
+      evt.preventDefault();
+
+      var svgX = getSvgXFromEvent(evt);
+      updateFromX(svgX);
+    }
+
+    function endDrag(evt) {
+      if (!isDragging) return;
+      evt.preventDefault();
+
+      isDragging = false;
+
+      // 손을 떼면 원래 위치로 되돌아가게
+      if (Math.abs(currentX - REST_X) > 0.2) {
+        startReturnAnimation();
+      }
+    }
+
+    // ====== 이벤트 등록 ======
+    function addDragListeners(el) {
+      el.addEventListener("mousedown", startDrag, false);
+      el.addEventListener("touchstart", startDrag, false);
+    }
+
+    addDragListeners(dragArea);
+    addDragListeners(piston);
+    addDragListeners(plungerBody);
+    addDragListeners(plungerHandle);
+
+    // 전역 이동/종료(마우스 + 터치)
+    window.addEventListener("mousemove", moveDrag, false);
+    window.addEventListener("mouseup", endDrag, false);
+    window.addEventListener("touchmove", moveDrag, false);
+    window.addEventListener("touchend", endDrag, false);
+    window.addEventListener("touchcancel", endDrag, false);
+
+    // 버튼으로 입자 시뮬레이션 토글
+    if (toggleBtn) {
+      toggleBtn.addEventListener("click", function () {
+        if (particlesEnabled) {
+          stopParticles();
+        } else {
+          startParticles();
+        }
+      });
+    }
+
+    // ====== 초기 설정 ======
+    createScale();
+    updateFromX(MAX_X); // 60 mL, 100 kPa에서 시작
+  })();
+
+  /* ===== 샤를 법칙 시뮬레이션 ===== */
+  (function () {
+    var svg = document.getElementById("charlesScene");
+    if (!svg) return;
+
+    var piston = document.getElementById("charlesPiston");
+    var gasRect = document.getElementById("charlesGas");
+    var mercury = document.getElementById("thermoMercury");
+    var tempSlider = document.getElementById("tempSlider");
+    var tempDisplay = document.getElementById("tempDisplay");
+    var volumeDisplay = document.getElementById("charlesVolumeDisplay");
+
+    if (!piston || !gasRect || !mercury || !tempSlider || !tempDisplay || !volumeDisplay) return;
+
+    var T_MIN = 0;
+    var T_MAX = 600;
+    var V_MAX = 120; // 600K에서 120 mL
+    var CYL_TOP = 60;
+    var CYL_BOTTOM = 180;
+    var CYL_HEIGHT = CYL_BOTTOM - CYL_TOP;
+    var PISTON_THICK = 10;
+
+    function tempToVolume(T) {
+      // 샤를 법칙: V ∝ T
+      return (V_MAX / T_MAX) * T;
+    }
+
+    function updateFromT(T) {
+      if (T < T_MIN) T = T_MIN;
+      if (T > T_MAX) T = T_MAX;
+
+      // 부피 계산
+      var V = tempToVolume(T);
+
+      // 기체 높이: T에 비례하게
+      var gasHeight = 10 + (CYL_HEIGHT - 20) * (T / T_MAX); // 최소 10, 최대 CYL_HEIGHT-10
+      var gasTop = CYL_BOTTOM - gasHeight;
+
+      gasRect.setAttribute("y", gasTop);
+      gasRect.setAttribute("height", gasHeight);
+
+      // 피스톤 위치
+      piston.setAttribute("y", gasTop - PISTON_THICK);
+
+      // 온도계 수은 기둥
+      var thermoHeight = 20 + 90 * (T / T_MAX); // 대략적인 비례
+      var mercuryY = 190 - thermoHeight;
+      mercury.setAttribute("y", mercuryY);
+      mercury.setAttribute("height", thermoHeight);
+
+      tempDisplay.textContent = Math.round(T);
+      volumeDisplay.textContent = V.toFixed(1);
+    }
+
+    tempSlider.addEventListener("input", function () {
+      var T = parseFloat(this.value);
+      updateFromT(T);
+    });
+
+    // 초기 상태: 300K
+    updateFromT(parseFloat(tempSlider.value || "300"));
+  })();
+</script>
 </body>
 </html>
