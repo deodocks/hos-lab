@@ -45,10 +45,37 @@
       gap: 16px;
     }
 
+    /* 데스크톱: 폭 넓을 때 */
     @media (min-width: 900px) {
       .sim-layout {
         flex-direction: row;
         align-items: stretch;
+      }
+    }
+
+    /* 모바일 가로 모드: 폭이 조금 좁아도 PC처럼 가로 배치 */
+    @media (orientation: landscape) and (max-width: 899px) {
+      .sim-root {
+        padding: 8px;
+      }
+      .sim-layout {
+        flex-direction: row;
+        align-items: stretch;
+      }
+      .visual-panel {
+        flex: 1.1;
+      }
+      .slider-panel {
+        flex: 0 0 90px;
+      }
+      .control-panel {
+        flex: 1.4;
+      }
+      h1 {
+        font-size: 1.3rem;
+      }
+      .subtitle {
+        font-size: 0.8rem;
       }
     }
 
@@ -298,6 +325,7 @@
       left: 50%;
       transform: translateX(-50%);
       bottom: 0;
+      opacity: 0; /* 초기에는 안 보이게 */
       transition: opacity 0.25s ease, transform 0.25s ease;
     }
 
@@ -660,7 +688,7 @@
           <!-- 입자 운동 토글 & 충돌 횟수 -->
           <div class="particle-controls">
             <button id="toggleParticlesBtn" class="btn">
-              입자 운동 보기: ON
+              입자 운동 보기: OFF
             </button>
             <span>
               충돌 횟수:
@@ -805,7 +833,7 @@
       let particles = [];
 
       // 충돌 계산
-      let showParticles = true;
+      let showParticles = false;  // 초기에는 OFF
       let collisionsAccum = 0;
       let timeAccum = 0;
       let collisionsPerSecond = 0;
