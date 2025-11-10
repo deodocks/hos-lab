@@ -312,7 +312,6 @@
       overflow: hidden;
     }
 
-    /* 윗쪽 유리 가장자리 */
     .ice-bucket::before {
       content: "";
       position: absolute;
@@ -325,7 +324,6 @@
       background: linear-gradient(to bottom, #f8fbff 0%, #d4e6ff 100%);
     }
 
-    /* 안쪽 물표면 반짝임 */
     .ice-bucket::after {
       content: "";
       position: absolute;
@@ -341,7 +339,6 @@
       pointer-events: none;
     }
 
-    /* 조각얼음 묶음 */
     .ice-cubes {
       position: absolute;
       left: 6px;
@@ -356,7 +353,6 @@
       pointer-events: none;
     }
 
-    /* 개별 조각얼음 */
     .ice-cube {
       width: 14px;
       height: 14px;
@@ -369,12 +365,8 @@
         0 1px 2px rgba(0,0,0,0.15);
     }
 
-    .ice-cube:nth-child(2n) {
-      transform: translateY(-2px);
-    }
-    .ice-cube:nth-child(3n) {
-      transform: translateY(1px);
-    }
+    .ice-cube:nth-child(2n) { transform: translateY(-2px); }
+    .ice-cube:nth-child(3n) { transform: translateY(1px); }
 
     .burner {
       width: 48px;
@@ -446,7 +438,7 @@
     .slider-panel {
       flex: 0 0 110px;
       display: flex;
-      align-items: flex-start; /* ← 세로 위쪽 고정 */
+      align-items: flex-start;
       justify-content: center;
     }
 
@@ -455,7 +447,7 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      margin-top: 12px; /* 살짝 아래로 내려준 여백 */
+      margin-top: 12px;
     }
 
     .heat-label {
@@ -598,6 +590,14 @@
       color: #777;
       text-align: right;
     }
+
+    .particle-controls {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+    }
   </style>
 </head>
 <body>
@@ -655,6 +655,17 @@
                 <div class="burner-base"></div>
               </div>
             </div>
+          </div>
+
+          <!-- 입자 운동 토글 & 충돌 횟수 -->
+          <div class="particle-controls">
+            <button id="toggleParticlesBtn" class="btn">
+              입자 운동 보기: ON
+            </button>
+            <span>
+              충돌 횟수:
+              <strong id="collisionCountLabel">0 회/s</strong>
+            </span>
           </div>
         </div>
       </div>
@@ -754,6 +765,7 @@
 
       const gasEl = document.querySelector(".gas");
       const pistonEl = document.getElementById("piston");
+      const tempSensorEl = document.querySelector(".temp-sensor");
 
       const heatTrack = document.getElementById("heatTrack");
       const heatHandle = document.getElementById("heatHandle");
@@ -770,6 +782,9 @@
       const volumeLabelRight = document.getElementById("volumeLabelRight");
 
       const brokenOverlay = document.getElementById("brokenOverlay");
+
+      const toggleParticlesBtn = document.getElementById("toggleParticlesBtn");
+      const collisionCountLabel = document.getElementById("collisionCountLabel");
 
       // 기준값 (공기, 이상기체 가정)
       const T_ENV = 293.15;       // 주변 온도 20 ℃
@@ -788,6 +803,12 @@
       const NUM_PARTICLES = 40;
       const PARTICLE_SIZE = 6;
       let particles = [];
+
+      // 충돌 계산
+      let showParticles = true;
+      let collisionsAccum = 0;
+      let timeAccum = 0;
+      let collisionsPerSecond = 0;
 
       // 상태
       let state = { tempC: 20.0, tempK: T_ENV, volume: V0 };
@@ -831,6 +852,8 @@
 
       function createParticles() {
         clearParticles();
+        if (!showParticles) return;
+
         const w = gasEl.clientWidth || 100;
         const h = gasEl.clientHeight || 80;
 
@@ -853,7 +876,7 @@
       }
 
       function updateParticles(dt) {
-        if (particles.length === 0) return;
+        if (!showParticles || particles.length === 0) return;
 
         const w = gasEl.clientWidth || 100;
         const h = gasEl.clientHeight || 80;
@@ -863,6 +886,8 @@
         if (currentTempK < 1) factor = 0;
         factor = Math.min(factor, 3);
 
+        let collisionsThisFrame = 0;
+
         particles.forEach(p => {
           let vx = p.vx * factor;
           let vy = p.vy * factor;
@@ -870,16 +895,26 @@
           let x = p.x + vx * dt;
           let y = p.y + vy * dt;
 
-          if (x < 0) { x = 0; p.vx = Math.abs(p.vx); }
-          if (x > w - PARTICLE_SIZE) { x = w - PARTICLE_SIZE; p.vx = -Math.abs(p.vx); }
-          if (y < 0) { y = 0; p.vy = Math.abs(p.vy); }
-          if (y > h - PARTICLE_SIZE) { y = h - PARTICLE_SIZE; p.vy = -Math.abs(p.vy); }
+          if (x < 0) { x = 0; p.vx = Math.abs(p.vx); collisionsThisFrame++; }
+          if (x > w - PARTICLE_SIZE) {
+            x = w - PARTICLE_SIZE;
+            p.vx = -Math.abs(p.vx);
+            collisionsThisFrame++;
+          }
+          if (y < 0) { y = 0; p.vy = Math.abs(p.vy); collisionsThisFrame++; }
+          if (y > h - PARTICLE_SIZE) {
+            y = h - PARTICLE_SIZE;
+            p.vy = -Math.abs(p.vy);
+            collisionsThisFrame++;
+          }
 
           p.x = x;
           p.y = y;
           p.el.style.left = x + "px";
           p.el.style.bottom = y + "px";
         });
+
+        collisionsAccum += collisionsThisFrame;
       }
 
       /* 온도 → 부피/표시 갱신 */
@@ -901,15 +936,22 @@
         volumeLabelValue.textContent = volume.toFixed(1);
         sensorTempLabel.textContent = tempC.toFixed(1) + " ℃";
 
-        // 100 mL 이후에도 계속 커지다가, 피스톤이 실린더를 넘으면 폭발
+        // 부피 → 기체 높이
         let vNorm = volume / V_MAX;
         if (vNorm < 0) vNorm = 0;
         let gasHeight = vNorm * GAS_RANGE;
         if (gasHeight < MIN_VISIBLE_GAS && volume > 0) gasHeight = MIN_VISIBLE_GAS;
 
+        const gasBottom = 4;
+
+        // 온도센서가 항상 기체 안에 있도록 센서 박스를 같이 이동
+        const targetTipY = gasBottom + gasHeight * 0.5;
+        const TIP_OFFSET = 8; // temp-sensor 안에서 tip bottom
+        tempSensorEl.style.bottom = (targetTipY - TIP_OFFSET) + "px";
+
         gasEl.style.height = gasHeight + "px";
 
-        const pistonBottom = 4 + gasHeight;
+        const pistonBottom = gasBottom + gasHeight;
         pistonEl.style.bottom = pistonBottom + "px";
 
         const pistonHeight = 14;
@@ -1051,6 +1093,23 @@
         updateHeatUIFromPower(heatPower);
       });
 
+      /* 입자 ON/OFF 토글 */
+      toggleParticlesBtn.addEventListener("click", () => {
+        showParticles = !showParticles;
+        toggleParticlesBtn.textContent =
+          "입자 운동 보기: " + (showParticles ? "ON" : "OFF");
+
+        if (showParticles) {
+          createParticles();
+        } else {
+          clearParticles();
+          collisionsAccum = 0;
+          timeAccum = 0;
+          collisionsPerSecond = 0;
+          collisionCountLabel.textContent = "0 회/s";
+        }
+      });
+
       /* 애니메이션 루프 */
       let lastTime = null;
       function animationLoop(timestamp) {
@@ -1072,6 +1131,17 @@
 
           applyCurrentTemperature();
           updateParticles(dt);
+
+          if (showParticles) {
+            timeAccum += dt;
+            if (timeAccum >= 0.2) {
+              collisionsPerSecond = collisionsAccum / timeAccum;
+              collisionsAccum = 0;
+              timeAccum = 0;
+              collisionCountLabel.textContent =
+                collisionsPerSecond.toFixed(0) + " 회/s";
+            }
+          }
         }
 
         requestAnimationFrame(animationLoop);
@@ -1113,7 +1183,16 @@
         applyCurrentTemperature();
         updateHeatUIFromPower(heatPower);
 
-        createParticles();
+        collisionsAccum = 0;
+        timeAccum = 0;
+        collisionsPerSecond = 0;
+        collisionCountLabel.textContent = "0 회/s";
+
+        if (showParticles) {
+          createParticles();
+        } else {
+          clearParticles();
+        }
 
         dataBody.innerHTML = "";
         runIndex = 0;
