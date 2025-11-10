@@ -55,8 +55,9 @@
     margin-left: 4px;
   }
   .panel-note {
-    text-align: right;
-    white-space: nowrap;
+    flex: 1 1 100%;      /* 한 줄을 통째로 차지 */
+    text-align: left;    /* 왼쪽 정렬 */
+    white-space: normal; /* 줄바꿈 허용 → 화면 밖으로 안 나가게 */
     font-size: 0.78rem;
   }
 
@@ -65,10 +66,31 @@
     touch-action: none;
     cursor: grab;
   }
+
+  /* 상단 오른쪽 버튼 */
+  .top-right {
+    text-align: right;
+    margin-bottom: 4px;
+  }
+  #toggleParticlesBtn {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    border-radius: 12px;
+    border: 1px solid #ccd3dd;
+    background: #f5f8ff;
+    cursor: pointer;
+  }
+  #toggleParticlesBtn:hover {
+    background: #e7f0ff;
+  }
 </style>
 </head>
 <body>
 <div class="wrapper">
+  <div class="top-right">
+    <button id="toggleParticlesBtn">입자 운동 보기: OFF</button>
+  </div>
+
   <h1>기체의 압력과 부피 가상 실험</h1>
   <p class="sub">고무패킹을 드래그하여 주사기 속 공기를 압축해 보세요. (마우스 / 터치)</p>
 
@@ -148,6 +170,10 @@
       현재 압력 P :
       <span id="pressureDisplay" class="value">100.0</span> kPa
     </div>
+    <div class="panel-item">
+      피스톤 충돌 빈도 :
+      <span id="collisionRate" class="value">-</span> 회/s
+    </div>
     <div class="panel-item panel-note">
       온도와 기체의 양은 일정하다고 가정합니다.
     </div>
@@ -171,6 +197,8 @@
   var scaleLines = document.getElementById("scaleLines");
   var scaleText = document.getElementById("scaleText");
   var svg = document.getElementById("scene");
+  var toggleBtn = document.getElementById("toggleParticlesBtn");
+  var collisionRateDisplay = document.getElementById("collisionRate");
 
   // 플런저 x 위치 범위 (SVG viewBox 좌표)
   var MIN_X = 305;    // 10 mL 위치
@@ -185,6 +213,27 @@
   var currentX = MAX_X;
   var isDragging = false;
   var returnAnimationId = null;
+
+  // ====== 입자 시뮬레이션 설정 ======
+  var particles = [];
+  var NUM_PARTICLES = 40;
+  var PARTICLE_RADIUS = 3; // 조금 더 작게
+
+  // 기체가 있는 영역(실린더 내부)
+  var GAS_LEFT_X = 270;
+  var GAS_TOP_Y = 86;
+  var GAS_BOTTOM_Y = 136;
+
+  var particlesEnabled = false;
+  var particleAnimationId = null;
+
+  // 시뮬레이션 시간 간격 (초) – 대략 60fps 기준
+  var DT_SIM_S = 0.016; // ≈ 1/60 s
+
+  // 충돌 횟수 및 시간(초) 누적 → 초당 충돌률
+  var collisionWindowCount = 0;
+  var windowTimeS = 0;
+  var collisionRate = 0;
 
   // ====== 부피/압력 계산 ======
   function xToVolume(x) {
@@ -259,15 +308,14 @@
     var bodyX = currentX + PISTON_WIDTH;
     plungerBody.setAttribute("x", bodyX);
     plungerBody.setAttribute("width", ROD_WIDTH);
-
     plungerHandle.setAttribute("x", bodyX + ROD_WIDTH);
 
     // 3) 부피 계산 후, 0.1 mL 단위로 반올림
-    var V_raw = xToVolume(currentX);          // 예: 19.96...
-    var V = Math.round(V_raw * 10) / 10;      // 예: 20.0
+    var V_raw = xToVolume(currentX);
+    var V = Math.round(V_raw * 10) / 10;
 
     // 4) 반올림된 부피로 압력 재계산 (P * V = 6000 유지)
-    var P = PV_CONST / V;                     // 6000 / 20.0 = 300.0
+    var P = PV_CONST / V;
 
     // 5) 화면 표시
     volumeDisplay.textContent = V.toFixed(1);
@@ -298,6 +346,161 @@
       returnAnimationId = null;
     }
     returnAnimationId = window.requestAnimationFrame(stepReturn);
+  }
+
+  // ====== 입자 생성 (옅은 파란색, 작은 크기) ======
+  function createParticles() {
+    // 기존 입자 삭제
+    var olds = svg.querySelectorAll(".gas-particle");
+    for (var i = 0; i < olds.length; i++) {
+      svg.removeChild(olds[i]);
+    }
+
+    particles = [];
+
+    var xMin = GAS_LEFT_X + PARTICLE_RADIUS;
+    var xMax = currentX - PARTICLE_RADIUS - 6;  // 피스톤과 약간 여유
+
+    if (xMax < xMin + 5) {
+      xMax = xMin + 5;
+    }
+
+    var yMin = GAS_TOP_Y + PARTICLE_RADIUS;
+    var yMax = GAS_BOTTOM_Y - PARTICLE_RADIUS;
+
+    for (var i = 0; i < NUM_PARTICLES; i++) {
+      var cx = xMin + Math.random() * (xMax - xMin);
+      var cy = yMin + Math.random() * (yMax - yMin);
+
+      var circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      circle.setAttribute("class", "gas-particle");
+      circle.setAttribute("r", PARTICLE_RADIUS);
+      circle.setAttribute("cx", cx);
+      circle.setAttribute("cy", cy);
+      // 옅은 파란색 + 살짝 테두리 느낌
+      circle.setAttribute("fill", "#cfe6ff");
+      circle.setAttribute("stroke", "#9ec5ff");
+      circle.setAttribute("stroke-width", "0.6");
+      circle.setAttribute("opacity", "0.8");
+
+      svg.appendChild(circle);
+
+      // 속도 (느리게) : 40~80 px/s 범위
+      var speed = 40 + Math.random() * 40;
+      var angle = Math.random() * Math.PI * 2;
+      var vx = speed * Math.cos(angle);
+      var vy = speed * Math.sin(angle);
+
+      particles.push({
+        el: circle,
+        x: cx,
+        y: cy,
+        vx: vx,
+        vy: vy
+      });
+    }
+  }
+
+  // ====== 입자 애니메이션 1프레임 ======
+  function stepParticles() {
+    if (!particlesEnabled) {
+      particleAnimationId = null;
+      return;
+    }
+
+    var pistonX = currentX;
+    var i, p;
+
+    for (i = 0; i < particles.length; i++) {
+      p = particles[i];
+
+      var newX = p.x + p.vx * DT_SIM_S;
+      var newY = p.y + p.vy * DT_SIM_S;
+
+      // 좌측 벽 충돌
+      if (newX - PARTICLE_RADIUS < GAS_LEFT_X) {
+        newX = GAS_LEFT_X + PARTICLE_RADIUS;
+        p.vx *= -1;
+      }
+
+      // 피스톤(오른쪽) 충돌
+      if (newX + PARTICLE_RADIUS > pistonX) {
+        newX = pistonX - PARTICLE_RADIUS;
+        p.vx *= -1;
+        collisionWindowCount++;
+      }
+
+      // 위/아래 벽 충돌
+      if (newY - PARTICLE_RADIUS < GAS_TOP_Y) {
+        newY = GAS_TOP_Y + PARTICLE_RADIUS;
+        p.vy *= -1;
+      }
+      if (newY + PARTICLE_RADIUS > GAS_BOTTOM_Y) {
+        newY = GAS_BOTTOM_Y - PARTICLE_RADIUS;
+        p.vy *= -1;
+      }
+
+      p.x = newX;
+      p.y = newY;
+      p.el.setAttribute("cx", newX);
+      p.el.setAttribute("cy", newY);
+    }
+
+    // 충돌 빈도 계산용 시간 누적 (초 단위)
+    windowTimeS += DT_SIM_S;
+    if (windowTimeS >= 1.0) { // 1초마다 샘플링
+      collisionRate = collisionWindowCount / windowTimeS; // 회/s
+      if (collisionRateDisplay) {
+        collisionRateDisplay.textContent = collisionRate.toFixed(1);
+      }
+      windowTimeS = 0;
+      collisionWindowCount = 0;
+    }
+
+    particleAnimationId = window.requestAnimationFrame(stepParticles);
+  }
+
+  function startParticles() {
+    if (particlesEnabled) return;
+    particlesEnabled = true;
+
+    collisionWindowCount = 0;
+    windowTimeS = 0;
+    if (collisionRateDisplay) {
+      collisionRateDisplay.textContent = "0.0"; // ON을 눌렀을 때부터 표시 시작
+    }
+
+    createParticles();
+
+    if (toggleBtn) {
+      toggleBtn.textContent = "입자 운동 보기: ON";
+    }
+
+    particleAnimationId = window.requestAnimationFrame(stepParticles);
+  }
+
+  function stopParticles() {
+    particlesEnabled = false;
+    if (particleAnimationId) {
+      window.cancelAnimationFrame(particleAnimationId);
+      particleAnimationId = null;
+    }
+
+    // 입자들을 화면에서 제거
+    var olds = svg.querySelectorAll(".gas-particle");
+    for (var i = 0; i < olds.length; i++) {
+      svg.removeChild(olds[i]);
+    }
+    particles = [];
+
+    // 충돌 빈도도 다시 숨김 상태 느낌으로
+    if (collisionRateDisplay) {
+      collisionRateDisplay.textContent = "-";
+    }
+
+    if (toggleBtn) {
+      toggleBtn.textContent = "입자 운동 보기: OFF";
+    }
   }
 
   // ====== 드래그 처리 (마우스 + 터치) ======
@@ -354,9 +557,20 @@
   window.addEventListener("touchend", endDrag, false);
   window.addEventListener("touchcancel", endDrag, false);
 
+  // 버튼으로 입자 시뮬레이션 토글
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", function () {
+      if (particlesEnabled) {
+        stopParticles();
+      } else {
+        startParticles();
+      }
+    });
+  }
+
   // ====== 초기 설정 ======
   createScale();
-  updateFromX(MAX_X);
+  updateFromX(MAX_X); // 60 mL, 100 kPa에서 시작
 </script>
 </body>
 </html>
