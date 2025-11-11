@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>온도에 따른 기체의 부피 변화 시뮬레이션</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <style>
     * { box-sizing: border-box; }
 
@@ -53,10 +53,15 @@
       }
     }
 
-    /* 모바일 가로 모드: 폭이 조금 좁아도 PC처럼 가로 배치 */
+    /* 모바일 가로 모드: PC처럼 가로 배치 + 전체 축소 */
     @media (orientation: landscape) and (max-width: 899px) {
+      body {
+        align-items: flex-start;
+      }
       .sim-root {
         padding: 8px;
+        transform: scale(0.9);          /* 전체를 살짝 줄여서 한 화면에 */
+        transform-origin: top left;
       }
       .sim-layout {
         flex-direction: row;
