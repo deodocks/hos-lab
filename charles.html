@@ -60,7 +60,7 @@
       }
       .sim-root {
         padding: 8px;
-        transform: scale(0.9);          /* 전체를 살짝 줄여서 한 화면에 */
+        transform: scale(0.9);
         transform-origin: top left;
       }
       .sim-layout {
@@ -552,22 +552,6 @@
       font-size: 1.05rem;
     }
 
-    .info-box {
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: #f9fafb;
-      border: 1px dashed #ccd3e0;
-      font-size: 0.8rem;
-      line-height: 1.4;
-    }
-
-    .info-box code {
-      background: #eef1ff;
-      padding: 1px 4px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-    }
-
     .data-panel {
       margin-top: 4px;
       padding: 8px 10px;
@@ -736,24 +720,8 @@
           </div>
         </div>
 
-        <div class="info-box">
-          <div class="section-title">2. 이론과 연결하기</div>
-          <div>
-            이 시뮬레이션에서는 <strong>압력(1 atm)과 기체의 양(n)을 일정</strong>하게 두고,
-            온도만 바꾸었을 때 <strong>부피가 어떻게 변하는지</strong> 관찰합니다.
-          </div>
-          <div style="margin-top: 4px;">
-            섭씨 온도 <code>t(℃)</code>를 절대온도
-            <code>T(K) = t + 273.15</code>로 바꾸어 사용하면,
-            <code>V ∝ T(K)</code> 이므로 <code>V = k × T(K)</code> 꼴의 관계를 가집니다.
-          </div>
-          <div style="margin-top: 4px;">
-            오른쪽 눈금과 수치를 함께 보며 온도와 부피의 비례 관계를 추론해 보세요.
-          </div>
-        </div>
-
         <div class="data-panel">
-          <div class="section-title">3. 측정값 기록하기</div>
+          <div class="section-title">2. 측정값 기록하기</div>
           <div style="font-size: 0.8rem; margin-bottom: 4px;">
             원하는 온도에서 조절 막대를 움직여 상태를 맞춘 뒤,
             <strong>현재 상태 기록하기</strong>를 눌러 온도와 부피 데이터를 표로 기록해 보세요.
@@ -1078,7 +1046,7 @@
         });
         heatTrack.addEventListener("pointermove", e => {
           if (!dragging) return;
-          handleHeatPointer(e.clientY);
+          handleHeatPointer(e.clientID);
         });
         heatTrack.addEventListener("pointerup", () => {
           dragging = false;
