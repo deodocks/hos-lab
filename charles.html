@@ -1015,6 +1015,7 @@
 
         const level = 1 - y / rect.height; // 위 1, 아래 0
         heatPower = 2 * level - 1;         // -1~1
+        if (!Number.isFinite(heatPower)) heatPower = 0;
         if (heatPower > 1) heatPower = 1;
         if (heatPower < -1) heatPower = -1;
         updateHeatUIFromPower(heatPower);
@@ -1046,7 +1047,7 @@
         });
         heatTrack.addEventListener("pointermove", e => {
           if (!dragging) return;
-          handleHeatPointer(e.clientID);
+          handleHeatPointer(e.clientY); // ✅ 여기 수정
         });
         heatTrack.addEventListener("pointerup", () => {
           dragging = false;
