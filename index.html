@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>빛의 굴절 및 전반사 탐구 시뮬레이션 | 중학교 과학</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+            outfit: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            science: {
+              bg: '#0f172a',
+              card: 'rgba(30, 41, 59, 0.7)',
+              border: 'rgba(51, 65, 85, 0.6)',
+              accent: '#38bdf8',
+              warning: '#f43f5e',
+            }
+          },
+          boxShadow: {
+            'neon-red': '0 0 15px rgba(255, 51, 85, 0.6)',
+            'neon-green': '0 0 15px rgba(0, 255, 136, 0.6)',
+            'neon-blue': '0 0 15px rgba(0, 191, 255, 0.6)',
+            'glow-tir': '0 0 25px rgba(244, 63, 94, 0.8)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Range slider custom styling */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: transparent;
+    }
+    input[type=range]:focus {
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-runnable-track {
+      width: 100%;
+      height: 8px;
+      cursor: pointer;
+      background: #334155;
+      border-radius: 4px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+      -webkit-appearance: none;
+      margin-top: -6px;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+      transition: transform 0.1s ease, background 0.2s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      background: #7dd3fc;
+    }
+
+    /* Glassmorphism background */
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Pulsating TIR banner */
+    @keyframes pulse-red-glow {
+      0%, 100% {
+        box-shadow: 0 0 15px rgba(244, 63, 94, 0.4), inset 0 0 15px rgba(244, 63, 94, 0.2);
+        border-color: rgba(244, 63, 94, 0.8);
+      }
+      50% {
+        box-shadow: 0 0 30px rgba(244, 63, 94, 0.9), inset 0 0 25px rgba(244, 63, 94, 0.4);
+        border-color: rgba(251, 113, 133, 1);
+      }
+    }
+    .animate-tir-alert {
+      animation: pulse-red-glow 1.2s infinite ease-in-out;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-sky-500 selection:text-white overflow-x-hidden">
+
+  <!-- Header Banner -->
+  <header class="w-full bg-slate-900/90 border-b border-slate-800 px-4 py-3 sticky top-0 z-50 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+          <i class="fa-solid fa-atom text-white text-xl animate-spin-slow"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+            빛의 굴절 & 전반사 탐구 시뮬레이션
+          </h1>
+          <p class="text-xs text-slate-400">중학교 2학년 과학 Ⅵ. 빛과 파동</p>
+        </div>
+      </div>
+
+      <!-- Quick Action / Status Badges -->
+      <div class="flex items-center space-x-2">
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-sky-950/80 text-sky-400 border border-sky-800/60">
+          <i class="fa-solid fa-graduation-cap mr-1.5"></i> 스넬의 법칙 (Snell's Law)
+        </span>
+        <button id="reset-btn" class="px-3 py-1 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors border border-slate-700 flex items-center">
+          <i class="fa-solid fa-rotate-right mr-1.5"></i> 초기화
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Total Internal Reflection Top Notification Banner (Hidden by default) -->
+  <div id="tir-top-banner" class="hidden w-full bg-rose-950/90 border-b-2 border-rose-500 text-rose-100 py-2.5 px-4 text-center text-sm font-bold shadow-lg animate-tir-alert transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-center space-x-2">
+      <i class="fa-solid fa-triangle-exclamation text-rose-400 text-lg animate-bounce"></i>
+      <span>⚠️ 전반사 (Total Internal Reflection) 발생!</span>
+      <span class="font-normal text-xs text-rose-200 hidden sm:inline">(입사각 &theta;₁ 이 임계각 &theta;c 보다 커서 굴절광이 없으며 빛이 100% 반사됩니다)</span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+    <!-- LEFT COLUMN: Canvas Visualizer (7 Cols) -->
+    <section class="lg:col-span-7 flex flex-col space-y-3">
+      
+      <!-- Canvas Wrapper Card -->
+      <div class="glass-panel rounded-2xl p-4 flex flex-col flex-1 shadow-2xl relative overflow-hidden group">
+        
+        <!-- Canvas Top Toolbar -->
+        <div class="flex justify-between items-center mb-3 text-xs text-slate-300">
+          <div class="flex items-center space-x-2">
+            <span class="font-semibold text-slate-200 flex items-center">
+              <i class="fa-solid fa-microscope text-sky-400 mr-1.5"></i> 캔버스 실험실
+            </span>
+            <span class="text-[11px] text-slate-400 hidden sm:inline">(캔버스를 직접 드래그하여 입사각 조절 가능)</span>
+          </div>
+
+          <!-- Quick Canvas Toggles -->
+          <div class="flex items-center space-x-3 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800">
+            <label class="flex items-center cursor-pointer space-x-1.5 select-none hover:text-sky-300">
+              <input type="checkbox" id="toggle-protractor" checked class="accent-sky-500 rounded cursor-pointer">
+              <span>각도기 가이드</span>
+            </label>
+            <span class="text-slate-700">|</span>
+            <label class="flex items-center cursor-pointer space-x-1.5 select-none hover:text-sky-300">
+              <input type="checkbox" id="toggle-particles" checked class="accent-sky-500 rounded cursor-pointer">
+              <span>파동/입자 이펙트</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- HTML5 Canvas Element -->
+        <div class="relative w-full aspect-[4/3] bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-inner flex items-center justify-center">
+          <canvas id="sim-canvas" class="w-full h-full cursor-crosshair block"></canvas>
+
+          <!-- Watermark / Visual Cue -->
+          <div class="absolute bottom-2 left-3 text-[11px] font-mono text-slate-500 pointer-events-none opacity-60">
+            Interface: y = 0 | Normal: x = 0
+          </div>
+        </div>
+
+        <!-- Material Legend / Labels beneath Canvas -->
+        <div class="grid grid-cols-2 gap-3 mt-3">
+          <!-- Medium 1 Info Box -->
+          <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div id="m1-color-indicator" class="w-3.5 h-3.5 rounded-full bg-slate-700 border border-slate-500"></div>
+              <div>
+                <div class="text-xs font-medium text-slate-400">매질 1 (상단)</div>
+                <div id="m1-name-display" class="text-sm font-bold text-sky-300">공기</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-400">굴절률 n₁</span>
+              <div id="m1-val-display" class="text-sm font-extrabold font-outfit text-sky-400">1.00</div>
+            </div>
+          </div>
+
+          <!-- Medium 2 Info Box -->
+          <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/80 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <div id="m2-color-indicator" class="w-3.5 h-3.5 rounded-full bg-sky-600 border border-sky-400"></div>
+              <div>
+                <div class="text-xs font-medium text-slate-400">매질 2 (하단)</div>
+                <div id="m2-name-display" class="text-sm font-bold text-indigo-300">물</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-400">굴절률 n₂</span>
+              <div id="m2-val-display" class="text-sm font-extrabold font-outfit text-indigo-400">1.33</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- RIGHT COLUMN: Control & Data Dashboard (5 Cols) -->
+    <section class="lg:col-span-5 flex flex-col space-y-4">
+
+      <!-- 1. EXPERIMENT PRESETS CARD -->
+      <div class="glass-panel rounded-2xl p-4 shadow-xl">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5 flex items-center">
+          <i class="fa-solid fa-sliders text-sky-400 mr-1.5"></i> 자주 쓰는 대표 실험 환경 프리셋
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <button data-preset="air-water" class="preset-btn px-2.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-xs font-medium border border-slate-700 transition-all hover:border-sky-500/50 flex flex-col items-center justify-center text-center">
+            <span class="text-slate-300 font-semibold">공기 &rarr; 물</span>
+            <span class="text-[10px] text-slate-400">1.00 &rarr; 1.33</span>
+          </button>
+          <button data-preset="air-glass" class="preset-btn px-2.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-xs font-medium border border-slate-700 transition-all hover:border-sky-500/50 flex flex-col items-center justify-center text-center">
+            <span class="text-slate-300 font-semibold">공기 &rarr; 유리</span>
+            <span class="text-[10px] text-slate-400">1.00 &rarr; 1.50</span>
+          </button>
+          <button data-preset="glass-air" class="preset-btn px-2.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-xs font-medium border border-slate-700 transition-all hover:border-amber-500/50 flex flex-col items-center justify-center text-center text-amber-300">
+            <span class="font-semibold">유리 &rarr; 공기 ⭐</span>
+            <span class="text-[10px] text-amber-400/80">1.50 &rarr; 1.00 (전반사)</span>
+          </button>
+          <button data-preset="water-air" class="preset-btn px-2.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-xs font-medium border border-slate-700 transition-all hover:border-amber-500/50 flex flex-col items-center justify-center text-center text-amber-300">
+            <span class="font-semibold">물 &rarr; 공기 ⭐</span>
+            <span class="text-[10px] text-amber-400/80">1.33 &rarr; 1.00 (전반사)</span>
+          </button>
+          <button data-preset="diamond-air" class="preset-btn px-2.5 py-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-xs font-medium border border-slate-700 transition-all hover:border-purple-500/50 flex flex-col items-center justify-center text-center text-purple-300">
+            <span class="font-semibold">다이아몬드 &rarr; 공기</span>
+            <span class="text-[10px] text-purple-400/80">2.42 &rarr; 1.00</span>
+          </button>
+          <button id="swap-media-btn" class="px-2.5 py-2 rounded-xl bg-sky-950/70 hover:bg-sky-900 text-xs font-medium border border-sky-800/80 text-sky-300 transition-all flex flex-col items-center justify-center text-center">
+            <span class="font-semibold"><i class="fa-solid fa-arrows-up-down mr-1"></i> 매질 맞바꾸기</span>
+            <span class="text-[10px] text-sky-400/80">n₁ &harr; n₂ 상하 전환</span>
+          </button>
+        </div>
+      </div>
+
+
+      <!-- 2. INTERACTIVE CONTROLS CARD -->
+      <div class="glass-panel rounded-2xl p-4 shadow-xl space-y-4">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <span><i class="fa-solid fa-gamepad text-sky-400 mr-1.5"></i> 파라미터 미세 조절</span>
+          <span class="text-[11px] text-slate-500 font-normal">실시간 반응형</span>
+        </h2>
+
+        <!-- Incident Angle Slider -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center text-xs">
+            <label for="slider-angle" class="font-medium text-slate-300 flex items-center">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block mr-1.5"></span>
+              입사각 (&theta;₁)
+            </label>
+            <div class="flex items-center space-x-1">
+              <input type="number" id="num-angle" min="0" max="89.9" step="0.1" value="45.0"
+                     class="w-16 bg-slate-900 border border-slate-700 rounded-md px-1.5 py-0.5 text-right font-outfit text-sm font-bold text-sky-400 focus:outline-none focus:border-sky-500">
+              <span class="text-xs font-bold text-slate-400">&deg;</span>
+            </div>
+          </div>
+          <input type="range" id="slider-angle" min="0" max="89.9" step="0.1" value="45.0" class="w-full">
+        </div>
+
+        <!-- Medium 1 Refractive Index Slider -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center text-xs">
+            <label for="slider-n1" class="font-medium text-slate-300">
+              매질 1 굴절률 (n₁)
+            </label>
+            <div class="flex items-center space-x-1">
+              <input type="number" id="num-n1" min="1.00" max="2.50" step="0.01" value="1.00"
+                     class="w-16 bg-slate-900 border border-slate-700 rounded-md px-1.5 py-0.5 text-right font-outfit text-sm font-bold text-sky-400 focus:outline-none focus:border-sky-500">
+            </div>
+          </div>
+          <input type="range" id="slider-n1" min="1.00" max="2.50" step="0.01" value="1.00" class="w-full">
+        </div>
+
+        <!-- Medium 2 Refractive Index Slider -->
+        <div class="space-y-1.5">
+          <div class="flex justify-between items-center text-xs">
+            <label for="slider-n2" class="font-medium text-slate-300">
+              매질 2 굴절률 (n₂)
+            </label>
+            <div class="flex items-center space-x-1">
+              <input type="number" id="num-n2" min="1.00" max="2.50" step="0.01" value="1.33"
+                     class="w-16 bg-slate-900 border border-slate-700 rounded-md px-1.5 py-0.5 text-right font-outfit text-sm font-bold text-indigo-400 focus:outline-none focus:border-indigo-500">
+            </div>
+          </div>
+          <input type="range" id="slider-n2" min="1.00" max="2.50" step="0.01" value="1.33" class="w-full">
+        </div>
+
+        <!-- Wavelength / Laser Color Dropdown -->
+        <div class="pt-1 flex items-center justify-between gap-3 text-xs">
+          <label for="select-laser-color" class="font-medium text-slate-300 shrink-0">
+            <i class="fa-solid fa-bolt text-amber-400 mr-1"></i> 레이저 색상(파장)
+          </label>
+          <select id="select-laser-color" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-sky-500 cursor-pointer flex-1">
+            <option value="#ff3355" data-wavelength="650" data-name="Red (650nm)">🔴 빨간색 레이저 (650 nm)</option>
+            <option value="#ffee00" data-wavelength="589" data-name="Yellow (589nm)">🟡 노란색 레이저 (589 nm)</option>
+            <option value="#00ff88" data-wavelength="532" data-name="Green (532nm)">🟢 초록색 레이저 (532 nm)</option>
+            <option value="#00bfff" data-wavelength="450" data-name="Blue (450nm)" selected>🔵 파란색 레이저 (450 nm)</option>
+            <option value="#a855f7" data-wavelength="405" data-name="Violet (405nm)">🟣 보라색 레이저 (405 nm)</option>
+          </select>
+        </div>
+      </div>
+
+
+      <!-- 3. DATA DASHBOARD & SNELL'S LAW DISPLAY -->
+      <div class="glass-panel rounded-2xl p-4 shadow-xl space-y-3">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <span><i class="fa-solid fa-chart-pie text-sky-400 mr-1.5"></i> 수치 분석 대시보드</span>
+          <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full font-mono">Snell's Law</span>
+        </h2>
+
+        <!-- Snell's Formula Card -->
+        <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 text-center space-y-1">
+          <div class="text-[11px] text-slate-400 font-mono">스넬의 법칙 공식: n₁ &middot; sin(&theta;₁) = n₂ &middot; sin(&theta;₂)</div>
+          <div id="snell-calc-display" class="text-xs font-mono font-bold text-sky-300 tracking-tight">
+            1.00 &middot; sin(45.0&deg;) = 1.33 &middot; sin(32.1&deg;)
+          </div>
+          <div id="dispersion-calc-sub" class="text-[10px] text-amber-300 font-medium pt-0.5">
+            🌈 파장 450nm 분산 효과 적용 중
+          </div>
+        </div>
+
+        <!-- Calculated Values Cards Grid -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <!-- Refraction Angle Box -->
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <div class="text-[11px] text-slate-400 font-medium">굴절각 (&theta;₂)</div>
+            <div id="dash-theta2" class="text-base font-extrabold font-outfit text-indigo-400 mt-0.5">
+              32.1&deg;
+            </div>
+            <div id="dash-theta2-sub" class="text-[10px] text-slate-500 mt-0.5">정상 굴절 진행 중</div>
+          </div>
+
+          <!-- Critical Angle Box -->
+          <div id="critical-angle-card" class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800 transition-colors">
+            <div class="text-[11px] text-slate-400 font-medium">임계각 (&theta;c)</div>
+            <div id="dash-thetac" class="text-base font-extrabold font-outfit text-slate-400 mt-0.5">
+              없음
+            </div>
+            <div id="dash-thetac-sub" class="text-[10px] text-slate-500 mt-0.5">n₁ &le; n₂ (전반사 불가)</div>
+          </div>
+
+          <!-- Reflection Angle Box -->
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <div class="text-[11px] text-slate-400 font-medium">반사각 (&theta;_r)</div>
+            <div id="dash-thetar" class="text-base font-extrabold font-outfit text-sky-400 mt-0.5">
+              45.0&deg;
+            </div>
+            <div class="text-[10px] text-slate-500 mt-0.5">&theta;_r = &theta;₁ (반사 법칙)</div>
+          </div>
+
+          <!-- Light Velocity Ratio Box -->
+          <div class="bg-slate-900/70 p-2.5 rounded-xl border border-slate-800">
+            <div class="text-[11px] text-slate-400 font-medium">매질 속 빛의 속도비</div>
+            <div id="dash-velocity" class="text-base font-extrabold font-outfit text-amber-400 mt-0.5">
+              1.00 : 0.75
+            </div>
+            <div class="text-[10px] text-slate-500 mt-0.5">v₁ : v₂ (v = c/n)</div>
+          </div>
+        </div>
+
+        <!-- Intensity Indicator Bar -->
+        <div class="bg-slate-900/70 p-3 rounded-xl border border-slate-800 space-y-1.5">
+          <div class="flex justify-between text-[11px] font-medium">
+            <span class="text-indigo-400">굴절광 세기: <span id="intensity-refract-text">85%</span></span>
+            <span class="text-sky-400">반사광 세기: <span id="intensity-reflect-text">15%</span></span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-slate-800 overflow-hidden flex">
+            <div id="bar-refract" class="h-full bg-indigo-500 transition-all duration-200" style="width: 85%;"></div>
+            <div id="bar-reflect" class="h-full bg-sky-400 transition-all duration-200" style="width: 15%;"></div>
+          </div>
+        </div>
+
+        <!-- Dashboard Internal TIR Warning Box -->
+        <div id="tir-dash-alert" class="hidden bg-rose-950/80 border border-rose-500/80 rounded-xl p-3 text-rose-200 text-xs space-y-1 animate-tir-alert">
+          <div class="font-bold text-rose-300 flex items-center">
+            <i class="fa-solid fa-triangle-exclamation text-rose-400 mr-1.5 text-sm"></i>
+            전반사 (Total Internal Reflection) 발생 중!
+          </div>
+          <p class="text-[11px] text-rose-200/90 leading-relaxed">
+            현재 매질 1의 굴절률이 매질 2보다 크며(n₁ &gt; n₂), 입사각(&theta;₁)이 임계각(&theta;c)을 초과하였습니다. 굴절광은 소멸하며 100% 반사됩니다.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Educational Concept Cards Section -->
+  <footer class="w-full max-w-7xl mx-auto p-3 sm:p-5 mt-auto">
+    <div class="glass-panel rounded-2xl p-5 border border-slate-800">
+      <h3 class="text-sm font-bold text-slate-300 mb-3 flex items-center">
+        <i class="fa-solid fa-book-open text-sky-400 mr-2"></i> 핵심 과학 개념 정리 (중학교 2학년 '빛과 파동')
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs leading-relaxed text-slate-400">
+        <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1">
+          <div class="font-bold text-sky-300 text-sm">1. 빛의 굴절 (Refraction)</div>
+          <p>빛이 서로 다른 매질의 경계면을 통과할 때, **매질에 따라 빛의 진행 속도가 달라져** 진행 방향이 꺾이는 현상입니다. 굴절률이 큰 매질일수록 빛의 속도가 느려집니다.</p>
+        </div>
+
+        <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1">
+          <div class="font-bold text-amber-300 text-sm">2. 임계각 (Critical Angle, &theta;c)</div>
+          <p>**굴절률이 큰 매질에서 작은 매질로** 빛이 진행할 때(n₁ &gt; n₂), 굴절각이 정확히 90&deg;가 되는 때의 입사각을 **임계각**이라고 합니다. (sin &theta;c = n₂ / n₁)</p>
+        </div>
+
+        <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-1">
+          <div class="font-bold text-rose-300 text-sm">3. 전반사 (Total Internal Reflection)</div>
+          <p>입사각이 임계각보다 커지면, 빛이 굴절하지 않고 **경계면에서 100% 전반사**합니다. 실생활의 **광섬유, 쌍안경 프리즘, 내시경** 등에 응용됩니다.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Simulation JavaScript Engine -->
+  <script>
+    // --- Material Presets Definition ---
+    const MATERIALS = [
+      { name: '공기 (Air)', n: 1.00, color: 'rgba(15, 23, 42, 0.4)' },
+      { name: '물 (Water)', n: 1.33, color: 'rgba(14, 116, 144, 0.25)' },
+      { name: '유리 (Glass)', n: 1.50, color: 'rgba(16, 185, 129, 0.25)' },
+      { name: '플라스틱 (Plastic)', n: 1.60, color: 'rgba(168, 85, 247, 0.25)' },
+      { name: '다이아몬드 (Diamond)', n: 2.42, color: 'rgba(59, 130, 246, 0.35)' }
+    ];
+
+    function getMaterialName(n) {
+      const match = MATERIALS.find(m => Math.abs(m.n - n) < 0.02);
+      if (match) return match.name;
+      return `커스텀 매질 (n=${n.toFixed(2)})`;
+    }
+
+    function getMaterialColor(n) {
+      const match = MATERIALS.find(m => Math.abs(m.n - n) < 0.02);
+      if (match) return match.color;
+      return 'rgba(30, 41, 59, 0.5)';
+    }
+
+    // --- State Variables ---
+    let state = {
+      theta1: 45.0, // Incident angle in degrees
+      n1: 1.00,     // Medium 1 refractive index
+      n2: 1.33,     // Medium 2 refractive index
+      laserColor: '#00bfff', // Laser color hex
+      laserName: 'Blue (450nm)',
+      wavelength: 450, // Wavelength in nm
+      showProtractor: true,
+      showParticles: true,
+      isDragging: false,
+      particleOffset: 0
+    };
+
+    // --- DOM Elements ---
+    const canvas = document.getElementById('sim-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const sliderAngle = document.getElementById('slider-angle');
+    const numAngle = document.getElementById('num-angle');
+
+    const sliderN1 = document.getElementById('slider-n1');
+    const numN1 = document.getElementById('num-n1');
+
+    const sliderN2 = document.getElementById('slider-n2');
+    const numN2 = document.getElementById('num-n2');
+
+    const selectLaserColor = document.getElementById('select-laser-color');
+    const toggleProtractor = document.getElementById('toggle-protractor');
+    const toggleParticles = document.getElementById('toggle-particles');
+    const resetBtn = document.getElementById('reset-btn');
+    const swapMediaBtn = document.getElementById('swap-media-btn');
+
+    // UI Displays
+    const m1NameDisplay = document.getElementById('m1-name-display');
+    const m1ValDisplay = document.getElementById('m1-val-display');
+    const m1ColorInd = document.getElementById('m1-color-indicator');
+
+    const m2NameDisplay = document.getElementById('m2-name-display');
+    const m2ValDisplay = document.getElementById('m2-val-display');
+    const m2ColorInd = document.getElementById('m2-color-indicator');
+
+    const snellCalcDisplay = document.getElementById('snell-calc-display');
+    const dispersionCalcSub = document.getElementById('dispersion-calc-sub');
+    const dashTheta2 = document.getElementById('dash-theta2');
+    const dashTheta2Sub = document.getElementById('dash-theta2-sub');
+    const dashThetac = document.getElementById('dash-thetac');
+    const dashThetacSub = document.getElementById('dash-thetac-sub');
+    const dashThetar = document.getElementById('dash-thetar');
+    const dashVelocity = document.getElementById('dash-velocity');
+
+    const criticalAngleCard = document.getElementById('critical-angle-card');
+    const tirTopBanner = document.getElementById('tir-top-banner');
+    const tirDashAlert = document.getElementById('tir-dash-alert');
+
+    const barRefract = document.getElementById('bar-refract');
+    const barReflect = document.getElementById('bar-reflect');
+    const intensityRefractText = document.getElementById('intensity-refract-text');
+    const intensityReflectText = document.getElementById('intensity-reflect-text');
+
+    // --- Canvas Resize & Resolution ---
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+
+    // Cauchy Dispersion formula for visible light relative to reference 589nm
+    function getEffectiveN(nBase, wavelength) {
+      if (nBase <= 1.0001) return 1.00; // Air/vacuum has negligible dispersion
+      const lambda0 = 589; // Reference wavelength (nm)
+      const C = 15000;     // Dispersion constant
+      const delta = C * (1 / (wavelength * wavelength) - 1 / (lambda0 * lambda0));
+      return Math.max(1.0, nBase + (nBase - 1.0) * delta);
+    }
+
+    // --- Physics Core Calculations ---
+    function calculatePhysics() {
+      const theta1Rad = (state.theta1 * Math.PI) / 180;
+      const sinTheta1 = Math.sin(theta1Rad);
+
+      // Wavelength-dependent effective refractive index (Chromatic Dispersion)
+      const n1Eff = getEffectiveN(state.n1, state.wavelength);
+      const n2Eff = getEffectiveN(state.n2, state.wavelength);
+
+      let isTIR = false;
+      let theta2Rad = 0;
+      let theta2Deg = 0;
+      let thetaCRad = null;
+      let thetaCDeg = null;
+
+      // Check Critical Angle (n1Eff > n2Eff)
+      if (n1Eff > n2Eff) {
+        thetaCRad = Math.asin(n2Eff / n1Eff);
+        thetaCDeg = (thetaCRad * 180) / Math.PI;
+      }
+
+      // Snell's Law: sin(theta2) = (n1Eff / n2Eff) * sin(theta1)
+      const sinTheta2Ratio = (n1Eff / n2Eff) * sinTheta1;
+
+      if (sinTheta2Ratio > 1.0000001) {
+        // Total Internal Reflection
+        isTIR = true;
+        theta2Rad = null;
+        theta2Deg = null;
+      } else {
+        // Normal Refraction
+        const clampedRatio = Math.min(1.0, Math.max(-1.0, sinTheta2Ratio));
+        theta2Rad = Math.asin(clampedRatio);
+        theta2Deg = (theta2Rad * 180) / Math.PI;
+      }
+
+      return {
+        theta1Rad,
+        theta1Deg: state.theta1,
+        n1Eff,
+        n2Eff,
+        theta2Rad,
+        theta2Deg,
+        thetaCRad,
+        thetaCDeg,
+        isTIR
+      };
+    }
+
+    // --- Render Loop & Canvas Visualizer ---
+    function render() {
+      const w = canvas.getBoundingClientRect().width;
+      const h = canvas.getBoundingClientRect().height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const physics = calculatePhysics();
+      const originX = w / 2;
+      const originY = h / 2;
+      const rayLength = Math.max(w, h) * 0.8;
+
+      // 1. Draw Media Backgrounds
+      // Medium 1 (Top Half)
+      ctx.fillStyle = getMaterialColor(state.n1);
+      ctx.fillRect(0, 0, w, originY);
+
+      // Medium 2 (Bottom Half)
+      ctx.fillStyle = getMaterialColor(state.n2);
+      ctx.fillRect(0, originY, w, originY);
+
+      // Media Boundary Interface Line
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.4)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, originY);
+      ctx.lineTo(w, originY);
+      ctx.stroke();
+
+      // 2. Draw Protractor Overlay (if enabled)
+      if (state.showProtractor) {
+        drawProtractor(ctx, originX, originY, Math.min(w, h) * 0.35);
+      }
+
+      // 3. Draw Normal Line (수직 점선)
+      ctx.save();
+      ctx.setLineDash([5, 5]);
+      ctx.strokeStyle = 'rgba(203, 213, 225, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(originX, 15);
+      ctx.lineTo(originX, h - 15);
+      ctx.stroke();
+      ctx.restore();
+
+      // Normal Line Label
+      ctx.fillStyle = 'rgba(203, 213, 225, 0.7)';
+      ctx.font = '10px Noto Sans KR';
+      ctx.fillText('법선 (Normal)', originX + 6, 25);
+
+      // 4. Calculate Ray Paths
+      // Incident Ray: Comes from top-left quadrant toward origin (0,0)
+      // theta1 is angle from vertical normal
+      const incX = originX - rayLength * Math.sin(physics.theta1Rad);
+      const incY = originY - rayLength * Math.cos(physics.theta1Rad);
+
+      // Reflected Ray: Symmetric into top-right quadrant
+      const refX = originX + rayLength * Math.sin(physics.theta1Rad);
+      const refY = originY - rayLength * Math.cos(physics.theta1Rad);
+
+      // Refracted Ray (if not TIR): Into bottom-right quadrant
+      let refrX = 0, refrY = 0;
+      if (!physics.isTIR) {
+        refrX = originX + rayLength * Math.sin(physics.theta2Rad);
+        refrY = originY + rayLength * Math.cos(physics.theta2Rad);
+      }
+
+      // 5. Draw Light Rays (Neon Laser Effect)
+
+      // A. Incident Ray (입사광)
+      drawNeonBeam(ctx, incX, incY, originX, originY, state.laserColor, 1.0);
+
+      // B. Reflected Ray (반사광)
+      // If TIR, 100% intensity; else partial reflection intensity (~15-30%)
+      const reflectAlpha = physics.isTIR ? 1.0 : 0.25;
+      drawNeonBeam(ctx, originX, originY, refX, refY, state.laserColor, reflectAlpha);
+
+      // C. Refracted Ray (굴절광)
+      if (!physics.isTIR) {
+        const refractAlpha = 0.85;
+        drawNeonBeam(ctx, originX, originY, refrX, refrY, state.laserColor, refractAlpha);
+      }
+
+      // 6. Draw Moving Wave Particles / Pulses along rays
+      if (state.showParticles) {
+        state.particleOffset = (state.particleOffset + 1.2) % 30;
+
+        // Incident Ray particles (Velocity v1 = 1 / n1)
+        drawRayParticles(ctx, incX, incY, originX, originY, state.laserColor, physics.n1Eff, 1.0);
+
+        // Reflected Ray particles (Velocity v1 = 1 / n1)
+        drawRayParticles(ctx, originX, originY, refX, refY, state.laserColor, physics.n1Eff, reflectAlpha);
+
+        // Refracted Ray particles (Velocity v2 = 1 / n2)
+        if (!physics.isTIR) {
+          drawRayParticles(ctx, originX, originY, refrX, refrY, state.laserColor, physics.n2Eff, 0.85);
+        }
+      }
+
+      // 7. Draw Incident Point Marker (0,0)
+      ctx.save();
+      ctx.shadowColor = state.laserColor;
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(originX, originY, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // 8. Draw Angles Arcs & Text Badges
+      const arcRadius = Math.min(w, h) * 0.18;
+
+      // Incident Angle Arc (Top-Left quadrant between normal & incident ray)
+      // Normal angle is -PI/2 (270 deg). Incident ray angle is Math.atan2(incY - originY, incX - originX).
+      const startAngleInc = -Math.PI / 2 - physics.theta1Rad;
+      const endAngleInc = -Math.PI / 2;
+      drawAngleArc(ctx, originX, originY, arcRadius, startAngleInc, endAngleInc, '#f43f5e', `θ₁ = ${state.theta1.toFixed(1)}°`);
+
+      // Reflected Angle Arc (Top-Right quadrant between normal & reflected ray)
+      const startAngleRef = -Math.PI / 2;
+      const endAngleRef = -Math.PI / 2 + physics.theta1Rad;
+      drawAngleArc(ctx, originX, originY, arcRadius * 0.85, startAngleRef, endAngleRef, '#38bdf8', `θ_r = ${state.theta1.toFixed(1)}°`);
+
+      // Refracted Angle Arc (Bottom-Right quadrant between normal & refracted ray)
+      if (!physics.isTIR) {
+        const startAngleRefr = Math.PI / 2 - physics.theta2Rad;
+        const endAngleRefr = Math.PI / 2;
+        drawAngleArc(ctx, originX, originY, arcRadius, startAngleRefr, endAngleRefr, '#818cf8', `θ₂ = ${physics.theta2Deg.toFixed(1)}°`);
+      }
+
+      // Critical Angle Guide Line (if n1 > n2)
+      if (physics.thetaCRad !== null) {
+        const critX = originX - rayLength * Math.sin(physics.thetaCRad);
+        const critY = originY - rayLength * Math.cos(physics.thetaCRad);
+
+        ctx.save();
+        ctx.setLineDash([3, 3]);
+        ctx.strokeStyle = 'rgba(251, 146, 60, 0.7)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(critX, critY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#fb923c';
+        ctx.font = '10px Outfit, Noto Sans KR';
+        ctx.fillText(`임계각 θc (${physics.thetaCDeg.toFixed(1)}°)`, critX - 10, critY - 8);
+        ctx.restore();
+      }
+
+      // Update Dashboard UI Values
+      updateDashboardUI(physics);
+
+      // Loop Animation Frame for Smooth Particle Motion
+      requestAnimationFrame(render);
+    }
+
+    // --- Helper Canvas Drawing Functions ---
+
+    // Glowing Neon Beam Line
+    function drawNeonBeam(ctx, x1, y1, x2, y2, color, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      // Outer Glow
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 18;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      // Inner Core White Hot Line
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    // Moving Particles along Light Ray
+    function drawRayParticles(ctx, x1, y1, x2, y2, color, n, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dist = Math.hypot(dx, dy);
+
+      // Speed inversely proportional to refractive index n
+      const step = 25;
+      const speedFactor = (1.5 / n);
+      const offset = (state.particleOffset * speedFactor * 8) % step;
+
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 8;
+
+      for (let d = offset; d < dist; d += step) {
+        const t = d / dist;
+        const px = x1 + dx * t;
+        const py = y1 + dy * t;
+
+        ctx.beginPath();
+        ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // Angle Arc with Text Badge
+    function drawAngleArc(ctx, cx, cy, r, startAngle, endAngle, color, labelText) {
+      ctx.save();
+
+      // Arc stroke
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, startAngle, endAngle);
+      ctx.stroke();
+
+      // Filled subtle arc sector
+      ctx.fillStyle = color.replace(')', ', 0.15)').replace('rgb', 'rgba').replace('#', ''); // fallback
+      ctx.fillStyle = `${color}25`;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, r, startAngle, endAngle);
+      ctx.closePath();
+      ctx.fill();
+
+      // Label Badge Position (Mid-angle)
+      const midAngle = (startAngle + endAngle) / 2;
+      const badgeR = r + 16;
+      const bx = cx + badgeR * Math.cos(midAngle);
+      const by = cy + badgeR * Math.sin(midAngle);
+
+      // Text Label
+      ctx.fillStyle = color;
+      ctx.font = 'bold 11px Outfit, Noto Sans KR';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      // Text background chip
+      const textWidth = ctx.measureText(labelText).width;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.beginPath();
+      ctx.roundRect(bx - textWidth / 2 - 4, by - 8, textWidth + 8, 16, 4);
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(labelText, bx, by);
+
+      ctx.restore();
+    }
+
+    // Semi-circular Protractor Grid
+    function drawProtractor(ctx, cx, cy, r) {
+      ctx.save();
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
+      ctx.lineWidth = 1;
+
+      // Semi-circles
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI, true);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI, false);
+      ctx.stroke();
+
+      // Degree Tick Marks (Every 10 deg)
+      for (let deg = 0; deg <= 360; deg += 10) {
+        const rad = (deg * Math.PI) / 180;
+        const innerR = (deg % 30 === 0) ? r - 10 : r - 5;
+        const x1 = cx + innerR * Math.cos(rad);
+        const y1 = cy + innerR * Math.sin(rad);
+        const x2 = cx + r * Math.cos(rad);
+        const y2 = cy + r * Math.sin(rad);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+
+    // --- UI Synchronizer & Dashboard Updater ---
+    function updateDashboardUI(physics) {
+      // Sync Material Display Badges
+      m1NameDisplay.textContent = getMaterialName(state.n1);
+      m1ValDisplay.textContent = physics.n1Eff !== state.n1 
+        ? `${state.n1.toFixed(2)} (분산: ${physics.n1Eff.toFixed(3)})` 
+        : state.n1.toFixed(2);
+
+      m2NameDisplay.textContent = getMaterialName(state.n2);
+      m2ValDisplay.textContent = physics.n2Eff !== state.n2 
+        ? `${state.n2.toFixed(2)} (분산: ${physics.n2Eff.toFixed(3)})` 
+        : state.n2.toFixed(2);
+
+      // Snell's Law Equation Box
+      const sin1 = Math.sin(physics.theta1Rad).toFixed(3);
+      if (!physics.isTIR) {
+        const sin2 = Math.sin(physics.theta2Rad).toFixed(3);
+        snellCalcDisplay.textContent = `${physics.n1Eff.toFixed(3)} · sin(${state.theta1.toFixed(1)}°) = ${physics.n2Eff.toFixed(3)} · sin(${physics.theta2Deg.toFixed(1)}°)   [${(physics.n1Eff * sin1).toFixed(3)} = ${(physics.n2Eff * sin2).toFixed(3)}]`;
+      } else {
+        snellCalcDisplay.textContent = `${physics.n1Eff.toFixed(3)} · sin(${state.theta1.toFixed(1)}°) > ${physics.n2Eff.toFixed(3)} · sin(90°) [전반사 조건 충족]`;
+      }
+
+      // Dispersion Subtext
+      if (state.wavelength === 589) {
+        dispersionCalcSub.textContent = `🟡 표준 기준 파장 589nm (기본 굴절률 적용)`;
+        dispersionCalcSub.className = 'text-[10px] text-slate-400 font-medium pt-0.5';
+      } else {
+        dispersionCalcSub.textContent = `🌈 파장 ${state.wavelength}nm 빛의 분산 적용 (유효 굴절률 n₁:${physics.n1Eff.toFixed(3)}, n₂:${physics.n2Eff.toFixed(3)})`;
+        dispersionCalcSub.className = 'text-[10px] text-amber-300 font-medium pt-0.5';
+      }
+
+      // Angles & Metrics Cards
+      dashThetar.textContent = `${state.theta1.toFixed(1)}°`;
+
+      // Refraction Angle Card
+      if (physics.isTIR) {
+        dashTheta2.textContent = '전반사 (없음)';
+        dashTheta2.className = 'text-base font-extrabold font-outfit text-rose-400 mt-0.5';
+        dashTheta2Sub.textContent = '⚠️ 굴절광 소멸 (100% 반사)';
+      } else {
+        dashTheta2.textContent = `${physics.theta2Deg.toFixed(1)}°`;
+        dashTheta2.className = 'text-base font-extrabold font-outfit text-indigo-400 mt-0.5';
+        dashTheta2Sub.textContent = state.wavelength === 589 ? '정상 굴절 진행 중' : `파장(${state.wavelength}nm) 분산 굴절각`;
+      }
+
+      // Critical Angle Card
+      if (physics.thetaCDeg !== null) {
+        dashThetac.textContent = `${physics.thetaCDeg.toFixed(1)}°`;
+        dashThetac.className = 'text-base font-extrabold font-outfit text-amber-400 mt-0.5';
+        dashThetacSub.textContent = `sin θc = ${physics.n2Eff.toFixed(3)} / ${physics.n1Eff.toFixed(3)}`;
+        criticalAngleCard.className = 'bg-amber-950/40 p-2.5 rounded-xl border border-amber-800/80 transition-colors';
+      } else {
+        dashThetac.textContent = '없음';
+        dashThetac.className = 'text-base font-extrabold font-outfit text-slate-500 mt-0.5';
+        dashThetacSub.textContent = 'n₁ ≤ n₂ (전반사 불가)';
+        criticalAngleCard.className = 'bg-slate-900/70 p-2.5 rounded-xl border border-slate-800 transition-colors';
+      }
+
+      // Velocity Ratio Card (v = c / nEff)
+      const v1 = 1 / physics.n1Eff;
+      const v2 = 1 / physics.n2Eff;
+      dashVelocity.textContent = `${(v1).toFixed(2)}c : ${(v2).toFixed(2)}c`;
+
+      // Intensity Bar Adjustments
+      if (physics.isTIR) {
+        barRefract.style.width = '0%';
+        barReflect.style.width = '100%';
+        intensityRefractText.textContent = '0%';
+        intensityReflectText.textContent = '100% (전반사)';
+      } else {
+        // Fresnel estimation placeholder for middle school visualizer
+        const reflectPercent = Math.min(80, Math.round(15 + Math.pow(state.theta1 / 90, 3) * 35));
+        const refractPercent = 100 - reflectPercent;
+        barRefract.style.width = `${refractPercent}%`;
+        barReflect.style.width = `${reflectPercent}%`;
+        intensityRefractText.textContent = `${refractPercent}%`;
+        intensityReflectText.textContent = `${reflectPercent}%`;
+      }
+
+      // Total Internal Reflection Alert Banner Trigger
+      if (physics.isTIR) {
+        tirTopBanner.classList.remove('hidden');
+        tirDashAlert.classList.remove('hidden');
+      } else {
+        tirTopBanner.classList.add('hidden');
+        tirDashAlert.classList.add('hidden');
+      }
+    }
+
+
+    // --- Event Listeners & Interactive Handlers ---
+
+    // Helper to update state and inputs simultaneously
+    function updateState(key, val) {
+      state[key] = parseFloat(val);
+
+      if (key === 'theta1') {
+        sliderAngle.value = state.theta1;
+        numAngle.value = state.theta1.toFixed(1);
+      } else if (key === 'n1') {
+        sliderN1.value = state.n1;
+        numN1.value = state.n1.toFixed(2);
+      } else if (key === 'n2') {
+        sliderN2.value = state.n2;
+        numN2.value = state.n2.toFixed(2);
+      }
+    }
+
+    // Incident Angle Controls
+    sliderAngle.addEventListener('input', (e) => updateState('theta1', e.target.value));
+    numAngle.addEventListener('change', (e) => {
+      let val = Math.min(89.9, Math.max(0, parseFloat(e.target.value) || 0));
+      updateState('theta1', val);
+    });
+
+    // Refractive Index 1 Controls
+    sliderN1.addEventListener('input', (e) => updateState('n1', e.target.value));
+    numN1.addEventListener('change', (e) => {
+      let val = Math.min(2.50, Math.max(1.00, parseFloat(e.target.value) || 1.00));
+      updateState('n1', val);
+    });
+
+    // Refractive Index 2 Controls
+    sliderN2.addEventListener('input', (e) => updateState('n2', e.target.value));
+    numN2.addEventListener('change', (e) => {
+      let val = Math.min(2.50, Math.max(1.00, parseFloat(e.target.value) || 1.00));
+      updateState('n2', val);
+    });
+
+    // Laser Color Dropdown
+    selectLaserColor.addEventListener('change', (e) => {
+      state.laserColor = e.target.value;
+      const selectedOpt = e.target.options[e.target.selectedIndex];
+      state.laserName = selectedOpt.getAttribute('data-name');
+      state.wavelength = parseFloat(selectedOpt.getAttribute('data-wavelength') || 589);
+    });
+
+    // Toggles
+    toggleProtractor.addEventListener('change', (e) => {
+      state.showProtractor = e.target.checked;
+    });
+
+    toggleParticles.addEventListener('change', (e) => {
+      state.showParticles = e.target.checked;
+    });
+
+    // Reset Button
+    resetBtn.addEventListener('click', () => {
+      updateState('theta1', 45.0);
+      updateState('n1', 1.00);
+      updateState('n2', 1.33);
+      selectLaserColor.value = '#00bfff';
+      state.laserColor = '#00bfff';
+      state.wavelength = 450;
+      toggleProtractor.checked = true;
+      toggleParticles.checked = true;
+      state.showProtractor = true;
+      state.showParticles = true;
+    });
+
+    // Swap Media Button
+    swapMediaBtn.addEventListener('click', () => {
+      const tempN1 = state.n1;
+      updateState('n1', state.n2);
+      updateState('n2', tempN1);
+    });
+
+    // Preset Buttons Handler
+    document.querySelectorAll('.preset-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const preset = btn.getAttribute('data-preset');
+        switch (preset) {
+          case 'air-water':
+            updateState('n1', 1.00);
+            updateState('n2', 1.33);
+            updateState('theta1', 45.0);
+            break;
+          case 'air-glass':
+            updateState('n1', 1.00);
+            updateState('n2', 1.50);
+            updateState('theta1', 45.0);
+            break;
+          case 'glass-air':
+            updateState('n1', 1.50);
+            updateState('n2', 1.00);
+            updateState('theta1', 48.0); // Pre-set above critical angle (41.8°) to show TIR!
+            break;
+          case 'water-air':
+            updateState('n1', 1.33);
+            updateState('n2', 1.00);
+            updateState('theta1', 52.0); // Pre-set above critical angle (48.8°) to show TIR!
+            break;
+          case 'diamond-air':
+            updateState('n1', 2.42);
+            updateState('n2', 1.00);
+            updateState('theta1', 30.0);
+            break;
+        }
+      });
+    });
+
+    // Direct Canvas Pointer Drag Interaction
+    function handleCanvasPointer(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+      const mouseX = clientX - rect.left;
+      const mouseY = clientY - rect.top;
+
+      const originX = rect.width / 2;
+      const originY = rect.height / 2;
+
+      // Calculate angle from vertical normal line in top half (y < originY)
+      const dx = mouseX - originX;
+      const dy = originY - mouseY; // inverted canvas y
+
+      if (dy > 5) { // Only when pointer is in Medium 1 (top half)
+        let angleRad = Math.atan2(Math.abs(dx), dy);
+        let angleDeg = (angleRad * 180) / Math.PI;
+        angleDeg = Math.min(89.9, Math.max(0, angleDeg));
+        updateState('theta1', angleDeg);
+      }
+    }
+
+    canvas.addEventListener('mousedown', (e) => {
+      state.isDragging = true;
+      handleCanvasPointer(e);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (state.isDragging) handleCanvasPointer(e);
+    });
+
+    window.addEventListener('mouseup', () => {
+      state.isDragging = false;
+    });
+
+    // Touch Support for Tablets / Mobile
+    canvas.addEventListener('touchstart', (e) => {
+      state.isDragging = true;
+      handleCanvasPointer(e);
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+      if (state.isDragging) handleCanvasPointer(e);
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+      state.isDragging = false;
+    });
+
+
+    // --- Initialization ---
+    window.addEventListener('DOMContentLoaded', () => {
+      resizeCanvas();
+      render();
+    });
+  </script>
+</body>
+</html>
