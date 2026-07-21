@@ -11,6 +11,9 @@
   <!-- FontAwesome 6 Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- SheetJS Library for Excel Parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -239,6 +242,11 @@
           <p class="text-xs text-slate-400 mt-1">등록된 총 <span id="teacher-count-badge">26</span>명의 교사 프로필 정보입니다.</p>
         </div>
         <div class="flex items-center space-x-2">
+          <button onclick="triggerExcelUpload()" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all flex items-center shadow-lg">
+            <i class="fa-solid fa-file-excel mr-1.5"></i> 엑셀 업로드
+          </button>
+          <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)" />
+
           <button onclick="openTeacherModal()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all flex items-center shadow-lg">
             <i class="fa-solid fa-user-plus mr-1.5"></i> 교사 직접 추가
           </button>
@@ -821,6 +829,112 @@
         appState.teachers = appState.teachers.filter(t => t.id !== id);
         renderTeachersTable();
       }
+    }
+
+    function triggerExcelUpload() {
+      document.getElementById('excel-file-input').click();
+    }
+
+    function handleExcelUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const rows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+
+          if (rows.length === 0) {
+            alert('엑셀 파일에 데이터가 없습니다.');
+            return;
+          }
+
+          // Let's find column mappings by examining the keys of the first row
+          const sampleRow = rows[0];
+          let nameKey = '';
+          let genderKey = '';
+          let subjectKey = '';
+          let homeroomKey = '';
+          let remarksKey = '';
+
+          const keys = Object.keys(sampleRow);
+          keys.forEach(k => {
+            const trimK = k.replace(/\s+/g, '');
+            if (trimK.includes('이름') || trimK.includes('성명') || trimK.includes('교사명') || trimK.includes('교사')) {
+              nameKey = k;
+            } else if (trimK.includes('성별')) {
+              genderKey = k;
+            } else if (trimK.includes('과목') || trimK.includes('담당')) {
+              subjectKey = k;
+            } else if (trimK.includes('담임') || trimK.includes('학반') || trimK.includes('반')) {
+              homeroomKey = k;
+            } else if (trimK.includes('비고') || trimK.includes('특이사항') || trimK.includes('메모') || trimK.includes('remarks') || trimK.includes('설명')) {
+              remarksKey = k;
+            }
+          });
+
+          // Fallbacks for standard order if headers not matched
+          if (!nameKey) nameKey = keys.find(k => k.toLowerCase().includes('name') || k.toLowerCase().includes('이름') || k.toLowerCase().includes('성명')) || keys[0];
+          if (!genderKey) genderKey = keys.find(k => k.toLowerCase().includes('gender') || k.toLowerCase().includes('성별')) || keys[1];
+          if (!subjectKey) subjectKey = keys.find(k => k.toLowerCase().includes('subject') || k.toLowerCase().includes('과목') || k.toLowerCase().includes('담당')) || keys[2];
+          if (!homeroomKey) homeroomKey = keys.find(k => k.toLowerCase().includes('homeroom') || k.toLowerCase().includes('담임') || k.toLowerCase().includes('학반') || k.toLowerCase().includes('반')) || keys[3];
+          if (!remarksKey) remarksKey = keys.find(k => k.toLowerCase().includes('remarks') || k.toLowerCase().includes('비고') || k.toLowerCase().includes('특이사항') || k.toLowerCase().includes('메모') || k.toLowerCase().includes('설명')) || keys[4];
+
+          const confirmOverwrite = confirm(`엑셀에서 ${rows.length}명의 교사 데이터를 읽었습니다.\n기존 등록된 교사 명단을 지우고 엑셀 데이터로 대체하시겠습니까?\n('취소'를 누르면 기존 명단 뒤에 추가합니다)`);
+
+          const parsedTeachers = rows.map((row, index) => {
+            let name = String(row[nameKey] || '').trim();
+            let gender = String(row[genderKey] || '').trim();
+            let subject = String(row[subjectKey] || '').trim();
+            let homeroom = String(row[homeroomKey] || '').trim();
+            let remarks = remarksKey ? String(row[remarksKey] || '').trim() : '';
+
+            // Clean values
+            if (!name) name = `교사${index + 1}`;
+            if (gender !== '남' && gender !== '여') {
+              if (gender.includes('남') || gender.includes('m') || gender.includes('M')) gender = '남';
+              else if (gender.includes('여') || gender.includes('f') || gender.includes('F')) gender = '여';
+              else gender = '여'; // default
+            }
+            if (!subject) subject = '미지정';
+            if (!homeroom || homeroom === '-' || homeroom.toLowerCase() === 'none') homeroom = '없음';
+
+            return {
+              id: `T${String(index + 1).padStart(2, '0')}`,
+              name,
+              gender,
+              subject,
+              homeroom,
+              remarks
+            };
+          });
+
+          if (confirmOverwrite) {
+            appState.teachers = parsedTeachers;
+          } else {
+            // Append and adjust IDs
+            const startIdx = appState.teachers.length;
+            parsedTeachers.forEach((t, i) => {
+              t.id = `T${String(startIdx + i + 1).padStart(2, '0')}`;
+              appState.teachers.push(t);
+            });
+          }
+
+          alert(`${parsedTeachers.length}명의 교사 정보가 등록되었습니다.`);
+          renderTeachersTable();
+          updateHeaderCounts();
+        } catch (error) {
+          console.error(error);
+          alert('엑셀 파일을 파싱하는 도중 에러가 발생했습니다. 파일 형식을 확인해 주세요.');
+        } finally {
+          event.target.value = ''; // clear input
+        }
+      };
+      reader.readAsArrayBuffer(file);
     }
 
 
