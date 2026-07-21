@@ -167,10 +167,8 @@
     function generateProctorSchedule(teachers, settings) {
       const { daysCount, grades, classesPerGrade, scheduleMatrix } = settings;
 
-      // Result storage
-      const slots = []; // { id, day, period, grade, className, subject, mainProctorId, assistantProctorId, warnings: [] }
+      const slots = [];
 
-      // Tracking teacher duties
       const teacherStats = {};
       teachers.forEach(t => {
         teacherStats[t.id] = {
@@ -178,7 +176,7 @@
           main: 0,
           assistant: 0,
           gradeCounts: { 2: 0, 3: 0, 1: 0 },
-          busy: {} // busy[day][period] = true
+          busy: {}
         };
       });
 
@@ -190,7 +188,6 @@
         teacherStats[teacherId].busy[`${day}-${period}`] = isBusy;
       }
 
-      // Generate all slot instances required
       let slotIdCounter = 1;
       for (let day = 1; day <= daysCount; day++) {
         const daySchedule = scheduleMatrix[day] || {};
@@ -220,62 +217,48 @@
         }
       }
 
-      // Helper function to find eligible candidates for a slot
       function getEligibleCandidates(slot, role, assignedMainId = null) {
         const { day, period, grade, className, subject } = slot;
 
         return teachers.filter(t => {
-          // Rule 4: No Double Booking in same period
           if (isTeacherBusy(t.id, day, period)) return false;
-
-          // Rule 2: No Homeroom Self-Assignment
           if (t.homeroom && t.homeroom === className) return false;
-
-          // Rule 3: Subject Exclusion (Current exam subject teacher excluded)
           if (t.subject && t.subject.trim() === subject.trim()) return false;
 
-          // If assigning Assistant Proctor, check Rule 1 (No Double Male)
           if (role === 'assistant' && assignedMainId) {
             const mainProctor = teachers.find(m => m.id === assignedMainId);
             if (mainProctor && mainProctor.gender === '남' && t.gender === '남') {
-              return false; // Candidate is Male and Main is Male -> Violation!
+              return false;
             }
-            if (t.id === assignedMainId) return false; // Cannot be same person
+            if (t.id === assignedMainId) return false;
           }
 
           return true;
         });
       }
 
-      // Sort candidates by fairness heuristics (prefer lower total duties)
       function sortCandidates(candidates, grade) {
         return [...candidates].sort((a, b) => {
           const statsA = teacherStats[a.id];
           const statsB = teacherStats[b.id];
 
-          // Primary: Total assigned duties (Ascending)
           if (statsA.total !== statsB.total) {
             return statsA.total - statsB.total;
           }
 
-          // Secondary: Grade balance (prefer teacher with fewer duties in this grade)
           const gradeA = statsA.gradeCounts[grade] || 0;
           const gradeB = statsB.gradeCounts[grade] || 0;
           if (gradeA !== gradeB) {
             return gradeA - gradeB;
           }
 
-          // Random tie-breaker
           return Math.random() - 0.5;
         });
       }
 
-      // Process allocation for each slot
-      const totalSlotCount = slots.length;
       let unassignedCount = 0;
 
       for (const slot of slots) {
-        // 1. Assign Main Proctor
         let mainCandidates = getEligibleCandidates(slot, 'main');
         mainCandidates = sortCandidates(mainCandidates, slot.grade);
 
@@ -291,7 +274,6 @@
           unassignedCount++;
         }
 
-        // 2. Assign Assistant Proctor
         let asstCandidates = getEligibleCandidates(slot, 'assistant', slot.mainProctorId);
         asstCandidates = sortCandidates(asstCandidates, slot.grade);
 
@@ -303,12 +285,11 @@
           teacherStats[chosenAsst.id].assistant += 1;
           teacherStats[chosenAsst.id].gradeCounts[slot.grade] = (teacherStats[chosenAsst.id].gradeCounts[slot.grade] || 0) + 1;
         } else {
-          slot.warnings.push('부감독 조건을 충족하는 교사 부족 (남-남 금지 등)');
+          slot.warnings.push('부감독 조건을 충족하는 교사 부족');
           unassignedCount++;
         }
       }
 
-      // Constraint Auditor: Double check all slots for warnings
       slots.forEach(slot => {
         const main = teachers.find(t => t.id === slot.mainProctorId);
         const asst = teachers.find(t => t.id === slot.assistantProctorId);
@@ -336,32 +317,28 @@
 
     // --- MAIN REACT APPLICATION COMPONENT ---
     function App() {
-      const [step, setStep] = useState(1); // 1: Settings, 2: Teachers, 3: Timetable & Stats
+      const [step, setStep] = useState(1);
       const [teachers, setTeachers] = useState(INITIAL_TEACHERS);
       const [examSettings, setExamSettings] = useState(DEFAULT_EXAM_SETTINGS);
       const [scheduleResult, setScheduleResult] = useState(null);
-      const [viewMode, setViewMode] = useState('classroom'); // 'classroom', 'teacher', 'timeline'
+      const [viewMode, setViewMode] = useState('classroom');
       const [selectedTeacherFilter, setSelectedTeacherFilter] = useState('');
       const [selectedSlotModal, setSelectedSlotModal] = useState(null);
 
-      // Filter & Search states for Step 2 Teacher Table
       const [teacherSearch, setTeacherSearch] = useState('');
       const [filterGender, setFilterGender] = useState('ALL');
       const [filterHomeroom, setFilterHomeroom] = useState('ALL');
 
-      // Modal state for Add/Edit Teacher
       const [teacherModalOpen, setTeacherModalOpen] = useState(false);
       const [editingTeacher, setEditingTeacher] = useState(null);
       const [teacherForm, setTeacherForm] = useState({ name: '', gender: '여', subject: '국어', homeroom: '없음', remarks: '' });
 
-      // Run schedule generation whenever moving to Step 3 or triggering manually
       const handleGenerateSchedule = () => {
         const result = generateProctorSchedule(teachers, examSettings);
         setScheduleResult(result);
         setStep(3);
       };
 
-      // Handle Teacher Add / Edit
       const handleSaveTeacher = () => {
         if (!teacherForm.name.trim()) {
           alert('교사 이름을 입력해주세요.');
@@ -391,7 +368,6 @@
         }
       };
 
-      // Reset to preset data
       const handleLoadPreset = () => {
         if (confirm('기본 26명 교사 및 3일차 시험 설정 샘플 데이터를 불러오시겠습니까?')) {
           setTeachers(INITIAL_TEACHERS);
@@ -399,11 +375,10 @@
         }
       };
 
-      // Export Timetable to CSV
       const exportToCSV = () => {
         if (!scheduleResult) return;
 
-        let csvContent = "\uFEFF"; // UTF-8 BOM
+        let csvContent = "\uFEFF";
         csvContent += "일차,교시,학년,학급,시험과목,정감독,정감독성별,부감독,부감독성별,제약위반경고\n";
 
         scheduleResult.slots.forEach(s => {
@@ -424,7 +399,6 @@
         document.body.removeChild(link);
       };
 
-      // Manual Slot Proctor Swap Handler
       const handleManualSwap = (slotId, newMainId, newAsstId) => {
         if (!scheduleResult) return;
 
@@ -446,7 +420,6 @@
             return s;
           });
 
-          // Recalculate stats
           const newStats = {};
           teachers.forEach(t => {
             newStats[t.id] = { total: 0, main: 0, assistant: 0, gradeCounts: { 2: 0, 3: 0, 1: 0 } };
@@ -471,7 +444,6 @@
         setSelectedSlotModal(null);
       };
 
-      // Filtered teachers list for Step 2 table
       const filteredTeachers = useMemo(() => {
         return teachers.filter(t => {
           const matchName = t.name.includes(teacherSearch) || t.subject.includes(teacherSearch) || t.homeroom.includes(teacherSearch);
@@ -485,7 +457,7 @@
       return (
         <div class="flex flex-col flex-1 pb-10">
 
-          <!-- TOP HEADER BANNER -->
+          {/* TOP HEADER BANNER */}
           <header class="bg-slate-900/90 border-b border-slate-800 px-4 py-3 sticky top-0 z-40 backdrop-blur-md no-print">
             <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
               
@@ -501,7 +473,7 @@
                 </div>
               </div>
 
-              <!-- Quick Status Badges & Preset Button -->
+              {/* Quick Status Badges & Preset Button */}
               <div class="flex items-center space-x-2 text-xs">
                 <span class="px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-medium">
                   <i class="fa-solid fa-users text-sky-400 mr-1.5"></i> 교사 <span class="text-sky-400 font-bold">{teachers.length}</span>명
@@ -517,46 +489,46 @@
             </div>
           </header>
 
-          <!-- STEPPER NAVIGATION HEADER -->
+          {/* STEPPER NAVIGATION HEADER */}
           <div class="bg-slate-900/60 border-b border-slate-800 py-3 px-4 no-print">
             <div class="max-w-7xl mx-auto flex items-center justify-center space-x-2 sm:space-x-8 text-xs sm:text-sm">
               
-              <!-- Step 1 Button -->
+              {/* Step 1 Button */}
               <button onClick={() => setStep(1)} 
                       class={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all ${step === 1 ? 'bg-sky-500 text-white font-bold shadow-lg shadow-sky-500/25' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}>
                 <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">1</span>
-                <span>시험 환경 & 과목 설정</span>
+                <span>시험 환경 &amp; 과목 설정</span>
               </button>
 
               <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
 
-              <!-- Step 2 Button -->
+              {/* Step 2 Button */}
               <button onClick={() => setStep(2)} 
                       class={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all ${step === 2 ? 'bg-sky-500 text-white font-bold shadow-lg shadow-sky-500/25' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}>
                 <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">2</span>
-                <span>교사 명단 & 과목 관리</span>
+                <span>교사 명단 &amp; 과목 관리</span>
               </button>
 
               <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
 
-              <!-- Step 3 Button -->
+              {/* Step 3 Button */}
               <button onClick={() => { if (!scheduleResult) handleGenerateSchedule(); else setStep(3); }} 
                       class={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all ${step === 3 ? 'bg-indigo-600 text-white font-bold shadow-lg shadow-indigo-500/25' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'}`}>
                 <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">3</span>
-                <span>자동 배정 & 결과 대시보드</span>
+                <span>자동 배정 &amp; 결과 대시보드</span>
               </button>
 
             </div>
           </div>
 
 
-          <!-- MAIN CONTENT CONTAINER -->
+          {/* MAIN CONTENT CONTAINER */}
           <main class="max-w-7xl w-full mx-auto p-4 sm:p-6 flex-1 flex flex-col space-y-6">
 
             {/* ================= STEP 1: EXAM SETTINGS ================= */}
             {step === 1 && (
               <div class="space-y-6">
-                <!-- Page Title -->
+                {/* Page Title */}
                 <div class="flex justify-between items-center">
                   <div>
                     <h2 class="text-lg font-bold text-slate-100 flex items-center">
@@ -569,14 +541,14 @@
                   </button>
                 </div>
 
-                <!-- Basic Settings Card -->
+                {/* Basic Settings Card */}
                 <div class="glass-card rounded-2xl p-5 space-y-4 shadow-xl">
                   <h3 class="text-sm font-bold text-sky-300 flex items-center">
                     <i class="fa-solid fa-gear mr-2"></i> 기본 시험 정보
                   </h3>
 
                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                    <!-- Title -->
+                    {/* Title */}
                     <div class="space-y-1.5">
                       <label class="font-medium text-slate-300">시험 명칭</label>
                       <input type="text" value={examSettings.title} 
@@ -584,7 +556,7 @@
                              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none" />
                     </div>
 
-                    <!-- Exam Days Count -->
+                    {/* Exam Days Count */}
                     <div class="space-y-1.5">
                       <label class="font-medium text-slate-300">시험 일수 (일간)</label>
                       <div class="flex items-center space-x-2">
@@ -596,7 +568,7 @@
                       </div>
                     </div>
 
-                    <!-- Class Counts -->
+                    {/* Class Counts */}
                     <div class="space-y-1.5">
                       <label class="font-medium text-slate-300">참여 학년 학급 수 (2학년 / 3학년)</label>
                       <div class="text-slate-400 text-xs py-1.5">
@@ -606,7 +578,7 @@
                   </div>
                 </div>
 
-                <!-- Daily Exam Subjects Schedule Matrix -->
+                {/* Daily Exam Subjects Schedule Matrix */}
                 <div class="glass-card rounded-2xl p-5 space-y-4 shadow-xl">
                   <h3 class="text-sm font-bold text-sky-300 flex items-center justify-between">
                     <span><i class="fa-solid fa-calendar-week mr-2"></i> 일자별 &amp; 교시별 시험 과목 설정</span>
@@ -688,7 +660,7 @@
             {/* ================= STEP 2: TEACHERS MANAGEMENT ================= */}
             {step === 2 && (
               <div class="space-y-6">
-                <!-- Page Title -->
+                {/* Page Title */}
                 <div class="flex justify-between items-center flex-wrap gap-3">
                   <div>
                     <h2 class="text-lg font-bold text-slate-100 flex items-center">
@@ -708,9 +680,9 @@
                   </div>
                 </div>
 
-                <!-- Filter & Search Toolbar -->
+                {/* Filter & Search Toolbar */}
                 <div class="glass-card rounded-2xl p-4 flex flex-wrap justify-between items-center gap-3">
-                  <!-- Search Bar -->
+                  {/* Search Bar */}
                   <div class="relative flex-1 min-w-[220px]">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
                     <input type="text" placeholder="이름, 과목, 담임학반 검색..." 
@@ -718,7 +690,7 @@
                            class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-100 focus:border-sky-500 focus:outline-none" />
                   </div>
 
-                  <!-- Gender Filter -->
+                  {/* Gender Filter */}
                   <div class="flex items-center space-x-2 text-xs">
                     <span class="text-slate-400">성별:</span>
                     <select value={filterGender} onChange={(e) => setFilterGender(e.target.value)}
@@ -729,7 +701,7 @@
                     </select>
                   </div>
 
-                  <!-- Homeroom Filter -->
+                  {/* Homeroom Filter */}
                   <div class="flex items-center space-x-2 text-xs">
                     <span class="text-slate-400">담임 여부:</span>
                     <select value={filterHomeroom} onChange={(e) => setFilterHomeroom(e.target.value)}
@@ -741,7 +713,7 @@
                   </div>
                 </div>
 
-                <!-- Teachers Table Card -->
+                {/* Teachers Table Card */}
                 <div class="glass-card rounded-2xl overflow-hidden shadow-xl border border-slate-800">
                   <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse text-xs">
@@ -803,7 +775,7 @@
             {step === 3 && scheduleResult && (
               <div class="space-y-6">
 
-                <!-- Page Header & Action Controls -->
+                {/* Page Header & Action Controls */}
                 <div class="flex justify-between items-center flex-wrap gap-3 no-print">
                   <div>
                     <h2 class="text-lg font-bold text-slate-100 flex items-center">
@@ -825,7 +797,7 @@
                   </div>
                 </div>
 
-                <!-- Warnings Notification Banner (if any) -->
+                {/* Warnings Notification Banner (if any) */}
                 {scheduleResult.unassignedCount > 0 && (
                   <div class="bg-rose-950/90 border border-rose-500/80 rounded-2xl p-4 text-rose-200 text-xs space-y-1.5 shadow-lg animate-pulse no-print">
                     <div class="font-bold text-rose-300 flex items-center text-sm">
@@ -838,7 +810,7 @@
                   </div>
                 )}
 
-                <!-- KPI Statistics Overview Cards -->
+                {/* KPI Statistics Overview Cards */}
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 no-print">
                   <div class="glass-card rounded-2xl p-4 border border-slate-800">
                     <div class="text-[11px] text-slate-400 font-medium">총 배정 슬롯 수</div>
@@ -867,7 +839,7 @@
                   </div>
                 </div>
 
-                <!-- View Mode Selector Tabs -->
+                {/* View Mode Selector Tabs */}
                 <div class="flex justify-between items-center bg-slate-900/80 p-1.5 rounded-xl border border-slate-800 text-xs no-print">
                   <div class="flex items-center space-x-1">
                     <button onClick={() => setViewMode('classroom')} 
@@ -896,7 +868,7 @@
                 </div>
 
 
-                <!-- TAB 1: CLASSROOM TIMETABLE GRID VIEW -->
+                {/* TAB 1: CLASSROOM TIMETABLE GRID VIEW */}
                 {viewMode === 'classroom' && (
                   <div class="space-y-6">
                     {Array.from({ length: examSettings.daysCount }).map((_, dIdx) => {
@@ -948,12 +920,12 @@
                                               onClick={() => setSelectedSlotModal(slot)}
                                               class={`py-2 px-2 border-l border-slate-800/60 cursor-pointer transition-all hover:bg-sky-950/40 ${hasWarning ? 'bg-rose-950/30' : ''}`}>
                                             <div class="space-y-1">
-                                              <!-- Subject Badge -->
+                                              {/* Subject Badge */}
                                               <div class="text-[10px] font-bold text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 inline-block">
                                                 {slot.subject}
                                               </div>
 
-                                              <!-- Main Proctor -->
+                                              {/* Main Proctor */}
                                               <div class="flex items-center justify-center space-x-1 text-xs">
                                                 <span class="text-[10px] font-semibold text-sky-400">정:</span>
                                                 <span class={`font-bold ${main ? (main.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}`}>
@@ -962,7 +934,7 @@
                                                 {main && <span class={`text-[9px] px-1 rounded ${main.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}`}>{main.gender}</span>}
                                               </div>
 
-                                              <!-- Assistant Proctor -->
+                                              {/* Assistant Proctor */}
                                               <div class="flex items-center justify-center space-x-1 text-xs">
                                                 <span class="text-[10px] font-semibold text-indigo-400">부:</span>
                                                 <span class={`font-bold ${asst ? (asst.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}`}>
@@ -995,7 +967,7 @@
                 )}
 
 
-                <!-- TAB 2: TEACHER INDIVIDUAL TIMETABLE VIEW -->
+                {/* TAB 2: TEACHER INDIVIDUAL TIMETABLE VIEW */}
                 {viewMode === 'teacher' && (
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {teachers
@@ -1057,7 +1029,7 @@
                 )}
 
 
-                <!-- TAB 3: WORKLOAD STATISTICS & FAIRNESS DASHBOARD -->
+                {/* TAB 3: WORKLOAD STATISTICS & FAIRNESS DASHBOARD */}
                 {viewMode === 'stats' && (
                   <div class="glass-card rounded-2xl p-5 border border-slate-800 space-y-4 shadow-xl">
                     <h3 class="text-sm font-bold text-sky-300 flex items-center justify-between">
@@ -1118,7 +1090,7 @@
           </main>
 
 
-          <!-- MODAL 1: ADD / EDIT TEACHER MODAL -->
+          {/* MODAL 1: ADD / EDIT TEACHER MODAL */}
           {teacherModalOpen && (
             <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
               <div class="glass-card rounded-2xl p-6 max-w-md w-full border border-slate-700 space-y-4 shadow-2xl animate-fade-in">
@@ -1190,7 +1162,7 @@
           )}
 
 
-          <!-- MODAL 2: MANUAL SLOT PROCTOR SWAP MODAL -->
+          {/* MODAL 2: MANUAL SLOT PROCTOR SWAP MODAL */}
           {selectedSlotModal && (
             <div class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
               <div class="glass-card rounded-2xl p-6 max-w-lg w-full border border-slate-700 space-y-4 shadow-2xl">
@@ -1209,7 +1181,7 @@
                   </button>
                 </div>
 
-                <!-- Warnings if any -->
+                {/* Warnings if any */}
                 {selectedSlotModal.warnings.length > 0 && (
                   <div class="bg-rose-950/80 border border-rose-800 rounded-xl p-3 text-rose-200 text-xs space-y-1">
                     {selectedSlotModal.warnings.map((w, idx) => (
@@ -1221,7 +1193,7 @@
                 )}
 
                 <div class="space-y-4 text-xs">
-                  <!-- Main Proctor Selector -->
+                  {/* Main Proctor Selector */}
                   <div class="space-y-1.5">
                     <label class="font-bold text-sky-300 flex items-center">
                       <span class="w-2 h-2 rounded-full bg-sky-400 mr-1.5"></span> 정감독 선택
@@ -1237,7 +1209,7 @@
                     </select>
                   </div>
 
-                  <!-- Assistant Proctor Selector -->
+                  {/* Assistant Proctor Selector */}
                   <div class="space-y-1.5">
                     <label class="font-bold text-indigo-300 flex items-center">
                       <span class="w-2 h-2 rounded-full bg-indigo-400 mr-1.5"></span> 부감독 선택
