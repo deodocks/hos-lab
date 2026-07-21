@@ -138,25 +138,29 @@
       <div class="flex justify-between items-center">
         <div>
           <h2 class="text-lg font-bold text-slate-100 flex items-center">
-            <i class="fa-solid fa-sliders text-sky-400 mr-2"></i> Step 1: 고사 환경 및 과목 시간표 설정
+            <i class="fa-solid fa-sliders text-sky-400 mr-2"></i> Step 1: 고사 환경, 교시 및 학급 수 설정
           </h2>
-          <p class="text-xs text-slate-400 mt-1">시험 명칭, 시험 일수, 학년별 학급 수 및 교시별 시험 과목을 설정합니다.</p>
+          <p class="text-xs text-slate-400 mt-1">시험 명칭, 일수, 교시 수 및 학년별 참여 학급 수를 자유롭게 설정합니다.</p>
         </div>
         <button onclick="switchStep(2)" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-lg flex items-center">
           다음: 교사 관리 <i class="fa-solid fa-arrow-right ml-1.5"></i>
         </button>
       </div>
 
-      <div class="glass-card rounded-2xl p-5 space-y-4 shadow-xl">
+      <!-- Basic Settings Card (Dynamic Days, Periods, Class Counts) -->
+      <div class="glass-card rounded-2xl p-5 space-y-5 shadow-xl">
         <h3 class="text-sm font-bold text-sky-300 flex items-center">
-          <i class="fa-solid fa-gear mr-2"></i> 기본 시험 정보
+          <i class="fa-solid fa-gear mr-2"></i> 기본 시험 & 학급 환경 설정
         </h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-          <div class="space-y-1.5">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <!-- Exam Title -->
+          <div class="space-y-1.5 md:col-span-2">
             <label class="font-medium text-slate-300">시험 명칭</label>
             <input type="text" id="input-exam-title" value="2026학년도 1학기 1차 지필고사" onchange="updateExamTitle(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none" />
           </div>
 
+          <!-- Exam Days Count -->
           <div class="space-y-1.5">
             <label class="font-medium text-slate-300">시험 일수 (일간)</label>
             <div class="flex items-center space-x-2">
@@ -166,15 +170,56 @@
             </div>
           </div>
 
+          <!-- Exam Periods Per Day Count -->
           <div class="space-y-1.5">
-            <label class="font-medium text-slate-300">참여 학년 학급 수 (2학년 / 3학년)</label>
-            <div class="text-slate-400 text-xs py-1.5">
-              2학년: <span class="font-bold text-sky-400">4개 반 (2-1 ~ 2-4)</span> | 3학년: <span class="font-bold text-indigo-400">4개 반 (3-1 ~ 3-4)</span>
+            <label class="font-medium text-slate-300">하루 시험 교시 수 (교시)</label>
+            <div class="flex items-center space-x-2">
+              <button onclick="adjustPeriodsPerDay(-1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">-</button>
+              <span id="label-periods-count" class="text-sm font-bold text-indigo-400 font-outfit w-12 text-center">3 교시</span>
+              <button onclick="adjustPeriodsPerDay(1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">+</button>
             </div>
           </div>
         </div>
+
+        <hr class="border-slate-800" />
+
+        <!-- Class Counts Per Grade Controls -->
+        <div class="space-y-3">
+          <div class="text-xs font-bold text-slate-200 flex items-center">
+            <i class="fa-solid fa-school-flag text-amber-400 mr-2"></i> 학년별 참여 학급 수 수동 조율
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <!-- Grade 2 Class Count -->
+            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-sky-300">2학년 학급 수</span>
+                <p id="label-class-list-2" class="text-[11px] text-slate-400 mt-0.5">2-1 ~ 2-4 (총 4개반)</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="adjustClassCount(2, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">-</button>
+                <span id="label-class-count-2" class="text-xs font-bold text-sky-400 w-12 text-center">4개 반</span>
+                <button onclick="adjustClassCount(2, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">+</button>
+              </div>
+            </div>
+
+            <!-- Grade 3 Class Count -->
+            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+              <div>
+                <span class="font-bold text-indigo-300">3학년 학급 수</span>
+                <p id="label-class-list-3" class="text-[11px] text-slate-400 mt-0.5">3-1 ~ 3-4 (총 4개반)</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="adjustClassCount(3, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">-</button>
+                <span id="label-class-count-3" class="text-xs font-bold text-indigo-400 w-12 text-center">4개 반</span>
+                <button onclick="adjustClassCount(3, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
+      <!-- Schedule Matrix Table -->
       <div class="glass-card rounded-2xl p-5 space-y-4 shadow-xl">
         <h3 class="text-sm font-bold text-sky-300 flex items-center justify-between">
           <span><i class="fa-solid fa-calendar-week mr-2"></i> 일자별 &amp; 교시별 시험 과목 설정</span>
@@ -443,7 +488,9 @@
     const DEFAULT_EXAM_SETTINGS = {
       title: '2026학년도 1학기 1차 지필고사',
       daysCount: 3,
+      periodsPerDay: 3,
       grades: [2, 3],
+      classCounts: { 2: 4, 3: 4 },
       classesPerGrade: {
         2: ['2-1', '2-2', '2-3', '2-4'],
         3: ['3-1', '3-2', '3-3', '3-4']
@@ -473,11 +520,13 @@
           appState.teachers = JSON.parse(JSON.stringify(INITIAL_TEACHERS));
           appState.examSettings = JSON.parse(JSON.stringify(DEFAULT_EXAM_SETTINGS));
           updateHeaderCounts();
+          updateClassLabels();
           renderStep1Matrix();
           renderTeachersTable();
         }
       });
       updateHeaderCounts();
+      updateClassLabels();
       renderStep1Matrix();
       renderTeachersTable();
     });
@@ -486,6 +535,15 @@
       document.getElementById('header-teacher-count').textContent = appState.teachers.length;
       document.getElementById('header-days-count').textContent = appState.examSettings.daysCount;
       document.getElementById('teacher-count-badge').textContent = appState.teachers.length;
+    }
+
+    function updateClassLabels() {
+      [2, 3].forEach(g => {
+        const cnt = appState.examSettings.classCounts[g] || 4;
+        document.getElementById(`label-class-count-${g}`).textContent = `${cnt}개 반`;
+        document.getElementById(`label-class-list-${g}`).textContent = `${g}-1 ~ ${g}-${cnt} (총 ${cnt}개반)`;
+      });
+      document.getElementById('label-periods-count').textContent = `${appState.examSettings.periodsPerDay || 3} 교시`;
     }
 
     function switchStep(stepNum) {
@@ -522,15 +580,39 @@
       renderStep1Matrix();
     }
 
+    function adjustPeriodsPerDay(delta) {
+      const current = appState.examSettings.periodsPerDay || 3;
+      const newPeriods = Math.min(6, Math.max(1, current + delta));
+      appState.examSettings.periodsPerDay = newPeriods;
+      updateClassLabels();
+      renderStep1Matrix();
+    }
+
+    function adjustClassCount(grade, delta) {
+      const current = appState.examSettings.classCounts[grade] || 4;
+      const newCount = Math.min(10, Math.max(1, current + delta));
+      appState.examSettings.classCounts[grade] = newCount;
+
+      const newClasses = [];
+      for (let c = 1; c <= newCount; c++) {
+        newClasses.push(`${grade}-${c}`);
+      }
+      appState.examSettings.classesPerGrade[grade] = newClasses;
+
+      updateClassLabels();
+    }
+
     function renderStep1Matrix() {
       const container = document.getElementById('schedule-matrix-container');
       container.innerHTML = '';
+
+      const periodsCount = appState.examSettings.periodsPerDay || 3;
 
       for (let day = 1; day <= appState.examSettings.daysCount; day++) {
         const daySchedule = appState.examSettings.scheduleMatrix[day] || {};
         
         let periodCards = '';
-        [1, 2, 3].forEach(period => {
+        for (let period = 1; period <= periodsCount; period++) {
           const pData = daySchedule[period] || {};
           const val2 = pData[2] || '';
           const val3 = pData[3] || '';
@@ -552,13 +634,16 @@
               </div>
             </div>
           `;
-        });
+        }
 
         const dayHtml = `
           <div class="bg-slate-900/80 rounded-xl p-4 border border-slate-800 space-y-3">
-            <div class="font-bold text-xs text-sky-400 flex items-center">
-              <span class="w-6 h-6 rounded-lg bg-sky-950 border border-sky-800 flex items-center justify-center mr-2">${day}</span>
-              <span>${day}일차 시험 과목 시간표</span>
+            <div class="font-bold text-xs text-sky-400 flex items-center justify-between">
+              <div class="flex items-center">
+                <span class="w-6 h-6 rounded-lg bg-sky-950 border border-sky-800 flex items-center justify-center mr-2">${day}</span>
+                <span>${day}일차 시험 과목 시간표</span>
+              </div>
+              <span class="text-[11px] font-normal text-slate-400">총 ${periodsCount}개 교시</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               ${periodCards}
@@ -692,7 +777,7 @@
     function runAutoSchedule() {
       const teachers = appState.teachers;
       const settings = appState.examSettings;
-      const { daysCount, grades, classesPerGrade, scheduleMatrix } = settings;
+      const { daysCount, periodsPerDay, grades, classesPerGrade, scheduleMatrix } = settings;
 
       const slots = [];
       const teacherStats = {};
@@ -715,11 +800,12 @@
       }
 
       let slotIdCounter = 1;
+      const totalPeriods = periodsPerDay || 3;
+
       for (let day = 1; day <= daysCount; day++) {
         const daySchedule = scheduleMatrix[day] || {};
-        const periods = Object.keys(daySchedule).map(Number).sort((a,b)=>a-b);
 
-        for (const period of periods) {
+        for (let period = 1; period <= totalPeriods; period++) {
           const periodSubjects = daySchedule[period] || {};
 
           for (const grade of grades) {
