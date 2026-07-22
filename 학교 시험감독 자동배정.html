@@ -1366,8 +1366,21 @@
           
           // 1. Build tasks for this period
           const tasks = [];
+
+          // 해당 교시에 시험이 있는 학년이 하나라도 있는지 판별
+          let hasAnyExam = false;
           for (const grade of grades) {
-            const subject = periodSubjects[grade] || '미지정';
+            const subject = (periodSubjects[grade] || '').trim();
+            if (subject && subject !== '-' && subject !== '미지정') {
+              hasAnyExam = true;
+            }
+          }
+
+          // 해당 교시에 시험이 아예 없는 경우 루프 건너뜀 (특별실 포함 배정 제외)
+          if (!hasAnyExam) continue;
+
+          for (const grade of grades) {
+            const subject = (periodSubjects[grade] || '').trim();
             if (!subject || subject === '-' || subject === '미지정') continue;
             const classes = classesPerGrade[grade] || [];
             for (const className of classes) {
@@ -1503,9 +1516,23 @@
         for (let period = 1; period <= totalPeriods; period++) {
           const periodSubjects = daySchedule[period] || {};
 
+          // 해당 교시에 시험이 있는 학년이 하나라도 있는지 판별
+          let hasAnyExam = false;
+          for (const grade of grades) {
+            const subject = (periodSubjects[grade] || '').trim();
+            if (subject && subject !== '-' && subject !== '미지정') {
+              hasAnyExam = true;
+            }
+          }
+
+          // 해당 교시에 시험이 아예 없으면 일반 교실 및 특별실 감독 배정에서 제외
+          if (!hasAnyExam) continue;
+
           // Normal grade classrooms
           for (const grade of grades) {
-            const subject = periodSubjects[grade] || '미지정';
+            const subject = (periodSubjects[grade] || '').trim();
+            if (!subject || subject === '-' || subject === '미지정') continue;
+
             const classes = classesPerGrade[grade] || [];
 
             for (const className of classes) {
