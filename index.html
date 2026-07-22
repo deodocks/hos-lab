@@ -496,7 +496,7 @@
           <label class="font-bold text-sky-300 flex items-center"><span class="w-2 h-2 rounded-full bg-sky-400 mr-1.5"></span> 정감독 선택</label>
           <select id="swap-main-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none"></select>
         </div>
-        <div class="space-y-1.5">
+        <div id="swap-asst-wrapper" class="space-y-1.5">
           <label class="font-bold text-indigo-300 flex items-center"><span class="w-2 h-2 rounded-full bg-indigo-400 mr-1.5"></span> 부감독 선택</label>
           <select id="swap-asst-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-indigo-500 focus:outline-none"></select>
         </div>
@@ -1350,7 +1350,6 @@
             }
 
             const main = appState.teachers.find(t => t.id === slot.mainProctorId);
-            const asst = appState.teachers.find(t => t.id === slot.assistantProctorId);
             const hasWarning = slot.warnings.length > 0;
 
             rowCells += `
@@ -1362,11 +1361,7 @@
                     <span class="font-bold ${main ? (main.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}">${main ? main.name : '미배정'}</span>
                     ${main ? `<span class="text-[9px] px-1 rounded ${main.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}">${main.gender}</span>` : ''}
                   </div>
-                  <div class="flex items-center justify-center space-x-1 text-xs">
-                    <span class="text-[10px] font-semibold text-indigo-400">부:</span>
-                    <span class="font-bold ${asst ? (asst.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}">${asst ? asst.name : '미배정'}</span>
-                    ${asst ? `<span class="text-[9px] px-1 rounded ${asst.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}">${asst.gender}</span>` : ''}
-                  </div>
+                  <div class="text-[9px] text-slate-500 italic">정감독 1인실</div>
                   ${hasWarning ? `<div class="text-[9px] text-rose-400 font-bold truncate">⚠️ 경고</div>` : ''}
                 </div>
               </td>
@@ -1557,6 +1552,13 @@
         asstSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedAsst}>${optText}</option>`);
       });
 
+      const asstWrapper = document.getElementById('swap-asst-wrapper');
+      if (isSpecial) {
+        asstWrapper.classList.add('hidden');
+      } else {
+        asstWrapper.classList.remove('hidden');
+      }
+
       document.getElementById('swap-modal').classList.remove('hidden');
     }
 
@@ -1570,14 +1572,14 @@
       if (!slot) return;
 
       const newMainId = document.getElementById('swap-main-select').value;
-      const newAsstId = document.getElementById('swap-asst-select').value;
+      const newAsstId = slot.isSpecialRoom ? null : document.getElementById('swap-asst-select').value;
 
       slot.mainProctorId = newMainId || null;
       slot.assistantProctorId = newAsstId || null;
 
       const warnings = [];
       const main = appState.teachers.find(t => t.id === newMainId);
-      const asst = appState.teachers.find(t => t.id === newAsstId);
+      const asst = slot.isSpecialRoom ? null : appState.teachers.find(t => t.id === newAsstId);
 
       if (slot.isSpecialRoom) {
         const designations = appState.examSettings.specialRoomDesignations || {};
