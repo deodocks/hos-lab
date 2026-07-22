@@ -1395,19 +1395,14 @@
             return true;
           });
 
-          // 3. Bipartite Matching to check matching feasibility
-          let matched = new Array(tasks.length).fill(null);
-          let usedTeachers = new Set();
+          // 3. DFS Bipartite Matching to check matching feasibility efficiently
+          let matched = {}; // key: teacherId, value: taskIdx
 
-          function match(taskIdx) {
-            if (taskIdx === tasks.length) return true;
+          function dfs(taskIdx, visited) {
             const task = tasks[taskIdx];
 
             for (const t of availableTeachers) {
-              if (usedTeachers.has(t.id)) continue;
-
-              // Check hard constraints:
-              // A. Role availability
+              // A. Role availability check
               if (task.role === 'main') {
                 if (t.availableRoles && !t.availableRoles.includes('main')) continue;
                 if (t.remarks) {
@@ -1418,7 +1413,7 @@
                 if (t.availableRoles && !t.availableRoles.includes('assistant')) continue;
               }
 
-              // B. Subject constraint (hard constraint)
+              // B. Subject constraint check
               if (!task.isSpecial && t.subject && t.subject.trim() === task.subject.trim()) continue;
 
               // C. Special room designations
@@ -1436,16 +1431,27 @@
                 if (isSepDesignated || isIndDesignated) continue;
               }
 
-              usedTeachers.add(t.id);
-              matched[taskIdx] = t.id;
-              if (match(taskIdx + 1)) return true;
-              usedTeachers.delete(t.id);
-              matched[taskIdx] = null;
+              // DFS Path Search with visited check to guarantee polynomial time
+              if (visited.has(t.id)) continue;
+              visited.add(t.id);
+
+              if (matched[t.id] === undefined || dfs(matched[t.id], visited)) {
+                matched[t.id] = taskIdx;
+                return true;
+              }
             }
             return false;
           }
 
-          if (!match(0)) {
+          let matchCount = 0;
+          for (let i = 0; i < tasks.length; i++) {
+            let visited = new Set();
+            if (dfs(i, visited)) {
+              matchCount++;
+            }
+          }
+
+          if (matchCount < tasks.length) {
             return true;
           }
         }
