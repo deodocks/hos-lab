@@ -1250,8 +1250,11 @@
         const { day, period, grade, className, subject, isSpecialRoom } = slot;
 
         return teachers.filter(t => {
-          // 1. 특이사항: 시험감독불가 검사
-          if (t.remarks && t.remarks.includes('시험감독불가')) return false;
+          // 1. 특이사항: 시험감독불가 검사 (공백 제거 후 '시험감독불가', '감독불가', '감독제외', '배정제외', '불가', '제외', '안됨', '불가능' 포함 여부 검사)
+          if (t.remarks) {
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
+          }
 
           // 2. 특이사항: X일차만 가능 검사
           if (t.remarks) {
@@ -1654,6 +1657,12 @@
       const designatedPool = designations[roomType] || [];
 
       appState.teachers.forEach(t => {
+        // 특이사항: 시험감독불가 검사 (수동 변경 후보군에서도 제외)
+        if (t.remarks) {
+          const cleanRemarks = t.remarks.replace(/\s+/g, '');
+          if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return;
+        }
+
         if (isSpecial) {
           const autoDesignated = t.remarks && t.remarks.includes(slot.className);
           const isDesignated = designatedPool.includes(t.id) || autoDesignated;
