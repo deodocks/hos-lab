@@ -1665,7 +1665,7 @@
           return candidates;
         }
 
-        // Step 3: Relax homeroom class check and homeroom closing assembly constraint
+        // Step 3: Relax homeroom class check only (Keep homeroom closing assembly constraint)
         candidates = teachers.filter(t => {
           if (t.availableDays && !t.availableDays.includes(slot.day)) return false;
           if (t.availableRoles && !t.availableRoles.includes(role)) return false;
@@ -1697,14 +1697,22 @@
           }
 
           if (role === 'assistant' && t.id === assignedMainId) return false;
+
+          // [강화] 담임교사 학년 종례 제약 조건은 절대 해제 불가
+          if (t.homeroom && t.homeroom !== '없음') {
+            const homeroomGrade = parseInt(t.homeroom.split('-')[0], 10);
+            const lastPeriod = getLastExamPeriodForGrade(slot.day, homeroomGrade);
+            if (lastPeriod > 0 && slot.period > lastPeriod) return false;
+          }
+
           return true;
         });
         if (candidates.length > 0) {
-          slot.warnings.push('⚠️ 자기 반 또는 종례 시간 제한 우회');
+          slot.warnings.push('⚠️ 자기 반 담임 교실 배정 제한 우회');
           return candidates;
         }
 
-        // Step 4: Relax everything except special room isolation, busy status, and ineligible remarks
+        // Step 4: Relax everything except special room isolation, homeroom closing assembly, busy status, and ineligible remarks
         candidates = teachers.filter(t => {
           if (t.availableDays && !t.availableDays.includes(slot.day)) return false;
           if (t.availableRoles && !t.availableRoles.includes(role)) return false;
@@ -1730,6 +1738,13 @@
             const autoDesignated = t.remarks && t.remarks.includes(slot.className);
             const isDesignated = designatedPool.includes(t.id) || autoDesignated;
             if (!isDesignated) return false;
+          }
+
+          // [강화] 담임교사 학년 종례 제약 조건은 절대 해제 불가
+          if (t.homeroom && t.homeroom !== '없음') {
+            const homeroomGrade = parseInt(t.homeroom.split('-')[0], 10);
+            const lastPeriod = getLastExamPeriodForGrade(slot.day, homeroomGrade);
+            if (lastPeriod > 0 && slot.period > lastPeriod) return false;
           }
 
           return true;
