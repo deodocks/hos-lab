@@ -1305,6 +1305,12 @@
             if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
           }
 
+          // 1.5. 특이사항: 부감독만 검사 (정감독 배정 시 제외)
+          if (role === 'main' && t.remarks) {
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (cleanRemarks.includes('부감독만') || cleanRemarks.includes('부감독')) return false;
+          }
+
           // 2. 특이사항: X일차만 가능 검사
           if (t.remarks) {
             const hasOnlyDayMatch = t.remarks.match(/(\d)일차만\s*가능/);
@@ -1370,6 +1376,11 @@
           }
           if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
           
+          if (role === 'main' && t.remarks) {
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (cleanRemarks.includes('부감독만') || cleanRemarks.includes('부감독')) return false;
+          }
+
           const designations = settings.specialRoomDesignations || {};
           const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
           const isIndDesignated = (designations.individual || []).includes(t.id) || (t.remarks && t.remarks.includes('개별학습실'));
@@ -1406,6 +1417,11 @@
             if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
           }
           if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
+
+          if (role === 'main' && t.remarks) {
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (cleanRemarks.includes('부감독만') || cleanRemarks.includes('부감독')) return false;
+          }
 
           const designations = settings.specialRoomDesignations || {};
           const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
@@ -1861,10 +1877,15 @@
           }
         }
 
+        const isAsstOnly = t.remarks && (t.remarks.replace(/\s+/g, '').includes('부감독만') || t.remarks.replace(/\s+/g, '').includes('부감독'));
+
         const selectedMain = t.id === slot.mainProctorId ? 'selected' : '';
         const selectedAsst = t.id === slot.assistantProctorId ? 'selected' : '';
         const optText = `${t.name} (${t.gender}, ${t.subject}, 담임:${t.homeroom !== '없음' ? t.homeroom + '담임' : '비담임'})`;
-        mainSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedMain}>${optText}</option>`);
+        
+        if (!isAsstOnly) {
+          mainSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedMain}>${optText}</option>`);
+        }
         asstSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedAsst}>${optText}</option>`);
       });
 
@@ -1932,6 +1953,12 @@
           const lastPeriod = getLastExamPeriodForGrade(slot.day, homeroomGrade);
           if (lastPeriod > 0 && slot.period > lastPeriod) {
             warnings.push('⚠️ [경고] 담임교사의 학년 시험 종료 후 교시 배정 위반 (종례 필요)');
+          }
+        }
+        if (main && main.remarks) {
+          const cleanRemarks = main.remarks.replace(/\s+/g, '');
+          if (cleanRemarks.includes('부감독만') || cleanRemarks.includes('부감독')) {
+            warnings.push('⚠️ [경고] 부감독 전담 교사를 정감독으로 배정');
           }
         }
       }
