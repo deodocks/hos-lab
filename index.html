@@ -362,6 +362,8 @@
                 <th class="py-3 px-4">성별</th>
                 <th class="py-3 px-4">담당 과목</th>
                 <th class="py-3 px-4">담임 학반</th>
+                <th class="py-3 px-4">감독 가능 일차</th>
+                <th class="py-3 px-4">가능 역할</th>
                 <th class="py-3 px-4">비고 / 제약 사항</th>
                 <th class="py-3 px-4 text-center">관리</th>
               </tr>
@@ -879,7 +881,62 @@
     }
 
     // Step 2 Teachers Table
+    function normalizeTeachersProperties(teachersList) {
+      teachersList.forEach(t => {
+        if (!t.availableDays) {
+          t.availableDays = [1, 2, 3];
+          if (t.remarks) {
+            const match = t.remarks.match(/(\d)일차만\s*가능/);
+            if (match) {
+              t.availableDays = [parseInt(match[1], 10)];
+            }
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) {
+              t.availableDays = [];
+            }
+          }
+        }
+        if (!t.availableRoles) {
+          t.availableRoles = ['main', 'assistant'];
+          if (t.remarks) {
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (cleanRemarks.includes('부감독만') || cleanRemarks.includes('부감독')) {
+              t.availableRoles = ['assistant'];
+            }
+          }
+        }
+      });
+    }
+
+    function toggleTeacherDay(teacherId, day) {
+      const t = appState.teachers.find(item => item.id === teacherId);
+      if (!t) return;
+      if (!t.availableDays) t.availableDays = [1, 2, 3];
+      
+      const idx = t.availableDays.indexOf(day);
+      if (idx > -1) {
+        t.availableDays.splice(idx, 1);
+      } else {
+        t.availableDays.push(day);
+      }
+    }
+
+    function toggleTeacherRole(teacherId, role) {
+      const t = appState.teachers.find(item => item.id === teacherId);
+      if (!t) return;
+      if (!t.availableRoles) t.availableRoles = ['main', 'assistant'];
+
+      const idx = t.availableRoles.indexOf(role);
+      if (idx > -1) {
+        t.availableRoles.splice(idx, 1);
+      } else {
+        t.availableRoles.push(role);
+      }
+    }
+
     function renderTeachersTable() {
+      normalizeTeachersProperties(appState.teachers);
+
       const search = document.getElementById('teacher-search-input').value.trim();
       const genderFilter = document.getElementById('filter-gender').value;
       const homeroomFilter = document.getElementById('filter-homeroom').value;
@@ -913,6 +970,34 @@
             <td class="py-2.5 px-4">${genderBadge}</td>
             <td class="py-2.5 px-4 font-medium text-indigo-300">${t.subject}</td>
             <td class="py-2.5 px-4">${homeroomBadge}</td>
+            <td class="py-2.5 px-4">
+              <div class="flex items-center space-x-1.5 text-[10px]">
+                <label class="flex items-center space-x-0.5 cursor-pointer">
+                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 1)" ${t.availableDays.includes(1) ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-slate-300">1일</span>
+                </label>
+                <label class="flex items-center space-x-0.5 cursor-pointer">
+                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 2)" ${t.availableDays.includes(2) ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-slate-300">2일</span>
+                </label>
+                <label class="flex items-center space-x-0.5 cursor-pointer">
+                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 3)" ${t.availableDays.includes(3) ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-slate-300">3일</span>
+                </label>
+              </div>
+            </td>
+            <td class="py-2.5 px-4">
+              <div class="flex items-center space-x-2 text-[10px]">
+                <label class="flex items-center space-x-0.5 cursor-pointer">
+                  <input type="checkbox" onchange="toggleTeacherRole('${t.id}', 'main')" ${t.availableRoles.includes('main') ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-emerald-400 font-bold">정</span>
+                </label>
+                <label class="flex items-center space-x-0.5 cursor-pointer">
+                  <input type="checkbox" onchange="toggleTeacherRole('${t.id}', 'assistant')" ${t.availableRoles.includes('assistant') ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-indigo-400 font-bold">부</span>
+                </label>
+              </div>
+            </td>
             <td class="py-2.5 px-4 text-slate-400 text-[11px]">${t.remarks || '-'}</td>
             <td class="py-2.5 px-4 text-center space-x-1.5">
               <button onclick="editTeacher('${t.id}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px]">수정</button>
@@ -981,11 +1066,30 @@
       if (appState.editingTeacherId) {
         const idx = appState.teachers.findIndex(t => t.id === appState.editingTeacherId);
         if (idx !== -1) {
-          appState.teachers[idx] = { id: appState.editingTeacherId, name, gender, subject, homeroom, remarks };
+          const oldT = appState.teachers[idx];
+          appState.teachers[idx] = { 
+            id: appState.editingTeacherId, 
+            name, 
+            gender, 
+            subject, 
+            homeroom, 
+            remarks,
+            availableDays: oldT.availableDays || [1, 2, 3],
+            availableRoles: oldT.availableRoles || ['main', 'assistant']
+          };
         }
       } else {
         const newId = `T${String(appState.teachers.length + 1).padStart(2, '0')}`;
-        appState.teachers.push({ id: newId, name, gender, subject, homeroom, remarks });
+        appState.teachers.push({ 
+          id: newId, 
+          name, 
+          gender, 
+          subject, 
+          homeroom, 
+          remarks,
+          availableDays: [1, 2, 3],
+          availableRoles: ['main', 'assistant']
+        });
       }
 
       closeTeacherModal();
@@ -1299,6 +1403,10 @@
         const { day, period, grade, className, subject, isSpecialRoom } = slot;
 
         return teachers.filter(t => {
+          // 0. 사용자 지정 감독 가능 일차 및 가능 역할 검증
+          if (t.availableDays && !t.availableDays.includes(day)) return false;
+          if (t.availableRoles && !t.availableRoles.includes(role)) return false;
+
           // 1. 특이사항: 시험감독불가 검사 (공백 제거 후 '시험감독불가', '감독불가', '감독제외', '배정제외', '불가', '제외', '안됨', '불가능' 포함 여부 검사)
           if (t.remarks) {
             const cleanRemarks = t.remarks.replace(/\s+/g, '');
@@ -1370,6 +1478,9 @@
 
         // Step 2: Relax same-subject check and male gender constraint
         candidates = teachers.filter(t => {
+          if (t.availableDays && !t.availableDays.includes(slot.day)) return false;
+          if (t.availableRoles && !t.availableRoles.includes(role)) return false;
+
           if (t.remarks) {
             const cleanRemarks = t.remarks.replace(/\s+/g, '');
             if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
@@ -1412,6 +1523,9 @@
 
         // Step 3: Relax homeroom class check and homeroom closing assembly constraint
         candidates = teachers.filter(t => {
+          if (t.availableDays && !t.availableDays.includes(slot.day)) return false;
+          if (t.availableRoles && !t.availableRoles.includes(role)) return false;
+
           if (t.remarks) {
             const cleanRemarks = t.remarks.replace(/\s+/g, '');
             if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
@@ -1447,6 +1561,9 @@
 
         // Step 4: Relax special room isolation and everything except busy/ineligible
         candidates = teachers.filter(t => {
+          if (t.availableDays && !t.availableDays.includes(slot.day)) return false;
+          if (t.availableRoles && !t.availableRoles.includes(role)) return false;
+
           if (t.remarks) {
             const cleanRemarks = t.remarks.replace(/\s+/g, '');
             if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
@@ -1858,6 +1975,9 @@
           if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return;
         }
 
+        // 0. 사용자 지정 감독 가능 일차 및 가능 역할 검증
+        if (t.availableDays && !t.availableDays.includes(slot.day)) return;
+
         if (isSpecial) {
           const autoDesignated = t.remarks && t.remarks.includes(slot.className);
           const isDesignated = designatedPool.includes(t.id) || autoDesignated;
@@ -1883,10 +2003,15 @@
         const selectedAsst = t.id === slot.assistantProctorId ? 'selected' : '';
         const optText = `${t.name} (${t.gender}, ${t.subject}, 담임:${t.homeroom !== '없음' ? t.homeroom + '담임' : '비담임'})`;
         
-        if (!isAsstOnly) {
+        const isMainAllowed = t.availableRoles ? t.availableRoles.includes('main') && !isAsstOnly : !isAsstOnly;
+        const isAsstAllowed = t.availableRoles ? t.availableRoles.includes('assistant') : true;
+
+        if (isMainAllowed) {
           mainSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedMain}>${optText}</option>`);
         }
-        asstSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedAsst}>${optText}</option>`);
+        if (isAsstAllowed) {
+          asstSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedAsst}>${optText}</option>`);
+        }
       });
 
       const asstWrapper = document.getElementById('swap-asst-wrapper');
@@ -1962,12 +2087,30 @@
           }
         }
       }
+
+      if (main) {
+        if (main.availableDays && !main.availableDays.includes(slot.day)) {
+          warnings.push(`⚠️ [경고] ${slot.day}일차 감독 불가 상태인 교사를 정감독으로 배정`);
+        }
+        if (main.availableRoles && !main.availableRoles.includes('main')) {
+          warnings.push('⚠️ [경고] 정감독 불가 상태인 교사를 정감독으로 배정');
+        }
+      }
+      if (asst) {
+        if (asst.availableDays && !asst.availableDays.includes(slot.day)) {
+          warnings.push(`⚠️ [경고] ${slot.day}일차 감독 불가 상태인 교사를 부감독으로 배정`);
+        }
+        if (asst.availableRoles && !asst.availableRoles.includes('assistant')) {
+          warnings.push('⚠️ [경고] 부감독 불가 상태인 교사를 부감독으로 배정');
+        }
+      }
+
       slot.warnings = warnings;
 
       // Recalculate stats
       const newStats = {};
       appState.teachers.forEach(t => {
-        newStats[t.id] = { total: 0, main: 0, assistant: 0, gradeCounts: { 2: 0, 3: 0 } };
+        newStats[t.id] = { total: 0, main: 0, assistant: 0, gradeCounts: { 1: 0, 2: 0, 3: 0 } };
       });
       appState.scheduleResult.slots.forEach(s => {
         if (s.mainProctorId && newStats[s.mainProctorId]) {
