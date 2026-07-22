@@ -668,19 +668,19 @@
 
       appState.examSettings.grades.forEach(g => {
         const cnt = appState.examSettings.classCounts[g] || 4;
-        const colorClass = g === 1 ? 'text-emerald-300' : (g === 2 ? 'text-sky-300' : 'text-indigo-300');
-        const badgeColorClass = g === 1 ? 'text-emerald-400' : (g === 2 ? 'text-sky-400' : 'text-indigo-400');
+        const colorClass = g === 1 ? 'text-emerald-600' : (g === 2 ? 'text-sky-600' : 'text-indigo-600');
+        const badgeColorClass = g === 1 ? 'text-emerald-600 font-bold' : (g === 2 ? 'text-sky-600 font-bold' : 'text-indigo-600 font-bold');
         
         const cardHtml = `
-          <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+          <div class="bg-white p-3.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
             <div>
               <span class="font-bold ${colorClass}">${g}학년 학급 수</span>
-              <p id="label-class-list-${g}" class="text-[11px] text-slate-400 mt-0.5">${g}-1 ~ ${g}-${cnt} (총 ${cnt}개반)</p>
+              <p id="label-class-list-${g}" class="text-[11px] text-slate-500 mt-0.5">${g}-1 ~ ${g}-${cnt} (총 ${cnt}개반)</p>
             </div>
             <div class="flex items-center space-x-2">
-              <button onclick="adjustClassCount(${g}, -1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">-</button>
+              <button onclick="adjustClassCount(${g}, -1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 font-bold text-slate-700">-</button>
               <span id="label-class-count-${g}" class="text-xs font-bold ${badgeColorClass} w-12 text-center">${cnt}개 반</span>
-              <button onclick="adjustClassCount(${g}, 1)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">+</button>
+              <button onclick="adjustClassCount(${g}, 1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 font-bold text-slate-700">+</button>
             </div>
           </div>
         `;
@@ -736,15 +736,15 @@
         const isIndChecked = indSelected.includes(t.id) || autoInd;
 
         sepHTML += `
-          <label class="flex items-center space-x-2 text-[11px] text-slate-300 cursor-pointer">
-            <input type="checkbox" value="${t.id}" onchange="toggleSpecialRoomTeacher('separate', '${t.id}', this.checked)" class="w-3.5 h-3.5 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-1" ${isSepChecked ? 'checked' : ''} />
+          <label class="flex items-center space-x-2 text-[11px] text-slate-700 cursor-pointer">
+            <input type="checkbox" value="${t.id}" onchange="toggleSpecialRoomTeacher('separate', '${t.id}', this.checked)" class="w-3.5 h-3.5 text-rose-500 bg-white border-slate-300 rounded focus:ring-rose-500 focus:ring-1" ${isSepChecked ? 'checked' : ''} />
             <span>${t.name} (${t.subject}${autoSep ? ' - 자동지정' : ''})</span>
           </label>
         `;
 
         indHTML += `
-          <label class="flex items-center space-x-2 text-[11px] text-slate-300 cursor-pointer">
-            <input type="checkbox" value="${t.id}" onchange="toggleSpecialRoomTeacher('individual', '${t.id}', this.checked)" class="w-3.5 h-3.5 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-1" ${isIndChecked ? 'checked' : ''} />
+          <label class="flex items-center space-x-2 text-[11px] text-slate-700 cursor-pointer">
+            <input type="checkbox" value="${t.id}" onchange="toggleSpecialRoomTeacher('individual', '${t.id}', this.checked)" class="w-3.5 h-3.5 text-rose-500 bg-white border-slate-300 rounded focus:ring-rose-500 focus:ring-1" ${isIndChecked ? 'checked' : ''} />
             <span>${t.name} (${t.subject}${autoInd ? ' - 자동지정' : ''})</span>
           </label>
         `;
@@ -782,10 +782,10 @@
         const btn = document.getElementById(`step-btn-${num}`);
         const container = document.getElementById(`step-container-${num}`);
         if (num === stepNum) {
-          btn.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl transition-all bg-sky-500 text-white font-bold shadow-lg shadow-sky-500/25';
+          btn.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl transition-all bg-sky-400 text-white font-bold shadow-lg shadow-sky-400/25';
           container.classList.remove('hidden');
         } else {
-          btn.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60';
+          btn.className = 'flex items-center space-x-2 px-4 py-2 rounded-xl transition-all text-slate-400 hover:text-slate-600 hover:bg-slate-100/60 font-semibold';
           container.classList.add('hidden');
         }
       });
@@ -965,55 +965,55 @@
 
       filtered.forEach(t => {
         const genderBadge = t.gender === '남' 
-          ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-950 text-sky-400 border border-sky-800">남</span>'
-          : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800">여</span>';
+          ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-600 border border-sky-100">남</span>'
+          : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-100">여</span>';
 
         const homeroomBadge = t.homeroom !== '없음'
-          ? `<span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">${t.homeroom}담임</span>`
-          : '<span class="text-slate-500">비담임</span>';
+          ? `<span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-bold">${t.homeroom}담임</span>`
+          : '<span class="text-slate-500 font-medium">비담임</span>';
 
         const tr = `
-          <tr class="hover:bg-slate-800/40 transition-colors">
-            <td class="py-2.5 px-4 font-mono text-slate-500">${t.id}</td>
-            <td class="py-2.5 px-4 font-bold text-slate-100 flex items-center">
+          <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100 text-slate-700">
+            <td class="py-2.5 px-4 font-mono text-slate-400">${t.id}</td>
+            <td class="py-2.5 px-4 font-bold text-slate-800 flex items-center">
               <span class="w-2 h-2 rounded-full mr-2 ${t.gender==='남'?'bg-sky-400':'bg-rose-400'}"></span>
               ${t.name}
             </td>
             <td class="py-2.5 px-4">${genderBadge}</td>
-            <td class="py-2.5 px-4 font-medium text-indigo-300">${t.subject}</td>
+            <td class="py-2.5 px-4 font-bold text-indigo-600">${t.subject}</td>
             <td class="py-2.5 px-4">${homeroomBadge}</td>
             <td class="py-2.5 px-4">
               <div class="flex items-center space-x-1.5 text-[10px]">
                 <label class="flex items-center space-x-0.5 cursor-pointer">
-                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 1)" ${t.availableDays.includes(1) ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
-                  <span class="text-slate-300">1일</span>
+                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 1)" ${t.availableDays.includes(1) ? 'checked' : ''} class="rounded bg-white border-slate-300 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-slate-600 font-medium">1일</span>
                 </label>
                 <label class="flex items-center space-x-0.5 cursor-pointer">
-                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 2)" ${t.availableDays.includes(2) ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
-                  <span class="text-slate-300">2일</span>
+                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 2)" ${t.availableDays.includes(2) ? 'checked' : ''} class="rounded bg-white border-slate-300 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-slate-600 font-medium">2일</span>
                 </label>
                 <label class="flex items-center space-x-0.5 cursor-pointer">
-                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 3)" ${t.availableDays.includes(3) ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
-                  <span class="text-slate-300">3일</span>
+                  <input type="checkbox" onchange="toggleTeacherDay('${t.id}', 3)" ${t.availableDays.includes(3) ? 'checked' : ''} class="rounded bg-white border-slate-300 text-sky-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-slate-600 font-medium">3일</span>
                 </label>
               </div>
             </td>
             <td class="py-2.5 px-4">
               <div class="flex items-center space-x-2 text-[10px]">
                 <label class="flex items-center space-x-0.5 cursor-pointer">
-                  <input type="checkbox" onchange="toggleTeacherRole('${t.id}', 'main')" ${t.availableRoles.includes('main') ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-emerald-500 focus:ring-0 w-3.5 h-3.5" />
-                  <span class="text-emerald-400 font-bold">정</span>
+                  <input type="checkbox" onchange="toggleTeacherRole('${t.id}', 'main')" ${t.availableRoles.includes('main') ? 'checked' : ''} class="rounded bg-white border-slate-300 text-emerald-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-emerald-600 font-bold">정</span>
                 </label>
                 <label class="flex items-center space-x-0.5 cursor-pointer">
-                  <input type="checkbox" onchange="toggleTeacherRole('${t.id}', 'assistant')" ${t.availableRoles.includes('assistant') ? 'checked' : ''} class="rounded bg-slate-900 border-slate-700 text-indigo-500 focus:ring-0 w-3.5 h-3.5" />
-                  <span class="text-indigo-400 font-bold">부</span>
+                  <input type="checkbox" onchange="toggleTeacherRole('${t.id}', 'assistant')" ${t.availableRoles.includes('assistant') ? 'checked' : ''} class="rounded bg-white border-slate-300 text-indigo-500 focus:ring-0 w-3.5 h-3.5" />
+                  <span class="text-indigo-600 font-bold">부</span>
                 </label>
               </div>
             </td>
-            <td class="py-2.5 px-4 text-slate-400 text-[11px]">${t.remarks || '-'}</td>
+            <td class="py-2.5 px-4 text-slate-500 text-[11px] font-medium">${t.remarks || '-'}</td>
             <td class="py-2.5 px-4 text-center space-x-1.5">
-              <button onclick="editTeacher('${t.id}')" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px]">수정</button>
-              <button onclick="deleteTeacher('${t.id}')" class="px-2 py-1 rounded bg-rose-950 hover:bg-rose-900 text-rose-400 text-[11px] border border-rose-900">삭제</button>
+              <button onclick="editTeacher('${t.id}')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] border border-slate-200 shadow-sm">수정</button>
+              <button onclick="deleteTeacher('${t.id}')" class="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] border border-rose-200 font-bold shadow-sm">삭제</button>
             </td>
           </tr>
         `;
