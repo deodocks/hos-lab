@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" class="dark">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,16 +17,15 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Noto Sans KR', 'sans-serif'],
-            outfit: ['Outfit', 'sans-serif'],
+            sans: ['Gowun Dodum', 'Outfit', 'sans-serif'],
+            jua: ['Jua', 'sans-serif'],
           }
         }
       }
@@ -34,28 +33,38 @@
   </script>
 
   <style>
+    /* Dotted Cute Pastel Background */
+    body {
+      background-color: #FCFBF7;
+      background-image: 
+        radial-gradient(#F3E8FF 1.5px, transparent 1.5px), 
+        radial-gradient(#E0F2FE 1.5px, transparent 1.5px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+    }
+
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 8px;
       height: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: #0f172a;
+      background: #f1f5f9;
     }
     ::-webkit-scrollbar-thumb {
-      background: #334155;
+      background: #cbd5e1;
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
+      background: #94a3b8;
     }
 
     /* Glassmorphism Cards */
     .glass-card {
-      background: rgba(30, 41, 59, 0.75);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
     }
 
     /* Print Styles */
@@ -99,56 +108,59 @@
   </style>
 </head>
 
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
+<body class="text-slate-700 font-sans min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
 
   <!-- TOP HEADER BANNER -->
-  <header class="bg-slate-900/90 border-b border-slate-800 px-4 py-3 sticky top-0 z-40 backdrop-blur-md no-print">
+  <header class="bg-white/80 border-b border-slate-100 px-4 py-3 sticky top-0 z-40 backdrop-blur-md no-print shadow-sm">
     <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-3">
       <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+        <a href="index.html" class="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 text-amber-500 flex items-center justify-center shadow-md transform hover:-rotate-12 transition-all duration-300">
+          <i class="fa-solid fa-house text-lg"></i>
+        </a>
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-400 to-indigo-500 flex items-center justify-center shadow-lg shadow-sky-400/20">
           <i class="fa-solid fa-clipboard-user text-white text-xl"></i>
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-sky-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-            학교 시험감독 자동 배정 시스템
+          <h1 class="text-xl font-jua tracking-wide text-slate-800">
+            학교 시험감독 자동 배정 🎒
           </h1>
-          <p class="text-xs text-slate-400">School Exam Proctor Scheduling System &bull; 제약 만족 최적화 알고리즘</p>
+          <p class="text-xs text-slate-500 font-medium">스마트 규칙 기반 자동 배정 시스템</p>
         </div>
       </div>
 
       <div class="flex items-center space-x-2 text-xs">
-        <span class="px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-medium">
-          <i class="fa-solid fa-users text-sky-400 mr-1.5"></i> 교사 <span id="header-teacher-count" class="text-sky-400 font-bold">26</span>명
+        <span class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-bold">
+          <i class="fa-solid fa-users text-sky-500 mr-1.5"></i> 교사 <span id="header-teacher-count" class="text-sky-500 font-bold">26</span>명
         </span>
-        <span class="px-2.5 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-medium">
-          <i class="fa-solid fa-calendar-days text-indigo-400 mr-1.5"></i> 시험 <span id="header-days-count" class="text-indigo-400 font-bold">3</span>일간
+        <span class="px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-600 font-bold">
+          <i class="fa-solid fa-calendar-days text-indigo-500 mr-1.5"></i> 시험 <span id="header-days-count" class="text-indigo-500 font-bold">3</span>일간
         </span>
-        <button id="btn-load-preset" class="px-3 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 border border-sky-800 text-sky-300 font-semibold transition-all flex items-center">
-          <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-amber-400"></i> 샘플 데이터 불러오기
+        <button id="btn-load-preset" class="px-3 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 font-bold transition-all flex items-center shadow-sm">
+          <i class="fa-solid fa-wand-magic-sparkles mr-1.5 text-amber-500"></i> 샘플 데이터 불러오기
         </button>
       </div>
     </div>
   </header>
 
   <!-- STEPPER NAVIGATION HEADER -->
-  <div class="bg-slate-900/60 border-b border-slate-800 py-3 px-4 no-print">
+  <div class="bg-white/40 border-b border-slate-100 py-3 px-4 no-print backdrop-blur-sm">
     <div class="max-w-7xl mx-auto flex items-center justify-center space-x-2 sm:space-x-8 text-xs sm:text-sm">
-      <button id="step-btn-1" onclick="switchStep(1)" class="flex items-center space-x-2 px-4 py-2 rounded-xl transition-all bg-sky-500 text-white font-bold shadow-lg shadow-sky-500/25">
-        <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">1</span>
+      <button id="step-btn-1" onclick="switchStep(1)" class="flex items-center space-x-2 px-4 py-2 rounded-xl transition-all bg-sky-400 text-white font-bold shadow-lg shadow-sky-400/25">
+        <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[11px]">1</span>
         <span>시험 환경 & 과목 설정</span>
       </button>
 
-      <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
+      <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
 
-      <button id="step-btn-2" onclick="switchStep(2)" class="flex items-center space-x-2 px-4 py-2 rounded-xl transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
-        <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">2</span>
+      <button id="step-btn-2" onclick="switchStep(2)" class="flex items-center space-x-2 px-4 py-2 rounded-xl transition-all text-slate-400 hover:text-slate-600 hover:bg-slate-100/60 font-semibold">
+        <span class="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[11px] text-slate-500">2</span>
         <span>교사 명단 & 과목 관리</span>
       </button>
 
-      <i class="fa-solid fa-chevron-right text-slate-600 text-xs"></i>
+      <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
 
-      <button id="step-btn-3" onclick="switchStep(3)" class="flex items-center space-x-2 px-4 py-2 rounded-xl transition-all text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
-        <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">3</span>
+      <button id="step-btn-3" onclick="switchStep(3)" class="flex items-center space-x-2 px-4 py-2 rounded-xl transition-all text-slate-400 hover:text-slate-600 hover:bg-slate-100/60 font-semibold">
+        <span class="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[11px] text-slate-500">3</span>
         <span>자동 배정 & 결과 대시보드</span>
       </button>
     </div>
@@ -161,98 +173,98 @@
     <div id="step-container-1" class="space-y-6">
       <div class="flex justify-between items-center">
         <div>
-          <h2 class="text-lg font-bold text-slate-100 flex items-center">
-            <i class="fa-solid fa-sliders text-sky-400 mr-2"></i> Step 1: 고사 환경, 교시 및 학급 수 설정
+          <h2 class="text-lg font-bold text-slate-800 flex items-center">
+            <i class="fa-solid fa-sliders text-sky-500 mr-2"></i> Step 1: 고사 환경, 교시 및 학급 수 설정
           </h2>
-          <p class="text-xs text-slate-400 mt-1">시험 명칭, 일수, 교시 수 및 학년별 참여 학급 수를 자유롭게 설정합니다.</p>
+          <p class="text-xs text-slate-500 mt-1">시험 명칭, 일수, 교시 수 및 학년별 참여 학급 수를 자유롭게 설정합니다.</p>
         </div>
-        <button onclick="switchStep(2)" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-lg flex items-center">
+        <button onclick="switchStep(2)" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-semibold text-xs transition-all shadow-md flex items-center">
           다음: 교사 관리 <i class="fa-solid fa-arrow-right ml-1.5"></i>
         </button>
       </div>
 
       <!-- Basic Settings Card (Dynamic Days, Periods, Class Counts) -->
-      <div class="glass-card rounded-2xl p-5 space-y-5 shadow-xl">
-        <h3 class="text-sm font-bold text-sky-300 flex items-center">
+      <div class="glass-card rounded-2xl p-5 space-y-5 shadow-sm">
+        <h3 class="text-sm font-bold text-sky-600 flex items-center">
           <i class="fa-solid fa-gear mr-2"></i> 기본 시험 & 학급 환경 설정
         </h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
           <!-- Exam Title -->
           <div class="space-y-1.5 md:col-span-2">
-            <label class="font-medium text-slate-300">시험 명칭</label>
-            <input type="text" id="input-exam-title" value="2026학년도 1학기 1차 지필고사" onchange="updateExamTitle(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none" />
+            <label class="font-medium text-slate-600">시험 명칭</label>
+            <input type="text" id="input-exam-title" value="2026학년도 1학기 1차 지필고사" onchange="updateExamTitle(this.value)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-700 focus:border-sky-500 focus:outline-none" />
           </div>
 
           <!-- Exam Days Count -->
           <div class="space-y-1.5">
-            <label class="font-medium text-slate-300">시험 일수 (일간)</label>
+            <label class="font-medium text-slate-600">시험 일수 (일간)</label>
             <div class="flex items-center space-x-2">
-              <button onclick="adjustDays(-1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">-</button>
-              <span id="label-days-count" class="text-sm font-bold text-sky-400 font-outfit w-10 text-center">3 일</span>
-              <button onclick="adjustDays(1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">+</button>
+              <button onclick="adjustDays(-1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-bold text-slate-700">-</button>
+              <span id="label-days-count" class="text-sm font-bold text-sky-600 font-outfit w-10 text-center">3 일</span>
+              <button onclick="adjustDays(1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-bold text-slate-700">+</button>
             </div>
           </div>
 
           <!-- Exam Periods Per Day Count -->
           <div class="space-y-1.5">
-            <label class="font-medium text-slate-300">하루 시험 교시 수 (교시)</label>
+            <label class="font-medium text-slate-600">하루 시험 교시 수 (교시)</label>
             <div class="flex items-center space-x-2">
-              <button onclick="adjustPeriodsPerDay(-1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">-</button>
-              <span id="label-periods-count" class="text-sm font-bold text-indigo-400 font-outfit w-12 text-center">3 교시</span>
-              <button onclick="adjustPeriodsPerDay(1)" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-bold text-slate-200">+</button>
+              <button onclick="adjustPeriodsPerDay(-1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-bold text-slate-700">-</button>
+              <span id="label-periods-count" class="text-sm font-bold text-indigo-600 font-outfit w-12 text-center">3 교시</span>
+              <button onclick="adjustPeriodsPerDay(1)" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-bold text-slate-700">+</button>
             </div>
           </div>
         </div>
 
-        <hr class="border-slate-800" />
+        <hr class="border-slate-100" />
 
         <!-- Participating Grades Selector Checkboxes -->
         <div class="space-y-2.5">
-          <div class="text-xs font-bold text-slate-200 flex items-center">
-            <i class="fa-solid fa-graduation-cap text-sky-400 mr-2"></i> 대상 학년 선택 (중복 가능)
+          <div class="text-xs font-bold text-slate-700 flex items-center">
+            <i class="fa-solid fa-graduation-cap text-sky-500 mr-2"></i> 대상 학년 선택 (중복 가능)
           </div>
-          <div class="flex items-center space-x-6 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-xs">
-            <label class="flex items-center space-x-2 text-slate-200 cursor-pointer">
-              <input type="checkbox" id="chk-grade-1" onchange="toggleGrade(1)" class="w-4 h-4 text-sky-500 bg-slate-950 border-slate-700 rounded focus:ring-sky-500 focus:ring-2" />
+          <div class="flex items-center space-x-6 bg-slate-50/60 border border-slate-100 rounded-xl px-4 py-2.5 text-xs">
+            <label class="flex items-center space-x-2 text-slate-700 cursor-pointer">
+              <input type="checkbox" id="chk-grade-1" onchange="toggleGrade(1)" class="w-4 h-4 text-sky-500 bg-white border-slate-350 rounded focus:ring-sky-500 focus:ring-2" />
               <span class="font-semibold">1학년</span>
             </label>
-            <label class="flex items-center space-x-2 text-slate-200 cursor-pointer">
-              <input type="checkbox" id="chk-grade-2" onchange="toggleGrade(2)" class="w-4 h-4 text-sky-500 bg-slate-950 border-slate-700 rounded focus:ring-sky-500 focus:ring-2" checked />
+            <label class="flex items-center space-x-2 text-slate-700 cursor-pointer">
+              <input type="checkbox" id="chk-grade-2" onchange="toggleGrade(2)" class="w-4 h-4 text-sky-500 bg-white border-slate-350 rounded focus:ring-sky-500 focus:ring-2" checked />
               <span class="font-semibold">2학년</span>
             </label>
-            <label class="flex items-center space-x-2 text-slate-200 cursor-pointer">
-              <input type="checkbox" id="chk-grade-3" onchange="toggleGrade(3)" class="w-4 h-4 text-sky-500 bg-slate-950 border-slate-700 rounded focus:ring-sky-500 focus:ring-2" checked />
+            <label class="flex items-center space-x-2 text-slate-700 cursor-pointer">
+              <input type="checkbox" id="chk-grade-3" onchange="toggleGrade(3)" class="w-4 h-4 text-sky-500 bg-white border-slate-350 rounded focus:ring-sky-500 focus:ring-2" checked />
               <span class="font-semibold">3학년</span>
             </label>
           </div>
         </div>
 
-        <hr class="border-slate-800" />
+        <hr class="border-slate-100" />
 
         <!-- Special Exam Rooms Toggle -->
         <div class="space-y-2.5">
-          <div class="text-xs font-bold text-slate-200 flex items-center">
-            <i class="fa-solid fa-door-open text-rose-400 mr-2"></i> 특별 고사실 설정 (정감독/부감독 배치)
+          <div class="text-xs font-bold text-slate-700 flex items-center">
+            <i class="fa-solid fa-door-open text-rose-500 mr-2"></i> 특별 고사실 설정 (정감독/부감독 배치)
           </div>
-          <div class="flex items-center space-x-6 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-xs">
-            <label class="flex items-center space-x-2 text-slate-200 cursor-pointer">
-              <input type="checkbox" id="chk-room-separate" onchange="toggleSpecialRoom('separate')" class="w-4 h-4 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-2" checked />
+          <div class="flex items-center space-x-6 bg-slate-50/60 border border-slate-100 rounded-xl px-4 py-2.5 text-xs">
+            <label class="flex items-center space-x-2 text-slate-700 cursor-pointer">
+              <input type="checkbox" id="chk-room-separate" onchange="toggleSpecialRoom('separate')" class="w-4 h-4 text-rose-500 bg-white border-slate-350 rounded focus:ring-rose-500 focus:ring-2" checked />
               <span class="font-semibold">분리고사실 운영</span>
             </label>
-            <label class="flex items-center space-x-2 text-slate-200 cursor-pointer">
-              <input type="checkbox" id="chk-room-individual" onchange="toggleSpecialRoom('individual')" class="w-4 h-4 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-2" checked />
+            <label class="flex items-center space-x-2 text-slate-700 cursor-pointer">
+              <input type="checkbox" id="chk-room-individual" onchange="toggleSpecialRoom('individual')" class="w-4 h-4 text-rose-500 bg-white border-slate-350 rounded focus:ring-rose-500 focus:ring-2" checked />
               <span class="font-semibold">개별학습실 운영</span>
             </label>
           </div>
         </div>
 
-        <hr class="border-slate-800" />
+        <hr class="border-slate-100" />
 
         <!-- Class Counts Per Grade Controls -->
         <div class="space-y-3">
-          <div class="text-xs font-bold text-slate-200 flex items-center">
-            <i class="fa-solid fa-school-flag text-amber-400 mr-2"></i> 학년별 참여 학급 수 수동 조율
+          <div class="text-xs font-bold text-slate-700 flex items-center">
+            <i class="fa-solid fa-school-flag text-amber-500 mr-2"></i> 학년별 참여 학급 수 수동 조율
           </div>
           <div id="class-counts-controls-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
             <!-- Dynamic items will be injected here -->
@@ -262,10 +274,10 @@
       </div>
 
       <!-- Schedule Matrix Table -->
-      <div class="glass-card rounded-2xl p-5 space-y-4 shadow-xl">
-        <h3 class="text-sm font-bold text-sky-300 flex items-center justify-between">
+      <div class="glass-card rounded-2xl p-5 space-y-4 shadow-sm">
+        <h3 class="text-sm font-bold text-sky-600 flex items-center justify-between">
           <span><i class="fa-solid fa-calendar-week mr-2"></i> 일자별 &amp; 교시별 시험 과목 설정</span>
-          <span class="text-xs font-normal text-slate-400">(해당 과목 교사는 해당 교시 감독에서 자동 제외됩니다)</span>
+          <span class="text-xs font-normal text-slate-500">(해당 과목 교사는 해당 교시 감독에서 자동 제외됩니다)</span>
         </h3>
         <div id="schedule-matrix-container" class="space-y-6"></div>
       </div>
@@ -276,53 +288,53 @@
     <div id="step-container-2" class="space-y-6 hidden">
       <div class="flex justify-between items-center flex-wrap gap-3">
         <div>
-          <h2 class="text-lg font-bold text-slate-100 flex items-center">
-            <i class="fa-solid fa-users-gear text-sky-400 mr-2"></i> Step 2: 교사 명단 및 담당 과목/담임 정보
+          <h2 class="text-lg font-bold text-slate-800 flex items-center">
+            <i class="fa-solid fa-users-gear text-sky-500 mr-2"></i> Step 2: 교사 명단 및 담당 과목/담임 정보
           </h2>
-          <p class="text-xs text-slate-400 mt-1">등록된 총 <span id="teacher-count-badge">26</span>명의 교사 프로필 정보입니다.</p>
+          <p class="text-xs text-slate-500 mt-1">등록된 총 <span id="teacher-count-badge">26</span>명의 교사 프로필 정보입니다.</p>
         </div>
         <div class="flex items-center space-x-2">
-          <button onclick="downloadExcelTemplate()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold text-xs transition-all flex items-center shadow">
-            <i class="fa-solid fa-download mr-1.5 text-sky-400"></i> 양식 다운로드
+          <button onclick="downloadExcelTemplate()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-bold text-xs transition-all flex items-center shadow-sm">
+            <i class="fa-solid fa-download mr-1.5 text-sky-500"></i> 양식 다운로드
           </button>
-          <button onclick="triggerExcelUpload()" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all flex items-center shadow-lg">
+          <button onclick="triggerExcelUpload()" class="px-3 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs transition-all flex items-center shadow-md">
             <i class="fa-solid fa-file-excel mr-1.5"></i> 엑셀 업로드
           </button>
           <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)" />
 
-          <button onclick="openTeacherModal()" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition-all flex items-center shadow-lg">
+          <button onclick="openTeacherModal()" class="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs transition-all flex items-center shadow-md">
             <i class="fa-solid fa-user-plus mr-1.5"></i> 교사 직접 추가
           </button>
-          <button onclick="runAutoSchedule()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-all shadow-lg flex items-center">
+          <button onclick="runAutoSchedule()" class="px-4 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-bold text-xs transition-all shadow-md flex items-center">
             ⚡ 자동 배정 실행 <i class="fa-solid fa-bolt ml-1.5"></i>
           </button>
         </div>
       </div>
 
       <!-- Special Rooms Designation Card (Step 2) -->
-      <div id="step-2-designation-card" class="glass-card rounded-2xl p-4 space-y-3 shadow-lg border border-slate-800">
-        <div class="text-xs font-bold text-slate-200 flex items-center">
-          <i class="fa-solid fa-door-open text-rose-400 mr-2"></i> 특별 고사실 감독 사전 지정 (선택 사항)
+      <div id="step-2-designation-card" class="glass-card rounded-2xl p-4 space-y-3 shadow-sm border border-slate-100">
+        <div class="text-xs font-bold text-slate-700 flex items-center">
+          <i class="fa-solid fa-door-open text-rose-500 mr-2"></i> 특별 고사실 감독 사전 지정 (선택 사항)
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Separate Room Card -->
-          <div id="designation-box-separate" class="bg-slate-900/50 border border-slate-800 rounded-xl p-3 space-y-2">
-            <label class="text-[11px] text-slate-300 font-bold block flex items-center">
+          <div id="designation-box-separate" class="bg-slate-50/50 border border-slate-100 rounded-xl p-3 space-y-2">
+            <label class="text-[11px] text-slate-600 font-bold block flex items-center">
               <span class="w-2 h-2 rounded-full bg-rose-400 mr-1.5 animate-pulse"></span>
               분리고사실 담당 교사 사전 지정
             </label>
-            <div id="separate-room-teachers-list" class="max-h-24 overflow-y-auto border border-slate-800 bg-slate-950/80 rounded-lg p-2.5 space-y-1.5 scrollbar-thin">
+            <div id="separate-room-teachers-list" class="max-h-24 overflow-y-auto border border-slate-150 bg-white rounded-lg p-2.5 space-y-1.5 scrollbar-thin">
               <!-- Checkboxes will be injected -->
             </div>
           </div>
 
           <!-- Individual Room Card -->
-          <div id="designation-box-individual" class="bg-slate-900/50 border border-slate-800 rounded-xl p-3 space-y-2">
-            <label class="text-[11px] text-slate-300 font-bold block flex items-center">
+          <div id="designation-box-individual" class="bg-slate-50/50 border border-slate-100 rounded-xl p-3 space-y-2">
+            <label class="text-[11px] text-slate-600 font-bold block flex items-center">
               <span class="w-2 h-2 rounded-full bg-rose-400 mr-1.5 animate-pulse"></span>
               개별학습실 담당 교사 사전 지정
             </label>
-            <div id="individual-room-teachers-list" class="max-h-24 overflow-y-auto border border-slate-800 bg-slate-950/80 rounded-lg p-2.5 space-y-1.5 scrollbar-thin">
+            <div id="individual-room-teachers-list" class="max-h-24 overflow-y-auto border border-slate-150 bg-white rounded-lg p-2.5 space-y-1.5 scrollbar-thin">
               <!-- Checkboxes will be injected -->
             </div>
           </div>
@@ -332,19 +344,19 @@
       <div class="glass-card rounded-2xl p-4 flex flex-wrap justify-between items-center gap-3">
         <div class="relative flex-1 min-w-[220px]">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-          <input type="text" id="teacher-search-input" placeholder="이름, 과목, 담임학반 검색..." oninput="renderTeachersTable()" class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-100 focus:border-sky-500 focus:outline-none" />
+          <input type="text" id="teacher-search-input" placeholder="이름, 과목, 담임학반 검색..." oninput="renderTeachersTable()" class="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-700 focus:border-sky-500 focus:outline-none" />
         </div>
         <div class="flex items-center space-x-2 text-xs">
-          <span class="text-slate-400">성별:</span>
-          <select id="filter-gender" onchange="renderTeachersTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none text-xs">
+          <span class="text-slate-500 font-medium">성별:</span>
+          <select id="filter-gender" onchange="renderTeachersTable()" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 focus:outline-none text-xs">
             <option value="ALL">전체 (남/여)</option>
             <option value="남">남교사만</option>
             <option value="여">여교사만</option>
           </select>
         </div>
         <div class="flex items-center space-x-2 text-xs">
-          <span class="text-slate-400">담임 여부:</span>
-          <select id="filter-homeroom" onchange="renderTeachersTable()" class="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-slate-200 focus:outline-none text-xs">
+          <span class="text-slate-500 font-medium">담임 여부:</span>
+          <select id="filter-homeroom" onchange="renderTeachersTable()" class="bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700 focus:outline-none text-xs">
             <option value="ALL">전체</option>
             <option value="HOMEROOM">담임 교사만</option>
             <option value="NONE">비담임 교사만</option>
@@ -352,11 +364,11 @@
         </div>
       </div>
 
-      <div class="glass-card rounded-2xl overflow-hidden shadow-xl border border-slate-800">
+      <div class="glass-card rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-white">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="bg-slate-900/90 text-slate-400 font-semibold border-b border-slate-800">
+              <tr class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-100">
                 <th class="py-3 px-4">ID</th>
                 <th class="py-3 px-4">교사명</th>
                 <th class="py-3 px-4">성별</th>
@@ -368,7 +380,7 @@
                 <th class="py-3 px-4 text-center">관리</th>
               </tr>
             </thead>
-            <tbody id="teachers-tbody" class="divide-y divide-slate-800/60"></tbody>
+            <tbody id="teachers-tbody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
       </div>
@@ -379,78 +391,78 @@
     <div id="step-container-3" class="space-y-6 hidden">
       <div class="flex justify-between items-center flex-wrap gap-3 no-print">
         <div>
-          <h2 class="text-lg font-bold text-slate-100 flex items-center">
-            <i class="fa-solid fa-table-cells text-indigo-400 mr-2"></i> Step 3: 시험감독 배정 시간표 &amp; 공정성 분석 대시보드
+          <h2 class="text-lg font-bold text-slate-800 flex items-center">
+            <i class="fa-solid fa-table-cells text-indigo-500 mr-2"></i> Step 3: 시험감독 배정 시간표 &amp; 공정성 분석 대시보드
           </h2>
-          <p class="text-xs text-slate-400 mt-1">알고리즘에 의해 생성된 정감독/부감독 시간표 및 교사별 업무량 통계입니다.</p>
+          <p class="text-xs text-slate-500 mt-1">알고리즘에 의해 생성된 정감독/부감독 시간표 및 교사별 업무량 통계입니다.</p>
         </div>
 
         <div class="flex items-center space-x-2">
-          <button onclick="runAutoSchedule()" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-semibold text-xs transition-all flex items-center">
-            <i class="fa-solid fa-rotate-right mr-1.5 text-sky-400"></i> 다시 배정하기
+          <button onclick="runAutoSchedule()" class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 font-bold text-xs transition-all flex items-center shadow-sm">
+            <i class="fa-solid fa-rotate-right mr-1.5 text-sky-500"></i> 다시 배정하기
           </button>
-          <button onclick="exportCSV()" class="px-3.5 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-xs transition-all shadow-lg flex items-center">
+          <button onclick="exportCSV()" class="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs transition-all shadow-md flex items-center">
             <i class="fa-solid fa-file-csv mr-1.5"></i> CSV 다운로드
           </button>
-          <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all shadow-lg flex items-center">
+          <button onclick="window.print()" class="px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs transition-all shadow-md flex items-center">
             <i class="fa-solid fa-print mr-1.5"></i> 시간표 인쇄
           </button>
         </div>
       </div>
 
       <!-- Warnings Banner -->
-      <div id="warnings-banner" class="hidden bg-rose-950/90 border border-rose-500/80 rounded-2xl p-4 text-rose-200 text-xs space-y-1.5 shadow-lg animate-pulse no-print">
-        <div class="font-bold text-rose-300 flex items-center text-sm">
-          <i class="fa-solid fa-triangle-exclamation text-rose-400 mr-2"></i>
+      <div id="warnings-banner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 text-rose-800 text-xs space-y-1.5 shadow-sm animate-pulse no-print">
+        <div class="font-bold text-rose-700 flex items-center text-sm">
+          <i class="fa-solid fa-triangle-exclamation text-rose-600 mr-2"></i>
           주의: 제약조건 준수를 위한 교사 인원 부족 슬롯이 <span id="warning-count">0</span>건 발견되었습니다!
         </div>
-        <p class="text-[11px] text-rose-200/90 leading-relaxed">
+        <p class="text-[11px] text-rose-600/90 leading-relaxed font-medium">
           (남교사 동시 배정 금지, 과목 제외, 담임 제외 조건으로 인해 일부 슬롯의 미배정 또는 제약 완화가 필요할 수 있습니다. 슬롯을 직접 클릭하여 수동 조정할 수 있습니다.)
         </p>
       </div>
 
       <!-- KPI Summary Cards -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 no-print">
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[11px] text-slate-400 font-medium">총 배정 슬롯 수</div>
-          <div id="kpi-total-slots" class="text-xl font-extrabold font-outfit text-sky-400 mt-1">24 개 슬롯</div>
-          <div id="kpi-total-duties" class="text-[10px] text-slate-500 mt-0.5">정감독 & 부감독 도합 48회</div>
+        <div class="glass-card rounded-2xl p-4 border border-slate-100 bg-white">
+          <div class="text-[11px] text-slate-500 font-medium">총 배정 슬롯 수</div>
+          <div id="kpi-total-slots" class="text-xl font-extrabold font-outfit text-sky-600 mt-1">24 개 슬롯</div>
+          <div id="kpi-total-duties" class="text-[10px] text-slate-400 mt-0.5">정감독 & 부감독 도합 48회</div>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[11px] text-slate-400 font-medium">교사 1인당 평균 감독</div>
-          <div id="kpi-avg-duty" class="text-xl font-extrabold font-outfit text-indigo-400 mt-1">1.8 회</div>
-          <div id="kpi-teacher-count" class="text-[10px] text-slate-500 mt-0.5">교사 수 26명 기준</div>
+        <div class="glass-card rounded-2xl p-4 border border-slate-100 bg-white">
+          <div class="text-[11px] text-slate-500 font-medium">교사 1인당 평균 감독</div>
+          <div id="kpi-avg-duty" class="text-xl font-extrabold font-outfit text-indigo-600 mt-1">1.8 회</div>
+          <div id="kpi-teacher-count" class="text-[10px] text-slate-400 mt-0.5">교사 수 26명 기준</div>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[11px] text-slate-400 font-medium">남-남 배정 금지 준수율</div>
-          <div class="text-xl font-extrabold font-outfit text-emerald-400 mt-1">100% (완벽 준수)</div>
-          <div class="text-[10px] text-emerald-500/80 mt-0.5">남남 동시 배정 0건</div>
+        <div class="glass-card rounded-2xl p-4 border border-slate-100 bg-white">
+          <div class="text-[11px] text-slate-500 font-medium">남-남 배정 금지 준수율</div>
+          <div class="text-xl font-extrabold font-outfit text-emerald-600 mt-1">100% (완벽 준수)</div>
+          <div class="text-[10px] text-emerald-600/80 mt-0.5 font-medium">남남 동시 배정 0건</div>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 border border-slate-800">
-          <div class="text-[11px] text-slate-400 font-medium">업무량 균등 편차 Score</div>
-          <div class="text-xl font-extrabold font-outfit text-amber-400 mt-1">98.5 점 (우수)</div>
-          <div class="text-[10px] text-slate-500 mt-0.5">최대-최소 차이 &le; 1회</div>
+        <div class="glass-card rounded-2xl p-4 border border-slate-100 bg-white">
+          <div class="text-[11px] text-slate-500 font-medium">업무량 균등 편차 Score</div>
+          <div class="text-xl font-extrabold font-outfit text-amber-600 mt-1">98.5 점 (우수)</div>
+          <div class="text-[10px] text-slate-400 mt-0.5 font-medium">최대-최소 차이 &le; 1회</div>
         </div>
       </div>
 
       <!-- View Switcher -->
-      <div class="flex justify-between items-center bg-slate-900/80 p-1.5 rounded-xl border border-slate-800 text-xs no-print">
+      <div class="flex justify-between items-center bg-slate-100 p-1.5 rounded-xl border border-slate-200 text-xs no-print shadow-sm">
         <div class="flex items-center space-x-1">
-          <button id="view-btn-classroom" onclick="switchViewMode('classroom')" class="px-3 py-1.5 rounded-lg font-semibold transition-all bg-sky-500 text-white shadow">
+          <button id="view-btn-classroom" onclick="switchViewMode('classroom')" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-sky-500 text-white shadow">
             <i class="fa-solid fa-school mr-1.5"></i> 학급별 시간표 보기
           </button>
-          <button id="view-btn-teacher" onclick="switchViewMode('teacher')" class="px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-slate-200">
+          <button id="view-btn-teacher" onclick="switchViewMode('teacher')" class="px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-500 hover:text-slate-800">
             <i class="fa-solid fa-user-check mr-1.5"></i> 교사별 개인 시간표
           </button>
-          <button id="view-btn-stats" onclick="switchViewMode('stats')" class="px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-slate-200">
+          <button id="view-btn-stats" onclick="switchViewMode('stats')" class="px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-500 hover:text-slate-800">
             <i class="fa-solid fa-chart-bar mr-1.5"></i> 교사별 업무량 통계
           </button>
         </div>
 
-        <select id="teacher-filter-select" onchange="renderStep3View()" class="hidden bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1 text-xs focus:outline-none">
+        <select id="teacher-filter-select" onchange="renderStep3View()" class="hidden bg-white border border-slate-200 text-slate-700 rounded-lg px-2.5 py-1 text-xs focus:outline-none">
           <option value="">전체 교사 시간표</option>
         </select>
       </div>
@@ -458,78 +470,78 @@
       <!-- VIEW TARGET CONTAINERS -->
       <div id="view-container-classroom" class="space-y-6"></div>
       <div id="view-container-teacher" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 hidden"></div>
-      <div id="view-container-stats" class="glass-card rounded-2xl p-5 border border-slate-800 space-y-4 shadow-xl hidden"></div>
+      <div id="view-container-stats" class="glass-card rounded-2xl p-5 border border-slate-150 space-y-4 shadow-sm hidden bg-white"></div>
     </div>
 
   </main>
 
 
   <!-- TEACHER MODAL -->
-  <div id="teacher-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="glass-card rounded-2xl p-6 max-w-md w-full border border-slate-700 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h3 id="modal-teacher-title" class="text-base font-bold text-slate-100">신규 교사 등록</h3>
-        <button onclick="closeTeacherModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+  <div id="teacher-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl p-6 max-w-md w-full border border-slate-200 space-y-4 shadow-xl bg-white">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="modal-teacher-title" class="text-base font-bold text-slate-800">신규 교사 등록</h3>
+        <button onclick="closeTeacherModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
       <div class="space-y-3 text-xs">
         <div class="space-y-1">
-          <label class="font-medium text-slate-300">교사 이름</label>
-          <input type="text" id="modal-t-name" placeholder="예: 홍길동" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none" />
+          <label class="font-medium text-slate-600">교사 이름</label>
+          <input type="text" id="modal-t-name" placeholder="예: 홍길동" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-750 focus:border-sky-500 focus:outline-none" />
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div class="space-y-1">
-            <label class="font-medium text-slate-300">성별</label>
-            <select id="modal-t-gender" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none">
+            <label class="font-medium text-slate-600">성별</label>
+            <select id="modal-t-gender" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-750 focus:border-sky-500 focus:outline-none">
               <option value="여">여교사</option>
               <option value="남">남교사</option>
             </select>
           </div>
           <div class="space-y-1">
-            <label class="font-medium text-slate-300">담당 과목</label>
-            <input type="text" id="modal-t-subject" placeholder="예: 수학" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none" />
+            <label class="font-medium text-slate-600">담당 과목</label>
+            <input type="text" id="modal-t-subject" placeholder="예: 수학" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-750 focus:border-sky-500 focus:outline-none" />
           </div>
         </div>
         <div class="space-y-1">
-          <label class="font-medium text-slate-300">담임 학반 (해당 학반 감독 제외)</label>
-          <input type="text" id="modal-t-homeroom" placeholder="예: 2-1 (없으면 '없음')" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none" />
+          <label class="font-medium text-slate-600">담임 학반 (해당 학반 감독 제외)</label>
+          <input type="text" id="modal-t-homeroom" placeholder="예: 2-1 (없으면 '없음')" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-750 focus:border-sky-500 focus:outline-none" />
         </div>
         <div class="space-y-1">
-          <label class="font-medium text-slate-300">비고 / 참고 사항</label>
-          <input type="text" id="modal-t-remarks" placeholder="예: 부장교사" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none" />
+          <label class="font-medium text-slate-600">비고 / 참고 사항</label>
+          <input type="text" id="modal-t-remarks" placeholder="예: 부장교사" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-750 focus:border-sky-500 focus:outline-none" />
         </div>
       </div>
       <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="closeTeacherModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">취소</button>
-        <button onclick="saveTeacher()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-lg">저장하기</button>
+        <button onclick="closeTeacherModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs">취소</button>
+        <button onclick="saveTeacher()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs shadow-md">저장하기</button>
       </div>
     </div>
   </div>
 
 
   <!-- MANUAL SWAP MODAL -->
-  <div id="swap-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="glass-card rounded-2xl p-6 max-w-lg w-full border border-slate-700 space-y-4 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+  <div id="swap-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glass-card rounded-2xl p-6 max-w-lg w-full border border-slate-200 space-y-4 shadow-xl bg-white">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <div>
-          <h3 id="swap-modal-title" class="text-base font-bold text-slate-100 flex items-center">감독 변경</h3>
-          <p id="swap-modal-sub" class="text-xs text-slate-400 mt-0.5"></p>
+          <h3 id="swap-modal-title" class="text-base font-bold text-slate-800 flex items-center">감독 변경</h3>
+          <p id="swap-modal-sub" class="text-xs text-slate-500 mt-0.5 font-medium"></p>
         </div>
-        <button onclick="closeSwapModal()" class="text-slate-400 hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <button onclick="closeSwapModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <div id="swap-modal-warnings" class="hidden bg-rose-950/80 border border-rose-800 rounded-xl p-3 text-rose-200 text-xs space-y-1"></div>
+      <div id="swap-modal-warnings" class="hidden bg-rose-50 border border-rose-200 rounded-xl p-3 text-rose-800 text-xs space-y-1 font-medium shadow-sm"></div>
       <div class="space-y-4 text-xs">
         <div class="space-y-1.5">
-          <label class="font-bold text-sky-300 flex items-center"><span class="w-2 h-2 rounded-full bg-sky-400 mr-1.5"></span> 정감독 선택</label>
-          <select id="swap-main-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-sky-500 focus:outline-none"></select>
+          <label class="font-bold text-sky-600 flex items-center"><span class="w-2 h-2 rounded-full bg-sky-400 mr-1.5"></span> 정감독 선택</label>
+          <select id="swap-main-select" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-750 focus:border-sky-500 focus:outline-none"></select>
         </div>
         <div id="swap-asst-wrapper" class="space-y-1.5">
-          <label class="font-bold text-indigo-300 flex items-center"><span class="w-2 h-2 rounded-full bg-indigo-400 mr-1.5"></span> 부감독 선택</label>
-          <select id="swap-asst-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-slate-100 focus:border-indigo-500 focus:outline-none"></select>
+          <label class="font-bold text-indigo-600 flex items-center"><span class="w-2 h-2 rounded-full bg-indigo-400 mr-1.5"></span> 부감독 선택</label>
+          <select id="swap-asst-select" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-slate-750 focus:border-indigo-500 focus:outline-none"></select>
         </div>
       </div>
       <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="closeSwapModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs">취소</button>
-        <button onclick="applySwap()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow-lg">감독 수동 변경 적용</button>
+        <button onclick="closeSwapModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs">취소</button>
+        <button onclick="applySwap()" class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs shadow-md">감독 수동 변경 적용</button>
       </div>
     </div>
   </div>
@@ -837,7 +849,7 @@
             gradeInputs += `
               <div>
                 <label class="text-[10px] ${colorClass}">${g}학년 과목</label>
-                <input type="text" value="${val}" onchange="updateMatrixSubject(${day}, ${period}, ${g}, this.value)" class="w-full bg-slate-900 border border-slate-700 rounded px-2 py-1 text-slate-200 text-xs focus:border-sky-500 focus:outline-none" />
+                <input type="text" value="${val}" onchange="updateMatrixSubject(${day}, ${period}, ${g}, this.value)" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-slate-700 text-xs focus:border-sky-500 focus:outline-none" />
               </div>
             `;
           });
@@ -845,8 +857,8 @@
           const gridCols = appState.examSettings.grades.length === 1 ? 'grid-cols-1' : (appState.examSettings.grades.length === 2 ? 'grid-cols-2' : 'grid-cols-3');
 
           periodCards += `
-            <div class="bg-slate-950/80 p-3 rounded-lg border border-slate-800/80 space-y-2">
-              <div class="text-xs font-bold text-slate-300 flex justify-between">
+            <div class="bg-white p-3 rounded-lg border border-slate-200 space-y-2 shadow-sm">
+              <div class="text-xs font-bold text-slate-700 flex justify-between">
                 <span>${period}교시</span>
               </div>
               <div class="grid ${gridCols} gap-2 text-xs">
@@ -857,13 +869,13 @@
         }
 
         const dayHtml = `
-          <div class="bg-slate-900/80 rounded-xl p-4 border border-slate-800 space-y-3">
-            <div class="font-bold text-xs text-sky-400 flex items-center justify-between">
+          <div class="bg-slate-50/80 rounded-xl p-4 border border-slate-100 space-y-3 shadow-sm">
+            <div class="font-bold text-xs text-sky-600 flex items-center justify-between">
               <div class="flex items-center">
-                <span class="w-6 h-6 rounded-lg bg-sky-950 border border-sky-800 flex items-center justify-center mr-2">${day}</span>
+                <span class="w-6 h-6 rounded-lg bg-sky-100 border border-sky-200 text-sky-700 flex items-center justify-center mr-2">${day}</span>
                 <span>${day}일차 시험 과목 시간표</span>
               </div>
-              <span class="text-[11px] font-normal text-slate-400">총 ${periodsCount}개 교시</span>
+              <span class="text-[11px] font-normal text-slate-500 font-sans">총 ${periodsCount}개 교시</span>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
               ${periodCards}
@@ -1640,10 +1652,10 @@
         const btn = document.getElementById(`view-btn-${m}`);
         const container = document.getElementById(`view-container-${m}`);
         if (m === mode) {
-          btn.className = 'px-3 py-1.5 rounded-lg font-semibold transition-all bg-sky-500 text-white shadow';
+          btn.className = 'px-3 py-1.5 rounded-lg font-bold transition-all bg-sky-500 text-white shadow';
           container.classList.remove('hidden');
         } else {
-          btn.className = 'px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-400 hover:text-slate-200';
+          btn.className = 'px-3 py-1.5 rounded-lg font-semibold transition-all text-slate-500 hover:text-slate-800';
           container.classList.add('hidden');
         }
       });
@@ -1681,8 +1693,8 @@
 
         let daySectionHtml = `
           <div class="space-y-4 print-day-section">
-            <h3 class="text-base font-bold text-sky-300 flex items-center border-b border-slate-800 pb-2 no-print">
-              <span class="w-7 h-7 rounded-xl bg-sky-950 border border-sky-800 flex items-center justify-center mr-2 text-sm text-sky-400 font-outfit">${day}</span>
+            <h3 class="text-base font-bold text-sky-600 flex items-center border-b border-slate-100 pb-2 no-print">
+              <span class="w-7 h-7 rounded-xl bg-sky-100 border border-sky-200 flex items-center justify-center mr-2 text-sm text-sky-700 font-bold font-outfit">${day}</span>
               <span>${day}일차 시험 감독 시간표</span>
             </h3>
         `;
@@ -1694,17 +1706,17 @@
 
           let tableHeaders = '<th class="py-2.5 px-3 w-20">교시</th>';
           classes.forEach(c => {
-            const colorClass = g === 1 ? 'text-emerald-300' : (g === 2 ? 'text-sky-300' : 'text-indigo-300');
-            tableHeaders += `<th class="py-2.5 px-3 border-l border-slate-800/80 font-bold ${colorClass}">${c}</th>`;
+            const colorClass = g === 1 ? 'text-emerald-600' : (g === 2 ? 'text-sky-600' : 'text-indigo-600');
+            tableHeaders += `<th class="py-2.5 px-3 border-l border-slate-150 font-bold ${colorClass}">${c}</th>`;
           });
 
           let tableRows = '';
           periods.forEach(period => {
-            let rowCells = `<td class="py-3 px-2 font-bold text-slate-300 bg-slate-900/60 border-r border-slate-800">${period}교시</td>`;
+            let rowCells = `<td class="py-3 px-2 font-bold text-slate-700 bg-slate-50 border-r border-slate-150">${period}교시</td>`;
             classes.forEach(className => {
               const slot = daySlots.find(s => s.period === period && s.className === className);
               if (!slot) {
-                rowCells += '<td class="border-l border-slate-800/60 bg-slate-950/40 text-slate-600 text-[10px]">-</td>';
+                rowCells += '<td class="border-l border-slate-150 bg-slate-50/20 text-slate-400 text-[10px]">-</td>';
                 return;
               }
 
@@ -1713,44 +1725,44 @@
               const hasWarning = slot.warnings.length > 0;
 
               rowCells += `
-                <td onclick="openSwapModal('${slot.id}')" class="py-2 px-1 border-l border-slate-800/60 cursor-pointer transition-all hover:bg-sky-950/40 ${hasWarning ? 'bg-rose-950/30' : ''}">
+                <td onclick="openSwapModal('${slot.id}')" class="py-2 px-1 border-l border-slate-150 cursor-pointer transition-all hover:bg-sky-50/60 ${hasWarning ? 'bg-rose-50/60' : ''}">
                   <div class="space-y-1">
-                    <div class="text-[10px] font-bold text-slate-400 bg-slate-900 px-1.5 py-0.5 rounded border border-slate-800 inline-block">${slot.subject}</div>
+                    <div class="text-[10px] font-bold text-slate-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200 inline-block">${slot.subject}</div>
                     <div class="flex items-center justify-center space-x-1.5 text-xs">
                       <!-- Left: Main -->
                       <div class="flex items-center space-x-0.5">
-                        <span class="text-[10px] font-semibold text-sky-400">정:</span>
-                        <span class="font-bold ${main ? (main.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}">${main ? main.name : '미배정'}</span>
-                        ${main ? `<span class="text-[9px] px-1 rounded ${main.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}">${main.gender}</span>` : ''}
+                        <span class="text-[10px] font-semibold text-sky-500">정:</span>
+                        <span class="font-bold ${main ? (main.gender==='남'?'text-sky-700':'text-rose-750') : 'text-slate-400'}">${main ? main.name : '미배정'}</span>
+                        ${main ? `<span class="text-[9px] px-1 rounded-md ${main.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold">${main.gender}</span>` : ''}
                       </div>
-                      <span class="text-slate-700">|</span>
+                      <span class="text-slate-400">|</span>
                       <!-- Right: Assistant -->
                       <div class="flex items-center space-x-0.5">
-                        <span class="text-[10px] font-semibold text-indigo-400">부:</span>
-                        <span class="font-bold ${asst ? (asst.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}">${asst ? asst.name : '미배정'}</span>
-                        ${asst ? `<span class="text-[9px] px-1 rounded ${asst.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}">${asst.gender}</span>` : ''}
+                        <span class="text-[10px] font-semibold text-indigo-500">부:</span>
+                        <span class="font-bold ${asst ? (asst.gender==='남'?'text-sky-700':'text-rose-750') : 'text-slate-400'}">${asst ? asst.name : '미배정'}</span>
+                        ${asst ? `<span class="text-[9px] px-1 rounded-md ${asst.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold">${asst.gender}</span>` : ''}
                       </div>
                     </div>
-                    ${hasWarning ? `<div class="text-[9px] text-rose-400 font-bold truncate">⚠️ 경고</div>` : ''}
+                    ${hasWarning ? `<div class="text-[9px] text-rose-600 font-bold truncate">⚠️ 경고</div>` : ''}
                   </div>
                 </td>
               `;
             });
-            tableRows += `<tr class="hover:bg-slate-900/30">${rowCells}</tr>`;
+            tableRows += `<tr class="hover:bg-slate-50/50">${rowCells}</tr>`;
           });
 
           daySectionHtml += `
-            <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3 shadow-lg print-card">
-              <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <h4 class="text-xs font-bold text-slate-200 flex items-center">
+            <div class="glass-card rounded-2xl p-4 border border-slate-100 space-y-3 shadow-sm print-card bg-white">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h4 class="text-xs font-bold text-slate-800 flex items-center">
                   <span class="w-1.5 h-3 rounded bg-sky-500 mr-2"></span>
                   <span>${day}일차 [${g}학년] 시간표</span>
                 </h4>
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-center border-collapse text-xs">
-                  <thead><tr class="bg-slate-900/90 text-slate-300 border-b border-slate-800">${tableHeaders}</tr></thead>
-                  <tbody class="divide-y divide-slate-800/60">${tableRows}</tbody>
+                  <thead><tr class="bg-slate-50 text-slate-700 border-b border-slate-100">${tableHeaders}</tr></thead>
+                  <tbody class="divide-y divide-slate-100">${tableRows}</tbody>
                 </table>
               </div>
             </div>
@@ -1765,16 +1777,16 @@
         if (specialRoomsList.length > 0) {
           let tableHeaders = '<th class="py-2.5 px-3 w-20">교시</th>';
           specialRoomsList.forEach(roomName => {
-            tableHeaders += `<th class="py-2.5 px-3 border-l border-slate-800/80 font-bold text-rose-300 bg-rose-950/20">${roomName}</th>`;
+            tableHeaders += `<th class="py-2.5 px-3 border-l border-slate-150 font-bold text-rose-600 bg-rose-50/40">${roomName}</th>`;
           });
 
           let tableRows = '';
           periods.forEach(period => {
-            let rowCells = `<td class="py-3 px-2 font-bold text-slate-300 bg-slate-900/60 border-r border-slate-800">${period}교시</td>`;
+            let rowCells = `<td class="py-3 px-2 font-bold text-slate-700 bg-slate-50 border-r border-slate-150">${period}교시</td>`;
             specialRoomsList.forEach(roomName => {
               const slot = daySlots.find(s => s.period === period && s.className === roomName);
               if (!slot) {
-                rowCells += '<td class="border-l border-slate-800/60 bg-slate-950/40 text-slate-600 text-[10px]">-</td>';
+                rowCells += '<td class="border-l border-slate-150 bg-slate-50/20 text-slate-400 text-[10px]">-</td>';
                 return;
               }
 
@@ -1782,35 +1794,35 @@
               const hasWarning = slot.warnings.length > 0;
 
               rowCells += `
-                <td onclick="openSwapModal('${slot.id}')" class="py-2 px-2 border-l border-slate-800/60 cursor-pointer transition-all hover:bg-rose-950/20 ${hasWarning ? 'bg-rose-950/30' : ''}">
+                <td onclick="openSwapModal('${slot.id}')" class="py-2 px-2 border-l border-slate-150 cursor-pointer transition-all hover:bg-rose-50/40 ${hasWarning ? 'bg-rose-50/60' : ''}">
                   <div class="space-y-1">
-                    <div class="text-[10px] font-bold text-rose-300 bg-rose-950/40 px-1.5 py-0.5 rounded border border-rose-800 inline-block">${slot.subject}</div>
+                    <div class="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 inline-block">${slot.subject}</div>
                     <div class="flex items-center justify-center space-x-1 text-xs">
-                      <span class="text-[10px] font-semibold text-sky-400">정:</span>
-                      <span class="font-bold ${main ? (main.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}">${main ? main.name : '미배정'}</span>
-                      ${main ? `<span class="text-[9px] px-1 rounded ${main.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}">${main.gender}</span>` : ''}
+                      <span class="text-[10px] font-semibold text-sky-500">정:</span>
+                      <span class="font-bold ${main ? (main.gender==='남'?'text-sky-700':'text-rose-755') : 'text-slate-400'}">${main ? main.name : '미배정'}</span>
+                      ${main ? `<span class="text-[9px] px-1 rounded-md ${main.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold">${main.gender}</span>` : ''}
                     </div>
-                    <div class="text-[9px] text-slate-500 italic">정감독 1인실</div>
-                    ${hasWarning ? `<div class="text-[9px] text-rose-400 font-bold truncate">⚠️ 경고</div>` : ''}
+                    <div class="text-[9px] text-slate-400 italic">정감독 1인실</div>
+                    ${hasWarning ? `<div class="text-[9px] text-rose-600 font-bold truncate">⚠️ 경고</div>` : ''}
                   </div>
                 </td>
               `;
             });
-            tableRows += `<tr class="hover:bg-slate-900/30">${rowCells}</tr>`;
+            tableRows += `<tr class="hover:bg-slate-50/50">${rowCells}</tr>`;
           });
 
           daySectionHtml += `
-            <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3 shadow-lg print-card">
-              <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-                <h4 class="text-xs font-bold text-rose-300 flex items-center">
-                  <span class="w-1.5 h-3 rounded bg-rose-500 mr-2"></span>
+            <div class="glass-card rounded-2xl p-4 border border-slate-100 space-y-3 shadow-sm print-card bg-white">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                <h4 class="text-xs font-bold text-rose-600 flex items-center">
+                  <span class="w-1.5 h-3 rounded bg-rose-400 mr-2"></span>
                   <span>${day}일차 [특별 고사실] 시간표</span>
                 </h4>
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-center border-collapse text-xs">
-                  <thead><tr class="bg-slate-900/90 text-slate-300 border-b border-slate-800">${tableHeaders}</tr></thead>
-                  <tbody class="divide-y divide-slate-800/60">${tableRows}</tbody>
+                  <thead><tr class="bg-slate-50 text-slate-700 border-b border-slate-100">${tableHeaders}</tr></thead>
+                  <tbody class="divide-y divide-slate-100">${tableRows}</tbody>
                 </table>
               </div>
             </div>
@@ -1847,14 +1859,14 @@
           assigned.forEach(s => {
             const isMain = s.mainProctorId === t.id;
             slotsHtml += `
-              <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between text-xs">
+              <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 flex items-center justify-between text-xs">
                 <div class="flex items-center space-x-2">
-                  <span class="font-bold text-sky-400 font-outfit">${s.day}일차 ${s.period}교시</span>
-                  <span class="font-bold text-slate-200">${s.className}</span>
-                  <span class="text-[10px] text-slate-400">(${s.subject})</span>
+                  <span class="font-bold text-sky-600 font-outfit">${s.day}일차 ${s.period}교시</span>
+                  <span class="font-bold text-slate-700">${s.className}</span>
+                  <span class="text-[10px] text-slate-500">(${s.subject})</span>
                 </div>
                 <div>
-                  <span class="px-2 py-0.5 rounded font-bold text-[10px] ${isMain ? 'bg-sky-950 text-sky-300 border border-sky-800' : 'bg-indigo-950 text-indigo-300 border border-indigo-800'}">
+                  <span class="px-2 py-0.5 rounded font-bold text-[10px] ${isMain ? 'bg-sky-50 text-sky-600 border border-sky-100' : 'bg-indigo-50 text-indigo-600 border border-indigo-100'}">
                     ${isMain ? '정감독' : '부감독'}
                   </span>
                 </div>
@@ -1864,15 +1876,15 @@
         }
 
         const teacherCard = `
-          <div class="glass-card rounded-2xl p-4 border border-slate-800 space-y-3">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <div class="glass-card rounded-2xl p-4 border border-slate-100 space-y-3 bg-white">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-2">
               <div>
-                <span class="text-sm font-bold text-slate-100">${t.name} 선생님</span>
-                <span class="text-xs text-slate-400 ml-2">(${t.subject})</span>
+                <span class="text-sm font-bold text-slate-800">${t.name} 선생님</span>
+                <span class="text-xs text-slate-500 ml-2">(${t.subject})</span>
               </div>
               <div class="flex items-center space-x-1 text-xs">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${t.gender==='남'?'bg-sky-950 text-sky-400 border border-sky-800':'bg-rose-950 text-rose-400 border border-rose-800'}">${t.gender}</span>
-                <span class="px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 font-bold text-[10px]">총 ${stats.total}회</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${t.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'}">${t.gender}</span>
+                <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-650 border border-indigo-100 font-bold text-[10px]">총 ${stats.total}회</span>
               </div>
             </div>
             <div class="space-y-2">${slotsHtml}</div>
@@ -1893,17 +1905,17 @@
         const percent = (stats.total / maxTotal) * 100;
 
         rowsHtml += `
-          <tr class="hover:bg-slate-900/40">
-            <td class="py-2.5 px-4 font-bold text-slate-100">${t.name}</td>
-            <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${t.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}">${t.gender}</span></td>
-            <td class="py-2.5 px-4 text-slate-300">${t.subject}</td>
-            <td class="py-2.5 px-4 text-slate-400">${t.homeroom}</td>
-            <td class="py-2.5 px-4 text-center font-bold text-sky-300">${stats.main}회</td>
-            <td class="py-2.5 px-4 text-center font-bold text-indigo-300">${stats.assistant}회</td>
-            <td class="py-2.5 px-4 text-center font-extrabold text-amber-400 text-sm font-outfit">${stats.total}회</td>
+          <tr class="hover:bg-slate-50/50">
+            <td class="py-2.5 px-4 font-bold text-slate-850">${t.name}</td>
+            <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${t.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'}">${t.gender}</span></td>
+            <td class="py-2.5 px-4 text-slate-700">${t.subject}</td>
+            <td class="py-2.5 px-4 text-slate-500">${t.homeroom !== '없음' ? t.homeroom + '담임' : '비담임'}</td>
+            <td class="py-2.5 px-4 text-center font-bold text-sky-600">${stats.main}회</td>
+            <td class="py-2.5 px-4 text-center font-bold text-indigo-600">${stats.assistant}회</td>
+            <td class="py-2.5 px-4 text-center font-extrabold text-amber-600 text-sm font-outfit">${stats.total}회</td>
             <td class="py-2.5 px-4">
-              <div class="w-full bg-slate-900 h-2.5 rounded-full overflow-hidden flex border border-slate-800">
-                <div class="bg-gradient-to-r from-sky-500 to-indigo-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
+              <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex border border-slate-200">
+                <div class="bg-gradient-to-r from-sky-400 to-indigo-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
               </div>
             </td>
           </tr>
@@ -1911,25 +1923,25 @@
       });
 
       const statsHtml = `
-        <h3 class="text-sm font-bold text-sky-300 flex items-center justify-between">
+        <h3 class="text-sm font-bold text-sky-600 flex items-center justify-between">
           <span><i class="fa-solid fa-chart-pie mr-2"></i> 교사별 감독 배정 수량 &amp; 업무량 공정성 통계</span>
-          <span class="text-xs font-normal text-slate-400">정감독 / 부감독 횟수 및 비율</span>
+          <span class="text-xs font-normal text-slate-500">정감독 / 부감독 횟수 및 비율</span>
         </h3>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="bg-slate-900/90 text-slate-300 border-b border-slate-800">
+              <tr class="bg-slate-50 text-slate-700 border-b border-slate-100">
                 <th class="py-2.5 px-4">교사명</th>
                 <th class="py-2.5 px-4">성별</th>
                 <th class="py-2.5 px-4">과목</th>
                 <th class="py-2.5 px-4">담임</th>
                 <th class="py-2.5 px-4 text-center">정감독 횟수</th>
                 <th class="py-2.5 px-4 text-center">부감독 횟수</th>
-                <th class="py-2.5 px-4 text-center font-bold text-sky-400">총 감독 횟수</th>
+                <th class="py-2.5 px-4 text-center font-bold text-sky-600">총 감독 횟수</th>
                 <th class="py-2.5 px-4">업무량 게이지</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-800/60">${rowsHtml}</tbody>
+            <tbody class="divide-y divide-slate-100">${rowsHtml}</tbody>
           </table>
         </div>
       `;
