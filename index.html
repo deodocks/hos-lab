@@ -1535,7 +1535,21 @@
       mainSelect.innerHTML = '<option value="">미배정</option>';
       asstSelect.innerHTML = '<option value="">미배정</option>';
 
+      const isSep = slot.className === '분리고사실';
+      const isInd = slot.className === '개별학습실';
+      const isSpecial = isSep || isInd;
+
+      const designations = appState.examSettings.specialRoomDesignations || {};
+      const roomType = isSep ? 'separate' : 'individual';
+      const designatedPool = designations[roomType] || [];
+
       appState.teachers.forEach(t => {
+        if (isSpecial) {
+          const autoDesignated = t.remarks && t.remarks.includes(slot.className);
+          const isDesignated = designatedPool.includes(t.id) || autoDesignated;
+          if (!isDesignated) return;
+        }
+
         const selectedMain = t.id === slot.mainProctorId ? 'selected' : '';
         const selectedAsst = t.id === slot.assistantProctorId ? 'selected' : '';
         const optText = `${t.name} (${t.gender}, ${t.subject}, 담임:${t.homeroom})`;
@@ -1565,10 +1579,29 @@
       const main = appState.teachers.find(t => t.id === newMainId);
       const asst = appState.teachers.find(t => t.id === newAsstId);
 
-      if (main && asst) {
-        if (main.gender === '남' && asst.gender === '남') warnings.push('⚠️ [경고] 남교사 동시 배정 금지 위반');
-        if (main.homeroom === slot.className || asst.homeroom === slot.className) warnings.push('⚠️ [경고] 자기 반 담임 배정 금지 위반');
-        if (main.subject === slot.subject || asst.subject === slot.subject) warnings.push('⚠️ [경고] 해당 교시 과목 교사 배정 금지 위반');
+      if (slot.isSpecialRoom) {
+        const designations = appState.examSettings.specialRoomDesignations || {};
+        const roomType = slot.className === '분리고사실' ? 'separate' : 'individual';
+        const designatedPool = designations[roomType] || [];
+
+        if (main) {
+          const autoDesignatedMain = main.remarks && main.remarks.includes(slot.className);
+          if (!designatedPool.includes(main.id) && !autoDesignatedMain) {
+            warnings.push('⚠️ [경고] 비지정 교사의 특별 고사실 정감독 배정');
+          }
+        }
+        if (asst) {
+          const autoDesignatedAsst = asst.remarks && asst.remarks.includes(slot.className);
+          if (!designatedPool.includes(asst.id) && !autoDesignatedAsst) {
+            warnings.push('⚠️ [경고] 비지정 교사의 특별 고사실 부감독 배정');
+          }
+        }
+      } else {
+        if (main && asst) {
+          if (main.gender === '남' && asst.gender === '남') warnings.push('⚠️ [경고] 남교사 동시 배정 금지 위반');
+          if (main.homeroom === slot.className || asst.homeroom === slot.className) warnings.push('⚠️ [경고] 자기 반 담임 배정 금지 위반');
+          if (main.subject === slot.subject || asst.subject === slot.subject) warnings.push('⚠️ [경고] 해당 교시 과목 교사 배정 금지 위반');
+        }
       }
       slot.warnings = warnings;
 
