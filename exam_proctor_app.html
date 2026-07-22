@@ -1308,6 +1308,96 @@
         });
       }
 
+      function getEligibleCandidatesWithFallback(slot, role, assignedMainId = null) {
+        // Step 1: Try with full constraints
+        let candidates = getEligibleCandidates(slot, role, assignedMainId);
+        if (candidates.length > 0) return candidates;
+
+        // Step 2: Relax same-subject check and male gender constraint
+        candidates = teachers.filter(t => {
+          if (t.remarks) {
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
+          }
+          if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
+          
+          const designations = settings.specialRoomDesignations || {};
+          const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
+          const isIndDesignated = (designations.individual || []).includes(t.id) || (t.remarks && t.remarks.includes('개별학습실'));
+
+          if (!slot.isSpecialRoom) {
+            if (isSepDesignated || isIndDesignated) return false;
+            if (t.homeroom && t.homeroom === slot.className) return false;
+          } else {
+            const roomType = slot.className === '분리고사실' ? 'separate' : 'individual';
+            const designatedPool = designations[roomType] || [];
+            const autoDesignated = t.remarks && t.remarks.includes(slot.className);
+            const isDesignated = designatedPool.includes(t.id) || autoDesignated;
+            if (!isDesignated) return false;
+          }
+
+          if (role === 'assistant' && t.id === assignedMainId) return false;
+
+          if (t.homeroom && t.homeroom !== '없음') {
+            const homeroomGrade = parseInt(t.homeroom.split('-')[0], 10);
+            const lastPeriod = getLastExamPeriodForGrade(slot.day, homeroomGrade);
+            if (lastPeriod > 0 && slot.period > lastPeriod) return false;
+          }
+          return true;
+        });
+        if (candidates.length > 0) {
+          slot.warnings.push('⚠️ 동일 과목 또는 남남 배정 제한 우회');
+          return candidates;
+        }
+
+        // Step 3: Relax homeroom class check and homeroom closing assembly constraint
+        candidates = teachers.filter(t => {
+          if (t.remarks) {
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
+          }
+          if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
+
+          const designations = settings.specialRoomDesignations || {};
+          const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
+          const isIndDesignated = (designations.individual || []).includes(t.id) || (t.remarks && t.remarks.includes('개별학습실'));
+
+          if (!slot.isSpecialRoom) {
+            if (isSepDesignated || isIndDesignated) return false;
+          } else {
+            const roomType = slot.className === '분리고사실' ? 'separate' : 'individual';
+            const designatedPool = designations[roomType] || [];
+            const autoDesignated = t.remarks && t.remarks.includes(slot.className);
+            const isDesignated = designatedPool.includes(t.id) || autoDesignated;
+            if (!isDesignated) return false;
+          }
+
+          if (role === 'assistant' && t.id === assignedMainId) return false;
+          return true;
+        });
+        if (candidates.length > 0) {
+          slot.warnings.push('⚠️ 자기 반 또는 종례 시간 제한 우회');
+          return candidates;
+        }
+
+        // Step 4: Relax special room isolation and everything except busy/ineligible
+        candidates = teachers.filter(t => {
+          if (t.remarks) {
+            const cleanRemarks = t.remarks.replace(/\s+/g, '');
+            if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
+          }
+          if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
+          if (role === 'assistant' && t.id === assignedMainId) return false;
+          return true;
+        });
+        if (candidates.length > 0) {
+          slot.warnings.push('⚠️ 특별 고사실 전담 또는 기타 제한 우회');
+          return candidates;
+        }
+
+        return [];
+      }
+
       function sortCandidates(candidates, grade) {
         return [...candidates].sort((a, b) => {
           const statsA = teacherStats[a.id];
@@ -1322,7 +1412,7 @@
 
       let unassignedCount = 0;
       for (const slot of slots) {
-        let mainCandidates = sortCandidates(getEligibleCandidates(slot, 'main'), slot.grade);
+        let mainCandidates = sortCandidates(getEligibleCandidatesWithFallback(slot, 'main'), slot.grade);
 
         if (mainCandidates.length > 0) {
           const chosenMain = mainCandidates[0];
@@ -1339,7 +1429,7 @@
         }
 
         if (!slot.isSpecialRoom) {
-          let asstCandidates = sortCandidates(getEligibleCandidates(slot, 'assistant', slot.mainProctorId), slot.grade);
+          let asstCandidates = sortCandidates(getEligibleCandidatesWithFallback(slot, 'assistant', slot.mainProctorId), slot.grade);
           if (asstCandidates.length > 0) {
             const chosenAsst = asstCandidates[0];
             slot.assistantProctorId = chosenAsst.id;
