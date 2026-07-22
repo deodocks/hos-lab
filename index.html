@@ -261,6 +261,9 @@
           <p class="text-xs text-slate-400 mt-1">등록된 총 <span id="teacher-count-badge">26</span>명의 교사 프로필 정보입니다.</p>
         </div>
         <div class="flex items-center space-x-2">
+          <button onclick="downloadExcelTemplate()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold text-xs transition-all flex items-center shadow">
+            <i class="fa-solid fa-download mr-1.5 text-sky-400"></i> 양식 다운로드
+          </button>
           <button onclick="triggerExcelUpload()" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs transition-all flex items-center shadow-lg">
             <i class="fa-solid fa-file-excel mr-1.5"></i> 엑셀 업로드
           </button>
@@ -968,6 +971,22 @@
         appState.teachers = appState.teachers.filter(t => t.id !== id);
         renderTeachersTable();
       }
+    }
+
+    function downloadExcelTemplate() {
+      const data = [
+        ["이름", "성별", "과목", "담임학반", "특이사항"],
+        ["홍길동", "남", "국어", "1-1담임", "1일차만 가능"],
+        ["김영희", "여", "수학", "비담임", "시험감독불가"],
+        ["이철수", "남", "영어", "2-2담임", "분리고사실"],
+        ["박민수", "남", "역사", "비담임", "개별학습실"],
+        ["최지혜", "여", "과학", "비담임", ""]
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "교사명단양식");
+      XLSX.writeFile(wb, "교사명단_업로드_양식.xlsx");
     }
 
     function triggerExcelUpload() {
