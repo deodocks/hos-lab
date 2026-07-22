@@ -867,8 +867,8 @@
           : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-950 text-rose-400 border border-rose-800">여</span>';
 
         const homeroomBadge = t.homeroom !== '없음'
-          ? `<span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">${t.homeroom} 담임</span>`
-          : '<span class="text-slate-500">없음</span>';
+          ? `<span class="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">${t.homeroom}담임</span>`
+          : '<span class="text-slate-500">비담임</span>';
 
         const tr = `
           <tr class="hover:bg-slate-800/40 transition-colors">
@@ -904,14 +904,14 @@
         document.getElementById('modal-t-name').value = t.name;
         document.getElementById('modal-t-gender').value = t.gender;
         document.getElementById('modal-t-subject').value = t.subject;
-        document.getElementById('modal-t-homeroom').value = t.homeroom;
+        document.getElementById('modal-t-homeroom').value = t.homeroom !== '없음' ? `${t.homeroom}담임` : '비담임';
         document.getElementById('modal-t-remarks').value = t.remarks || '';
       } else {
         title.textContent = '신규 교사 등록';
         document.getElementById('modal-t-name').value = '';
         document.getElementById('modal-t-gender').value = '여';
         document.getElementById('modal-t-subject').value = '국어';
-        document.getElementById('modal-t-homeroom').value = '없음';
+        document.getElementById('modal-t-homeroom').value = '비담임';
         document.getElementById('modal-t-remarks').value = '';
       }
       modal.classList.remove('hidden');
@@ -925,12 +925,24 @@
       const name = document.getElementById('modal-t-name').value.trim();
       const gender = document.getElementById('modal-t-gender').value;
       const subject = document.getElementById('modal-t-subject').value.trim();
-      const homeroom = document.getElementById('modal-t-homeroom').value.trim() || '없음';
+      let homeroom = document.getElementById('modal-t-homeroom').value.trim();
       const remarks = document.getElementById('modal-t-remarks').value.trim();
 
       if (!name) {
         alert('교사 이름을 입력해 주세요.');
         return;
+      }
+
+      // Normalize homeroom string input
+      if (homeroom.includes('비담임') || homeroom.includes('없음') || !homeroom) {
+        homeroom = '없음';
+      } else {
+        const match = homeroom.match(/(\d-\d+)/);
+        if (match) {
+          homeroom = match[1];
+        } else {
+          homeroom = '없음';
+        }
       }
 
       if (appState.editingTeacherId) {
@@ -1010,19 +1022,55 @@
           let remarksIdx = -1;
 
           headers.forEach((h, idx) => {
-            const cleanH = h.replace(/\s+/g, '');
+            const cleanH = h.replace(/\s+/g, '').toLowerCase();
             if (cleanH.includes('이름') || cleanH.includes('성명') || cleanH.includes('교사명') || cleanH.includes('교사')) {
               nameIdx = idx;
-            } else if (cleanH.includes('성별')) {
+            } else if (cleanH.includes('성별') || cleanH === '성') {
               genderIdx = idx;
-            } else if (cleanH.includes('과목') || cleanH.includes('담당')) {
+            } else if (cleanH.includes('과목') || cleanH.includes('담당') || cleanH.includes('교과')) {
               subjectIdx = idx;
-            } else if (cleanH.includes('담임') || cleanH.includes('학반') || cleanH.includes('반')) {
+            } else if (cleanH.includes('담임') || cleanH.includes('학반') || cleanH.includes('반') || cleanH.includes('학급')) {
               homeroomIdx = idx;
             } else if (cleanH.includes('비고') || cleanH.includes('특이사항') || cleanH.includes('메모') || cleanH.includes('remarks') || cleanH.includes('설명')) {
               remarksIdx = idx;
             }
           });
+
+          // Scan all cells to match Gender if not found via headers
+          if (genderIdx === -1) {
+            for (let c = 0; c < headers.length; c++) {
+              let maleCount = 0;
+              let femaleCount = 0;
+              for (let r = 0; r < dataRows.length; r++) {
+                const cellVal = String(dataRows[r][c] || '').trim();
+                if (cellVal === '남' || cellVal === '여' || cellVal.includes('남교사') || cellVal.includes('여교사') || cellVal.includes('남자') || cellVal.includes('여자')) {
+                  if (cellVal.includes('남')) maleCount++;
+                  if (cellVal.includes('여')) femaleCount++;
+                }
+              }
+              if (maleCount > 0 || femaleCount > 0) {
+                genderIdx = c;
+                break;
+              }
+            }
+          }
+
+          // Scan all cells to match Homeroom if not found via headers
+          if (homeroomIdx === -1) {
+            for (let c = 0; c < headers.length; c++) {
+              let matchCount = 0;
+              for (let r = 0; r < dataRows.length; r++) {
+                const cellVal = String(dataRows[r][c] || '').trim();
+                if (cellVal.includes('담임') || cellVal.includes('비담임') || /\d-\d+/.test(cellVal)) {
+                  matchCount++;
+                }
+              }
+              if (matchCount > 0) {
+                homeroomIdx = c;
+                break;
+              }
+            }
+          }
 
           // Fallbacks for standard order if headers not matched
           if (nameIdx === -1) nameIdx = headers.findIndex(h => h.toLowerCase().includes('name') || h.includes('이름') || h.includes('성명')) !== -1 ? headers.findIndex(h => h.toLowerCase().includes('name') || h.includes('이름') || h.includes('성명')) : 0;
@@ -1045,9 +1093,9 @@
 
             // Clean gender value
             if (gender) {
-              if (gender.includes('남') || gender.includes('m') || gender.includes('M') || gender.includes('Male') || gender.includes('male')) {
+              if (gender.includes('남') || gender.includes('m') || gender.includes('M') || gender.includes('Male') || gender.includes('male') || gender === '남자') {
                 gender = '남';
-              } else if (gender.includes('여') || gender.includes('f') || gender.includes('F') || gender.includes('Female') || gender.includes('female')) {
+              } else if (gender.includes('여') || gender.includes('f') || gender.includes('F') || gender.includes('Female') || gender.includes('female') || gender === '여자') {
                 gender = '여';
               } else {
                 gender = '여'; // default fallback
@@ -1057,7 +1105,18 @@
             }
 
             if (!subject) subject = '미지정';
-            if (!homeroom || homeroom === '-' || homeroom.toLowerCase() === 'none') homeroom = '없음';
+            
+            // Normalize homeroom value (e.g. "1-1담임" -> "1-1", "비담임" -> "없음")
+            if (homeroom.includes('비담임') || homeroom.includes('없음') || !homeroom || homeroom === '-') {
+              homeroom = '없음';
+            } else {
+              const match = homeroom.match(/(\d-\d+)/);
+              if (match) {
+                homeroom = match[1];
+              } else {
+                homeroom = '없음';
+              }
+            }
 
             parsedTeachers.push({
               id: `T${String(parsedTeachers.length + 1).padStart(2, '0')}`,
