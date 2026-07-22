@@ -212,7 +212,7 @@
         <!-- Special Exam Rooms Toggle -->
         <div class="space-y-2.5">
           <div class="text-xs font-bold text-slate-200 flex items-center">
-            <i class="fa-solid fa-door-open text-rose-400 mr-2"></i> 특별 고사실 설정 (정감독 1인만 배치)
+            <i class="fa-solid fa-door-open text-rose-400 mr-2"></i> 특별 고사실 설정 (정감독/부감독 배치)
           </div>
           <div class="flex items-center space-x-6 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-xs">
             <label class="flex items-center space-x-2 text-slate-200 cursor-pointer">
@@ -285,7 +285,7 @@
           <div id="designation-box-separate" class="bg-slate-900/50 border border-slate-800 rounded-xl p-3 space-y-2">
             <label class="text-[11px] text-slate-300 font-bold block flex items-center">
               <span class="w-2 h-2 rounded-full bg-rose-400 mr-1.5 animate-pulse"></span>
-              분리고사실 담당 교사 사전 지정 (정감독 1인만 배치)
+              분리고사실 담당 교사 사전 지정
             </label>
             <div id="separate-room-teachers-list" class="max-h-24 overflow-y-auto border border-slate-800 bg-slate-950/80 rounded-lg p-2.5 space-y-1.5 scrollbar-thin">
               <!-- Checkboxes will be injected -->
@@ -296,7 +296,7 @@
           <div id="designation-box-individual" class="bg-slate-900/50 border border-slate-800 rounded-xl p-3 space-y-2">
             <label class="text-[11px] text-slate-300 font-bold block flex items-center">
               <span class="w-2 h-2 rounded-full bg-rose-400 mr-1.5 animate-pulse"></span>
-              개별학습실 담당 교사 사전 지정 (정감독 1인만 배치)
+              개별학습실 담당 교사 사전 지정
             </label>
             <div id="individual-room-teachers-list" class="max-h-24 overflow-y-auto border border-slate-800 bg-slate-950/80 rounded-lg p-2.5 space-y-1.5 scrollbar-thin">
               <!-- Checkboxes will be injected -->
@@ -1147,15 +1147,41 @@
         const { day, period, grade, className, subject, isSpecialRoom } = slot;
 
         return teachers.filter(t => {
+          // 1. 특이사항: 시험감독불가 검사
+          if (t.remarks && t.remarks.includes('시험감독불가')) return false;
+
+          // 2. 특이사항: X일차만 가능 검사
+          if (t.remarks) {
+            const hasOnlyDayMatch = t.remarks.match(/(\d)일차만\s*가능/);
+            if (hasOnlyDayMatch) {
+              const allowedDay = parseInt(hasOnlyDayMatch[1], 10);
+              if (day !== allowedDay) return false;
+            }
+          }
+
+          // 3. 바쁜 상태 검사
           if (isTeacherBusy(t.id, day, period)) return false;
           
           if (!isSpecialRoom) {
             if (t.homeroom && t.homeroom === className) return false;
             if (t.subject && t.subject.trim() === subject.trim()) return false;
+          } else {
+            // 특별 고사실일 경우: 사전 지정된 교사만 배정되도록 함
+            const designations = settings.specialRoomDesignations || {};
+            const roomType = className === '분리고사실' ? 'separate' : 'individual';
+            const designatedPool = designations[roomType] || [];
+            
+            const autoDesignated = t.remarks && t.remarks.includes(className);
+            const isDesignated = designatedPool.includes(t.id) || autoDesignated;
+
+            const anyDesignatedForThisRoom = teachers.some(te => 
+              (designations[roomType] || []).includes(te.id) || (te.remarks && te.remarks.includes(className))
+            );
+
+            if (anyDesignatedForThisRoom && !isDesignated) return false;
           }
 
           if (role === 'assistant') {
-            if (isSpecialRoom) return false;
             if (assignedMainId) {
               const mainProctor = teachers.find(m => m.id === assignedMainId);
               if (mainProctor && mainProctor.gender === '남' && t.gender === '남') return false;
@@ -1196,21 +1222,19 @@
           unassignedCount++;
         }
 
-        if (!slot.isSpecialRoom) {
-          let asstCandidates = sortCandidates(getEligibleCandidates(slot, 'assistant', slot.mainProctorId), slot.grade);
-          if (asstCandidates.length > 0) {
-            const chosenAsst = asstCandidates[0];
-            slot.assistantProctorId = chosenAsst.id;
-            setTeacherBusy(chosenAsst.id, slot.day, slot.period, true);
-            teacherStats[chosenAsst.id].total += 1;
-            teacherStats[chosenAsst.id].assistant += 1;
-            if (slot.grade > 0) {
-              teacherStats[chosenAsst.id].gradeCounts[slot.grade] = (teacherStats[chosenAsst.id].gradeCounts[slot.grade] || 0) + 1;
-            }
-          } else {
-            slot.warnings.push('부감독 배치 인원 부족');
-            unassignedCount++;
+        let asstCandidates = sortCandidates(getEligibleCandidates(slot, 'assistant', slot.mainProctorId), slot.grade);
+        if (asstCandidates.length > 0) {
+          const chosenAsst = asstCandidates[0];
+          slot.assistantProctorId = chosenAsst.id;
+          setTeacherBusy(chosenAsst.id, slot.day, slot.period, true);
+          teacherStats[chosenAsst.id].total += 1;
+          teacherStats[chosenAsst.id].assistant += 1;
+          if (slot.grade > 0) {
+            teacherStats[chosenAsst.id].gradeCounts[slot.grade] = (teacherStats[chosenAsst.id].gradeCounts[slot.grade] || 0) + 1;
           }
+        } else {
+          slot.warnings.push('부감독 배치 인원 부족');
+          unassignedCount++;
         }
       }
 
@@ -1326,6 +1350,7 @@
             }
 
             const main = appState.teachers.find(t => t.id === slot.mainProctorId);
+            const asst = appState.teachers.find(t => t.id === slot.assistantProctorId);
             const hasWarning = slot.warnings.length > 0;
 
             rowCells += `
@@ -1337,7 +1362,11 @@
                     <span class="font-bold ${main ? (main.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}">${main ? main.name : '미배정'}</span>
                     ${main ? `<span class="text-[9px] px-1 rounded ${main.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}">${main.gender}</span>` : ''}
                   </div>
-                  <div class="text-[9px] text-slate-500 italic">정감독 1인실</div>
+                  <div class="flex items-center justify-center space-x-1 text-xs">
+                    <span class="text-[10px] font-semibold text-indigo-400">부:</span>
+                    <span class="font-bold ${asst ? (asst.gender==='남'?'text-sky-300':'text-rose-300') : 'text-slate-500'}">${asst ? asst.name : '미배정'}</span>
+                    ${asst ? `<span class="text-[9px] px-1 rounded ${asst.gender==='남'?'bg-sky-950 text-sky-400':'bg-rose-950 text-rose-400'}">${asst.gender}</span>` : ''}
+                  </div>
                   ${hasWarning ? `<div class="text-[9px] text-rose-400 font-bold truncate">⚠️ 경고</div>` : ''}
                 </div>
               </td>
