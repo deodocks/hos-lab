@@ -1153,6 +1153,21 @@
     }
 
 
+    function getLastExamPeriodForGrade(day, grade) {
+      const settings = appState.examSettings;
+      const daySchedule = settings.scheduleMatrix[day] || {};
+      let maxPeriod = 0;
+      const totalPeriods = settings.periodsPerDay || 3;
+      for (let p = 1; p <= totalPeriods; p++) {
+        const periodSubjects = daySchedule[p] || {};
+        const subject = periodSubjects[grade];
+        if (subject && subject.trim() !== '' && subject.trim() !== '미지정') {
+          maxPeriod = p;
+        }
+      }
+      return maxPeriod;
+    }
+
     // SCHEDULING ALGORITHM ENGINE
     function runAutoSchedule() {
       const teachers = appState.teachers;
@@ -1249,6 +1264,15 @@
 
           // 3. 바쁜 상태 검사
           if (isTeacherBusy(t.id, day, period)) return false;
+          
+          // 4. 담임교사의 학년 종례 제약 조건 검사 (학년 시험 완료 후 교시 감독 제외)
+          if (t.homeroom && t.homeroom !== '없음') {
+            const homeroomGrade = parseInt(t.homeroom.split('-')[0], 10);
+            const lastPeriod = getLastExamPeriodForGrade(day, homeroomGrade);
+            if (lastPeriod > 0 && period > lastPeriod) {
+              return false;
+            }
+          }
           
           const designations = settings.specialRoomDesignations || {};
           const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
@@ -1640,9 +1664,18 @@
           if (isSepDesignated || isIndDesignated) return;
         }
 
+        // 담임교사 학년 종례 제약 조건 검사 (해당 학년 시험 종료 후 교시 감독 불가)
+        if (t.homeroom && t.homeroom !== '없음') {
+          const homeroomGrade = parseInt(t.homeroom.split('-')[0], 10);
+          const lastPeriod = getLastExamPeriodForGrade(slot.day, homeroomGrade);
+          if (lastPeriod > 0 && slot.period > lastPeriod) {
+            return;
+          }
+        }
+
         const selectedMain = t.id === slot.mainProctorId ? 'selected' : '';
         const selectedAsst = t.id === slot.assistantProctorId ? 'selected' : '';
-        const optText = `${t.name} (${t.gender}, ${t.subject}, 담임:${t.homeroom})`;
+        const optText = `${t.name} (${t.gender}, ${t.subject}, 담임:${t.homeroom !== '없음' ? t.homeroom + '담임' : '비담임'})`;
         mainSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedMain}>${optText}</option>`);
         asstSelect.insertAdjacentHTML('beforeend', `<option value="${t.id}" ${selectedAsst}>${optText}</option>`);
       });
@@ -1698,6 +1731,20 @@
           if (main.gender === '남' && asst.gender === '남') warnings.push('⚠️ [경고] 남교사 동시 배정 금지 위반');
           if (main.homeroom === slot.className || asst.homeroom === slot.className) warnings.push('⚠️ [경고] 자기 반 담임 배정 금지 위반');
           if (main.subject === slot.subject || asst.subject === slot.subject) warnings.push('⚠️ [경고] 해당 교시 과목 교사 배정 금지 위반');
+        }
+        if (main && main.homeroom && main.homeroom !== '없음') {
+          const homeroomGrade = parseInt(main.homeroom.split('-')[0], 10);
+          const lastPeriod = getLastExamPeriodForGrade(slot.day, homeroomGrade);
+          if (lastPeriod > 0 && slot.period > lastPeriod) {
+            warnings.push('⚠️ [경고] 담임교사의 학년 시험 종료 후 교시 배정 위반 (종례 필요)');
+          }
+        }
+        if (asst && asst.homeroom && asst.homeroom !== '없음') {
+          const homeroomGrade = parseInt(asst.homeroom.split('-')[0], 10);
+          const lastPeriod = getLastExamPeriodForGrade(slot.day, homeroomGrade);
+          if (lastPeriod > 0 && slot.period > lastPeriod) {
+            warnings.push('⚠️ [경고] 담임교사의 학년 시험 종료 후 교시 배정 위반 (종례 필요)');
+          }
         }
       }
       slot.warnings = warnings;
