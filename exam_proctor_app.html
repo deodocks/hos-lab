@@ -1162,23 +1162,24 @@
           // 3. 바쁜 상태 검사
           if (isTeacherBusy(t.id, day, period)) return false;
           
+          const designations = settings.specialRoomDesignations || {};
+          const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
+          const isIndDesignated = (designations.individual || []).includes(t.id) || (t.remarks && t.remarks.includes('개별학습실'));
+
           if (!isSpecialRoom) {
+            // 일반 고사실일 경우: 특별 고사실 지정 교사는 배정에서 전면 제외
+            if (isSepDesignated || isIndDesignated) return false;
+            
             if (t.homeroom && t.homeroom === className) return false;
             if (t.subject && t.subject.trim() === subject.trim()) return false;
           } else {
-            // 특별 고사실일 경우: 사전 지정된 교사만 배정되도록 함
-            const designations = settings.specialRoomDesignations || {};
+            // 특별 고사실일 경우: 오직 해당 고사실에 사전 지정된 교사만 배정 가능
             const roomType = className === '분리고사실' ? 'separate' : 'individual';
             const designatedPool = designations[roomType] || [];
-            
             const autoDesignated = t.remarks && t.remarks.includes(className);
             const isDesignated = designatedPool.includes(t.id) || autoDesignated;
 
-            const anyDesignatedForThisRoom = teachers.some(te => 
-              (designations[roomType] || []).includes(te.id) || (te.remarks && te.remarks.includes(className))
-            );
-
-            if (anyDesignatedForThisRoom && !isDesignated) return false;
+            if (!isDesignated) return false;
           }
 
           if (role === 'assistant') {
@@ -1545,6 +1546,10 @@
           const autoDesignated = t.remarks && t.remarks.includes(slot.className);
           const isDesignated = designatedPool.includes(t.id) || autoDesignated;
           if (!isDesignated) return;
+        } else {
+          const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
+          const isIndDesignated = (designations.individual || []).includes(t.id) || (t.remarks && t.remarks.includes('개별학습실'));
+          if (isSepDesignated || isIndDesignated) return;
         }
 
         const selectedMain = t.id === slot.mainProctorId ? 'selected' : '';
