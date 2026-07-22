@@ -311,6 +311,17 @@
         </div>
       </div>
 
+      <!-- Warnings Banner if teacher count is insufficient -->
+      <div id="step2-shortage-banner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 text-rose-800 text-xs space-y-1.5 shadow-sm animate-pulse">
+        <div class="font-bold text-rose-700 flex items-center text-sm">
+          <i class="fa-solid fa-triangle-exclamation text-rose-600 mr-2"></i>
+          주의: 시험감독에 필요한 인원수가 부족합니다.
+        </div>
+        <p class="text-[11px] text-rose-600/90 leading-relaxed font-medium">
+          (일부 교시의 시험 과목 교사 제외, 감독 불가 체크, 혹은 총 학급 수 대비 교사 인원 부족으로 인해 자동 배정 시 미배정 교실이 발생할 수 있습니다. 교사 추가 등록 또는 제약을 완화해 주세요.)
+        </p>
+      </div>
+
       <!-- Special Rooms Designation Card (Step 2) -->
       <div id="step-2-designation-card" class="glass-card rounded-2xl p-4 space-y-3 shadow-sm border border-slate-100">
         <div class="text-xs font-bold text-slate-700 flex items-center">
@@ -643,6 +654,15 @@
       document.getElementById('header-teacher-count').textContent = appState.teachers.length;
       document.getElementById('header-days-count').textContent = appState.examSettings.daysCount;
       document.getElementById('teacher-count-badge').textContent = appState.teachers.length;
+
+      const shortageBanner = document.getElementById('step2-shortage-banner');
+      if (shortageBanner) {
+        if (isProctorShortage()) {
+          shortageBanner.classList.remove('hidden');
+        } else {
+          shortageBanner.classList.add('hidden');
+        }
+      }
     }
 
     function toggleGrade(grade) {
@@ -1333,8 +1353,113 @@
       return maxPeriod;
     }
 
+    function isProctorShortage() {
+      const teachers = appState.teachers;
+      const settings = appState.examSettings;
+      const { daysCount, periodsPerDay, grades, classesPerGrade, scheduleMatrix } = settings;
+      const totalPeriods = periodsPerDay || 3;
+
+      for (let day = 1; day <= daysCount; day++) {
+        const daySchedule = scheduleMatrix[day] || {};
+        for (let period = 1; period <= totalPeriods; period++) {
+          const periodSubjects = daySchedule[period] || {};
+          
+          // 1. Build tasks for this period
+          const tasks = [];
+          for (const grade of grades) {
+            const subject = periodSubjects[grade] || '미지정';
+            if (!subject || subject === '-' || subject === '미지정') continue;
+            const classes = classesPerGrade[grade] || [];
+            for (const className of classes) {
+              tasks.push({ role: 'main', className, subject, isSpecial: false });
+              tasks.push({ role: 'assistant', className, subject, isSpecial: false });
+            }
+          }
+          // Special rooms
+          const specialRoomsList = [];
+          if (settings.specialRooms?.separate) specialRoomsList.push('분리고사실');
+          if (settings.specialRooms?.individual) specialRoomsList.push('개별학습실');
+          for (const roomName of specialRoomsList) {
+            tasks.push({ role: 'main', className: roomName, subject: '별도감독', isSpecial: true });
+          }
+
+          if (tasks.length === 0) continue;
+
+          // 2. Filter available teachers for this day/period
+          const availableTeachers = teachers.filter(t => {
+            if (t.availableDays && !t.availableDays.includes(day)) return false;
+            if (t.remarks) {
+              const cleanRemarks = t.remarks.replace(/\s+/g, '');
+              if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
+            }
+            return true;
+          });
+
+          // 3. Bipartite Matching to check matching feasibility
+          let matched = new Array(tasks.length).fill(null);
+          let usedTeachers = new Set();
+
+          function match(taskIdx) {
+            if (taskIdx === tasks.length) return true;
+            const task = tasks[taskIdx];
+
+            for (const t of availableTeachers) {
+              if (usedTeachers.has(t.id)) continue;
+
+              // Check hard constraints:
+              // A. Role availability
+              if (task.role === 'main') {
+                if (t.availableRoles && !t.availableRoles.includes('main')) continue;
+                if (t.remarks) {
+                  const cleanRemarks = t.remarks.replace(/\s+/g, '');
+                  if (cleanRemarks.includes('부감독만') || cleanRemarks.includes('부감독')) continue;
+                }
+              } else if (task.role === 'assistant') {
+                if (t.availableRoles && !t.availableRoles.includes('assistant')) continue;
+              }
+
+              // B. Subject constraint (hard constraint)
+              if (!task.isSpecial && t.subject && t.subject.trim() === task.subject.trim()) continue;
+
+              // C. Special room designations
+              if (task.isSpecial) {
+                const designations = settings.specialRoomDesignations || {};
+                const roomType = task.className === '분리고사실' ? 'separate' : 'individual';
+                const designatedPool = designations[roomType] || [];
+                const autoDesignated = t.remarks && t.remarks.includes(task.className);
+                const isDesignated = designatedPool.includes(t.id) || autoDesignated;
+                if (!isDesignated) continue;
+              } else {
+                const designations = settings.specialRoomDesignations || {};
+                const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
+                const isIndDesignated = (designations.individual || []).includes(t.id) || (t.remarks && t.remarks.includes('개별학습실'));
+                if (isSepDesignated || isIndDesignated) continue;
+              }
+
+              usedTeachers.add(t.id);
+              matched[taskIdx] = t.id;
+              if (match(taskIdx + 1)) return true;
+              usedTeachers.delete(t.id);
+              matched[taskIdx] = null;
+            }
+            return false;
+          }
+
+          if (!match(0)) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
     // SCHEDULING ALGORITHM ENGINE
     function runAutoSchedule() {
+      if (isProctorShortage()) {
+        const ok = confirm('시험 감독에 필요한 인원이 부족합니다. 그래도 실행하시겠습니까?');
+        if (!ok) return;
+      }
+
       const teachers = appState.teachers;
       const settings = appState.examSettings;
       const { daysCount, periodsPerDay, grades, classesPerGrade, scheduleMatrix } = settings;
@@ -1511,6 +1636,7 @@
           if (!slot.isSpecialRoom) {
             if (isSepDesignated || isIndDesignated) return false;
             if (t.homeroom && t.homeroom === slot.className) return false;
+            if (t.subject && t.subject.trim() === slot.subject.trim()) return false;
           } else {
             const roomType = slot.className === '분리고사실' ? 'separate' : 'individual';
             const designatedPool = designations[roomType] || [];
@@ -1529,7 +1655,7 @@
           return true;
         });
         if (candidates.length > 0) {
-          slot.warnings.push('⚠️ 동일 과목 또는 남남 배정 제한 우회');
+          slot.warnings.push('⚠️ 남교사 동시 배정 제한 우회');
           return candidates;
         }
 
@@ -1555,6 +1681,7 @@
 
           if (!slot.isSpecialRoom) {
             if (isSepDesignated || isIndDesignated) return false;
+            if (t.subject && t.subject.trim() === slot.subject.trim()) return false;
           } else {
             const roomType = slot.className === '분리고사실' ? 'separate' : 'individual';
             const designatedPool = designations[roomType] || [];
@@ -1582,6 +1709,7 @@
           }
           if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
           if (role === 'assistant' && t.id === assignedMainId) return false;
+          if (!slot.isSpecialRoom && t.subject && t.subject.trim() === slot.subject.trim()) return false;
           return true;
         });
         if (candidates.length > 0) {
@@ -1998,6 +2126,7 @@
           const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
           const isIndDesignated = (designations.individual || []).includes(t.id) || (t.remarks && t.remarks.includes('개별학습실'));
           if (isSepDesignated || isIndDesignated) return;
+          if (t.subject && t.subject.trim() === slot.subject.trim()) return;
         }
 
         // 담임교사 학년 종례 제약 조건 검사 (해당 학년 시험 종료 후 교시 감독 불가)
@@ -2073,10 +2202,16 @@
           }
         }
       } else {
+        if (main) {
+          if (main.homeroom === slot.className) warnings.push('⚠️ [경고] 자기 반 담임 배정 금지 위반');
+          if (main.subject && main.subject.trim() === slot.subject.trim()) warnings.push('⚠️ [경고] 해당 교시 과목 교사 배정 금지 위반');
+        }
+        if (asst) {
+          if (asst.homeroom === slot.className) warnings.push('⚠️ [경고] 자기 반 담임 배정 금지 위반');
+          if (asst.subject && asst.subject.trim() === slot.subject.trim()) warnings.push('⚠️ [경고] 해당 교시 과목 교사 배정 금지 위반');
+        }
         if (main && asst) {
           if (main.gender === '남' && asst.gender === '남') warnings.push('⚠️ [경고] 남교사 동시 배정 금지 위반');
-          if (main.homeroom === slot.className || asst.homeroom === slot.className) warnings.push('⚠️ [경고] 자기 반 담임 배정 금지 위반');
-          if (main.subject === slot.subject || asst.subject === slot.subject) warnings.push('⚠️ [경고] 해당 교시 과목 교사 배정 금지 위반');
         }
         if (main && main.homeroom && main.homeroom !== '없음') {
           const homeroomGrade = parseInt(main.homeroom.split('-')[0], 10);
