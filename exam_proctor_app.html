@@ -209,20 +209,40 @@
 
         <hr class="border-slate-800" />
 
-        <!-- Special Exam Rooms Toggle -->
-        <div class="space-y-2.5">
+        <!-- Special Exam Rooms Toggle & Teacher Designation -->
+        <div class="space-y-3">
           <div class="text-xs font-bold text-slate-200 flex items-center">
             <i class="fa-solid fa-door-open text-rose-400 mr-2"></i> 특별 고사실 설정 (정감독 1인만 배치)
           </div>
-          <div class="flex items-center space-x-6 bg-slate-900/60 border border-slate-800 rounded-xl px-4 py-2.5 text-xs">
-            <label class="flex items-center space-x-2 text-slate-200 cursor-pointer">
-              <input type="checkbox" id="chk-room-separate" onchange="toggleSpecialRoom('separate')" class="w-4 h-4 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-2" checked />
-              <span class="font-semibold">분리고사실</span>
-            </label>
-            <label class="flex items-center space-x-2 text-slate-200 cursor-pointer">
-              <input type="checkbox" id="chk-room-individual" onchange="toggleSpecialRoom('individual')" class="w-4 h-4 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-2" checked />
-              <span class="font-semibold">개별학습실</span>
-            </label>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Separate Room Card -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 space-y-3">
+              <label class="flex items-center space-x-2 text-slate-200 cursor-pointer font-bold text-xs">
+                <input type="checkbox" id="chk-room-separate" onchange="toggleSpecialRoom('separate')" class="w-4 h-4 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-2" checked />
+                <span>분리고사실 운영</span>
+              </label>
+              <div id="designation-box-separate" class="space-y-1.5">
+                <label class="text-[10px] text-slate-400 font-bold block">분리고사실 담당 교사 사전 지정</label>
+                <div id="separate-room-teachers-list" class="max-h-28 overflow-y-auto border border-slate-700/80 bg-slate-950/80 rounded-lg p-2.5 space-y-1.5 scrollbar-thin">
+                  <!-- Checkboxes will be injected -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Individual Room Card -->
+            <div class="bg-slate-900/50 border border-slate-800 rounded-xl p-4 space-y-3">
+              <label class="flex items-center space-x-2 text-slate-200 cursor-pointer font-bold text-xs">
+                <input type="checkbox" id="chk-room-individual" onchange="toggleSpecialRoom('individual')" class="w-4 h-4 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-2" checked />
+                <span>개별학습실 운영</span>
+              </label>
+              <div id="designation-box-individual" class="space-y-1.5">
+                <label class="text-[10px] text-slate-400 font-bold block">개별학습실 담당 교사 사전 지정</label>
+                <div id="individual-room-teachers-list" class="max-h-28 overflow-y-auto border border-slate-700/80 bg-slate-950/80 rounded-lg p-2.5 space-y-1.5 scrollbar-thin">
+                  <!-- Checkboxes will be injected -->
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -614,7 +634,67 @@
     function toggleSpecialRoom(room) {
       if (!appState.examSettings.specialRooms) appState.examSettings.specialRooms = {};
       appState.examSettings.specialRooms[room] = !appState.examSettings.specialRooms[room];
+      
+      const box = document.getElementById(`designation-box-${room}`);
+      if (box) {
+        if (appState.examSettings.specialRooms[room]) {
+          box.classList.remove('opacity-40', 'pointer-events-none');
+        } else {
+          box.classList.add('opacity-40', 'pointer-events-none');
+        }
+      }
       updateClassLabels();
+    }
+
+    function toggleSpecialRoomTeacher(room, teacherId, isChecked) {
+      if (!appState.examSettings.specialRoomDesignations) {
+        appState.examSettings.specialRoomDesignations = { separate: [], individual: [] };
+      }
+      const list = appState.examSettings.specialRoomDesignations[room] || [];
+      const idx = list.indexOf(teacherId);
+      if (isChecked && idx === -1) {
+        list.push(teacherId);
+      } else if (!isChecked && idx > -1) {
+        list.splice(idx, 1);
+      }
+      appState.examSettings.specialRoomDesignations[room] = list;
+    }
+
+    function renderSpecialRoomTeacherSelectors() {
+      const sepContainer = document.getElementById('separate-room-teachers-list');
+      const indContainer = document.getElementById('individual-room-teachers-list');
+      if (!sepContainer || !indContainer) return;
+
+      const sepSelected = appState.examSettings.specialRoomDesignations?.separate || [];
+      const indSelected = appState.examSettings.specialRoomDesignations?.individual || [];
+
+      let sepHTML = '';
+      let indHTML = '';
+
+      appState.teachers.forEach(t => {
+        const autoSep = t.remarks && t.remarks.includes('분리고사실');
+        const autoInd = t.remarks && t.remarks.includes('개별학습실');
+        
+        const isSepChecked = sepSelected.includes(t.id) || autoSep;
+        const isIndChecked = indSelected.includes(t.id) || autoInd;
+
+        sepHTML += `
+          <label class="flex items-center space-x-2 text-[11px] text-slate-300 cursor-pointer">
+            <input type="checkbox" value="${t.id}" onchange="toggleSpecialRoomTeacher('separate', '${t.id}', this.checked)" class="w-3.5 h-3.5 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-1" ${isSepChecked ? 'checked' : ''} />
+            <span>${t.name} (${t.subject}${autoSep ? ' - 자동지정' : ''})</span>
+          </label>
+        `;
+
+        indHTML += `
+          <label class="flex items-center space-x-2 text-[11px] text-slate-300 cursor-pointer">
+            <input type="checkbox" value="${t.id}" onchange="toggleSpecialRoomTeacher('individual', '${t.id}', this.checked)" class="w-3.5 h-3.5 text-rose-500 bg-slate-950 border-slate-700 rounded focus:ring-rose-500 focus:ring-1" ${isIndChecked ? 'checked' : ''} />
+            <span>${t.name} (${t.subject}${autoInd ? ' - 자동지정' : ''})</span>
+          </label>
+        `;
+      });
+
+      sepContainer.innerHTML = sepHTML || '<span class="text-slate-500 text-[10px]">등록된 교사가 없습니다.</span>';
+      indContainer.innerHTML = indHTML || '<span class="text-slate-500 text-[10px]">등록된 교사가 없습니다.</span>';
     }
 
     function updateClassLabels() {
@@ -631,6 +711,7 @@
       if (chkInd) chkInd.checked = !!appState.examSettings.specialRooms?.individual;
 
       renderStep1ClassCounts();
+      renderSpecialRoomTeacherSelectors();
       document.getElementById('label-periods-count').textContent = `${appState.examSettings.periodsPerDay || 3} 교시`;
     }
 
