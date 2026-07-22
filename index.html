@@ -1222,19 +1222,21 @@
           unassignedCount++;
         }
 
-        let asstCandidates = sortCandidates(getEligibleCandidates(slot, 'assistant', slot.mainProctorId), slot.grade);
-        if (asstCandidates.length > 0) {
-          const chosenAsst = asstCandidates[0];
-          slot.assistantProctorId = chosenAsst.id;
-          setTeacherBusy(chosenAsst.id, slot.day, slot.period, true);
-          teacherStats[chosenAsst.id].total += 1;
-          teacherStats[chosenAsst.id].assistant += 1;
-          if (slot.grade > 0) {
-            teacherStats[chosenAsst.id].gradeCounts[slot.grade] = (teacherStats[chosenAsst.id].gradeCounts[slot.grade] || 0) + 1;
+        if (!slot.isSpecialRoom) {
+          let asstCandidates = sortCandidates(getEligibleCandidates(slot, 'assistant', slot.mainProctorId), slot.grade);
+          if (asstCandidates.length > 0) {
+            const chosenAsst = asstCandidates[0];
+            slot.assistantProctorId = chosenAsst.id;
+            setTeacherBusy(chosenAsst.id, slot.day, slot.period, true);
+            teacherStats[chosenAsst.id].total += 1;
+            teacherStats[chosenAsst.id].assistant += 1;
+            if (slot.grade > 0) {
+              teacherStats[chosenAsst.id].gradeCounts[slot.grade] = (teacherStats[chosenAsst.id].gradeCounts[slot.grade] || 0) + 1;
+            }
+          } else {
+            slot.warnings.push('부감독 배치 인원 부족');
+            unassignedCount++;
           }
-        } else {
-          slot.warnings.push('부감독 배치 인원 부족');
-          unassignedCount++;
         }
       }
 
