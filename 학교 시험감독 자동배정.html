@@ -1704,7 +1704,7 @@
           return candidates;
         }
 
-        // Step 4: Relax special room isolation and everything except busy/ineligible
+        // Step 4: Relax everything except special room isolation, busy status, and ineligible remarks
         candidates = teachers.filter(t => {
           if (t.availableDays && !t.availableDays.includes(slot.day)) return false;
           if (t.availableRoles && !t.availableRoles.includes(role)) return false;
@@ -1715,7 +1715,23 @@
           }
           if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
           if (role === 'assistant' && t.id === assignedMainId) return false;
-          if (!slot.isSpecialRoom && t.subject && t.subject.trim() === slot.subject.trim()) return false;
+
+          // 특별 고사실 담당 교사는 일반 교실에 갈 수 없고, 일반 교사는 특별 고사실에 갈 수 없는 제약조건은 절대 해제 불가
+          const designations = settings.specialRoomDesignations || {};
+          const isSepDesignated = (designations.separate || []).includes(t.id) || (t.remarks && t.remarks.includes('분리고사실'));
+          const isIndDesignated = (designations.individual || []).includes(t.id) || (t.remarks && t.remarks.includes('개별학습실'));
+
+          if (!slot.isSpecialRoom) {
+            if (isSepDesignated || isIndDesignated) return false;
+            if (t.subject && t.subject.trim() === slot.subject.trim()) return false;
+          } else {
+            const roomType = slot.className === '분리고사실' ? 'separate' : 'individual';
+            const designatedPool = designations[roomType] || [];
+            const autoDesignated = t.remarks && t.remarks.includes(slot.className);
+            const isDesignated = designatedPool.includes(t.id) || autoDesignated;
+            if (!isDesignated) return false;
+          }
+
           return true;
         });
         if (candidates.length > 0) {
