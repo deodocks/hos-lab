@@ -1495,7 +1495,8 @@
           main: 0,
           assistant: 0,
           gradeCounts: { 1: 0, 2: 0, 3: 0 },
-          busy: {}
+          busy: {},
+          assignedClasses: []
         };
       });
 
@@ -1603,6 +1604,9 @@
 
           // 3. 바쁜 상태 검사
           if (isTeacherBusy(t.id, day, period)) return false;
+
+          // 3.5. 시험기간 동일 학급 중복 배정 금지 제약조건 (일반 교실 대상)
+          if (!isSpecialRoom && teacherStats[t.id].assignedClasses.includes(className)) return false;
           
           // 4. 담임교사의 학년 종례 제약 조건 검사 (학년 시험 완료 후 교시 감독 제외)
           if (t.homeroom && t.homeroom !== '없음') {
@@ -1660,6 +1664,9 @@
           }
           if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
           
+          // 시험기간 동일 학급 중복 배정 금지 제약조건 (일반 교실 대상)
+          if (!slot.isSpecialRoom && teacherStats[t.id].assignedClasses.includes(slot.className)) return false;
+
           if (role === 'main' && t.remarks) {
             const cleanRemarks = t.remarks.replace(/\s+/g, '');
             if (cleanRemarks.includes('부감독만') || cleanRemarks.includes('부감독')) return false;
@@ -1705,6 +1712,9 @@
             if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
           }
           if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
+
+          // 시험기간 동일 학급 중복 배정 금지 제약조건 (일반 교실 대상)
+          if (!slot.isSpecialRoom && teacherStats[t.id].assignedClasses.includes(slot.className)) return false;
 
           if (role === 'main' && t.remarks) {
             const cleanRemarks = t.remarks.replace(/\s+/g, '');
@@ -1752,6 +1762,10 @@
             if (/시험감독불가|감독불가|감독제외|배정제외|불가|제외|안됨|불가능/.test(cleanRemarks)) return false;
           }
           if (isTeacherBusy(t.id, slot.day, slot.period)) return false;
+
+          // 시험기간 동일 학급 중복 배정 금지 제약조건 (일반 교실 대상)
+          if (!slot.isSpecialRoom && teacherStats[t.id].assignedClasses.includes(slot.className)) return false;
+
           if (role === 'assistant' && t.id === assignedMainId) return false;
 
           // 특별 고사실 담당 교사는 일반 교실에 갈 수 없고, 일반 교사는 특별 고사실에 갈 수 없는 제약조건은 절대 해제 불가
@@ -1812,6 +1826,9 @@
           if (slot.grade > 0) {
             teacherStats[chosenMain.id].gradeCounts[slot.grade] = (teacherStats[chosenMain.id].gradeCounts[slot.grade] || 0) + 1;
           }
+          if (!slot.isSpecialRoom) {
+            teacherStats[chosenMain.id].assignedClasses.push(slot.className);
+          }
         } else {
           slot.warnings.push('정감독 배치 인원 부족');
           unassignedCount++;
@@ -1828,6 +1845,7 @@
             if (slot.grade > 0) {
               teacherStats[chosenAsst.id].gradeCounts[slot.grade] = (teacherStats[chosenAsst.id].gradeCounts[slot.grade] || 0) + 1;
             }
+            teacherStats[chosenAsst.id].assignedClasses.push(slot.className);
           } else {
             slot.warnings.push('부감독 배치 인원 부족');
             unassignedCount++;
