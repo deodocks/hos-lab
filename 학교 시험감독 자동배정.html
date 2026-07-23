@@ -2102,8 +2102,8 @@
         dayColgroupHeaders += `<th colspan="${totalPeriods * 2}" class="py-1.5 px-2 border-l border-slate-200 text-center whitespace-nowrap">${d}일차</th>`;
         for (let p = 1; p <= totalPeriods; p++) {
           daySubHeaders += `
-            <th class="py-1 px-1 border-l border-slate-100 text-center font-bold text-sky-600 bg-sky-50/20 select-none whitespace-nowrap">정</th>
-            <th class="py-1 px-1 border-l border-slate-100 text-center font-bold text-indigo-600 bg-indigo-50/20 select-none whitespace-nowrap">부</th>
+            <th class="py-1 px-1 border-l border-slate-100 text-center font-bold text-sky-600 bg-sky-50/20 select-none whitespace-nowrap w-14 min-w-[56px]">정</th>
+            <th class="py-1 px-1 border-l border-slate-100 text-center font-bold text-indigo-600 bg-indigo-50/20 select-none whitespace-nowrap w-14 min-w-[56px]">부</th>
           `;
         }
       }
@@ -2126,8 +2126,8 @@
             const asstText = asstSlot ? asstSlot.className : '<span class="text-slate-300">-</span>';
 
             allocationCells += `
-              <td class="py-1 px-1 border-r border-slate-100 text-center font-medium text-slate-850">${mainText}</td>
-              <td class="py-1 px-1 border-r border-slate-200 text-center font-medium text-slate-850">${asstText}</td>
+              <td class="py-1 px-1 border-r border-slate-100 text-center font-medium text-slate-850 w-14 min-w-[56px]">${mainText}</td>
+              <td class="py-1 px-1 border-r border-slate-200 text-center font-medium text-slate-850 w-14 min-w-[56px]">${asstText}</td>
             `;
           }
         }
