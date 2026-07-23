@@ -2092,15 +2092,61 @@
       const statsContainer = document.getElementById('view-container-stats');
       statsContainer.innerHTML = '';
 
-      let dayColgroupHeaders = '';
-      let daySubHeaders = '';
-      for (let d = 1; d <= appState.examSettings.daysCount; d++) {
-        dayColgroupHeaders += `<th colspan="2" class="py-1.5 px-2 border-l border-slate-200 text-center whitespace-nowrap">${d}일차</th>`;
-        daySubHeaders += `
-          <th class="py-1 px-1 border-l border-slate-100 text-center font-bold text-sky-600 bg-sky-50/20 select-none whitespace-nowrap">정</th>
-          <th class="py-1 px-1 border-l border-slate-100 text-center font-bold text-indigo-600 bg-indigo-50/20 select-none whitespace-nowrap">부</th>
-        `;
+      const totalPeriods = periodsPerDay || 3;
+
+      // 1. Header Row 1 (Days)
+      let headerRow1 = `
+        <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
+          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">교사명</th>
+          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">성별</th>
+          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">과목</th>
+          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">담임</th>
+          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">정감독</th>
+          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">부감독</th>
+          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold text-sky-600 whitespace-nowrap">총 횟수</th>
+      `;
+      for (let d = 1; d <= daysCount; d++) {
+        headerRow1 += `<th colspan="${totalPeriods * 2}" class="py-2 px-2 border-r border-slate-200 text-center font-bold whitespace-nowrap">${d}일차</th>`;
       }
+      headerRow1 += `<th rowspan="4" class="py-3 px-3 align-middle text-center font-bold no-print whitespace-nowrap">업무량 게이지</th></tr>`;
+
+      // 2. Header Row 2 (Periods)
+      let headerRow2 = `<tr class="bg-slate-50 text-slate-700 border-b border-slate-100 text-center font-bold">`;
+      for (let d = 1; d <= daysCount; d++) {
+        for (let p = 1; p <= totalPeriods; p++) {
+          headerRow2 += `<th colspan="2" class="py-1 px-1 border-r border-slate-100 whitespace-nowrap">${p}교시</th>`;
+        }
+      }
+      headerRow2 += `</tr>`;
+
+      // 3. Header Row 3 (Subjects)
+      let headerRow3 = `<tr class="bg-slate-50 text-slate-650 border-b border-slate-100 text-center font-semibold">`;
+      for (let d = 1; d <= daysCount; d++) {
+        const daySchedule = scheduleMatrix[d] || {};
+        for (let p = 1; p <= totalPeriods; p++) {
+          const periodSubjects = daySchedule[p] || {};
+          const subs = [];
+          for (const g of grades) {
+            const s = (periodSubjects[g] || '').trim();
+            if (s && s !== '-' && s !== '미지정') subs.push(s);
+          }
+          const subText = subs.length > 0 ? Array.from(new Set(subs)).join('/') : '시험없음';
+          headerRow3 += `<th colspan="2" class="py-1 px-1 border-r border-slate-100 text-[10px] text-emerald-700 bg-emerald-50/20 whitespace-nowrap">${subText}</th>`;
+        }
+      }
+      headerRow3 += `</tr>`;
+
+      // 4. Header Row 4 (Roles: 정 / 부)
+      let headerRow4 = `<tr class="bg-slate-50 text-slate-650 border-b border-slate-200 text-center text-[10px]">`;
+      for (let d = 1; d <= daysCount; d++) {
+        for (let p = 1; p <= totalPeriods; p++) {
+          headerRow4 += `
+            <th class="py-1 px-1 border-r border-slate-100 font-bold text-sky-600 bg-sky-50/10 select-none">정</th>
+            <th class="py-1 px-1 border-r border-slate-200 font-bold text-indigo-600 bg-indigo-50/10 select-none">부</th>
+          `;
+        }
+      }
+      headerRow4 += `</tr>`;
 
       let rowsHtml = '';
       const maxTotal = Math.max(...Object.values(res.teacherStats).map(s => s.total)) || 1;
@@ -2110,48 +2156,34 @@
         const percent = (stats.total / maxTotal) * 100;
         const assigned = res.slots.filter(s => s.mainProctorId === t.id || s.assistantProctorId === t.id);
 
-        // Group allocations by day and role
-        const dayAllocations = {};
-        for (let d = 1; d <= appState.examSettings.daysCount; d++) {
-          dayAllocations[d] = { main: [], assistant: [] };
-        }
-
-        assigned.forEach(s => {
-          const isMain = s.mainProctorId === t.id;
-          const displayStr = `<div class="font-semibold text-[10px] my-0.5 text-slate-700 whitespace-nowrap">${s.period}교시: ${s.className}</div>`;
-          if (isMain) {
-            dayAllocations[s.day].main.push(displayStr);
-          } else {
-            dayAllocations[s.day].assistant.push(displayStr);
-          }
-        });
-
         let allocationCells = '';
-        for (let d = 1; d <= appState.examSettings.daysCount; d++) {
-          const mainList = dayAllocations[d].main.join('');
-          const asstList = dayAllocations[d].assistant.join('');
-          
-          const mainContent = mainList !== '' ? mainList : '<span class="text-slate-300 text-[10px] font-medium">-</span>';
-          const asstContent = asstList !== '' ? asstList : '<span class="text-slate-300 text-[10px] font-medium">-</span>';
+        for (let d = 1; d <= daysCount; d++) {
+          for (let p = 1; p <= totalPeriods; p++) {
+            const mainSlot = assigned.find(s => s.day === d && s.period === p && s.mainProctorId === t.id);
+            const asstSlot = assigned.find(s => s.day === d && s.period === p && s.assistantProctorId === t.id);
 
-          allocationCells += `
-            <td class="py-1 px-1 border-l border-slate-100 text-center">${mainContent}</td>
-            <td class="py-1 px-1 border-l border-slate-100 text-center">${asstContent}</td>
-          `;
+            const mainText = mainSlot ? mainSlot.className : '<span class="text-slate-300">-</span>';
+            const asstText = asstSlot ? asstSlot.className : '<span class="text-slate-300">-</span>';
+
+            allocationCells += `
+              <td class="py-1 px-1 border-r border-slate-100 text-center font-medium text-slate-850">${mainText}</td>
+              <td class="py-1 px-1 border-r border-slate-200 text-center font-medium text-slate-850">${asstText}</td>
+            `;
+          }
         }
 
         rowsHtml += `
           <tr class="hover:bg-slate-50/50">
-            <td class="py-2.5 px-4 font-bold text-slate-850">${t.name}</td>
-            <td class="py-2.5 px-4"><span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${t.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'}">${t.gender}</span></td>
-            <td class="py-2.5 px-4 text-slate-700">${t.subject}</td>
-            <td class="py-2.5 px-4 text-slate-500">${t.homeroom !== '없음' ? t.homeroom + '담임' : '비담임'}</td>
-            <td class="py-2.5 px-4 text-center font-bold text-sky-600">${stats.main}회</td>
-            <td class="py-2.5 px-4 text-center font-bold text-indigo-600">${stats.assistant}회</td>
-            <td class="py-2.5 px-4 text-center font-extrabold text-amber-600 text-sm font-outfit">${stats.total}회</td>
+            <td class="py-2 px-3 font-bold text-slate-850 border-r border-slate-100 text-center">${t.name}</td>
+            <td class="py-2 px-3 border-r border-slate-100 text-center"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${t.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'}">${t.gender}</span></td>
+            <td class="py-2 px-3 text-slate-700 border-r border-slate-100 text-center">${t.subject}</td>
+            <td class="py-2 px-3 text-slate-500 border-r border-slate-100 text-center">${t.homeroom !== '없음' ? t.homeroom + '담임' : '비담임'}</td>
+            <td class="py-2 px-3 text-center font-bold text-sky-600 border-r border-slate-100">${stats.main}회</td>
+            <td class="py-2 px-3 text-center font-bold text-indigo-600 border-r border-slate-100">${stats.assistant}회</td>
+            <td class="py-2 px-3 text-center font-extrabold text-amber-600 text-sm font-outfit border-r border-slate-100">${stats.total}회</td>
             ${allocationCells}
-            <td class="py-2.5 px-4 no-print">
-              <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden flex border border-slate-200">
+            <td class="py-2 px-3 no-print text-center">
+              <div class="w-16 bg-slate-100 h-2 rounded-full overflow-hidden inline-flex border border-slate-200">
                 <div class="bg-gradient-to-r from-sky-400 to-indigo-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
               </div>
             </td>
@@ -2175,20 +2207,10 @@
         <div class="overflow-x-auto border border-slate-150 rounded-xl bg-white">
           <table class="w-full text-left border-collapse text-xs">
             <thead>
-              <tr class="bg-slate-50 text-slate-700 border-b border-slate-100">
-                <th rowspan="2" class="py-3 px-4 border-r border-slate-200 align-middle">교사명</th>
-                <th rowspan="2" class="py-3 px-4 border-r border-slate-200 align-middle">성별</th>
-                <th rowspan="2" class="py-3 px-4 border-r border-slate-200 align-middle">과목</th>
-                <th rowspan="2" class="py-3 px-4 border-r border-slate-200 align-middle">담임</th>
-                <th rowspan="2" class="py-3 px-4 text-center border-r border-slate-200 align-middle">정감독</th>
-                <th rowspan="2" class="py-3 px-4 text-center border-r border-slate-200 align-middle">부감독</th>
-                <th rowspan="2" class="py-3 px-4 text-center font-bold text-sky-600 border-r border-slate-200 align-middle">총 횟수</th>
-                ${dayColgroupHeaders}
-                <th rowspan="2" class="py-3 px-4 align-middle no-print">업무량 게이지</th>
-              </tr>
-              <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
-                ${daySubHeaders}
-              </tr>
+              ${headerRow1}
+              ${headerRow2}
+              ${headerRow3}
+              ${headerRow4}
             </thead>
             <tbody class="divide-y divide-slate-100">${rowsHtml}</tbody>
           </table>
