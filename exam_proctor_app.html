@@ -2089,12 +2089,44 @@
       const statsContainer = document.getElementById('view-container-stats');
       statsContainer.innerHTML = '';
 
+      let dayHeaders = '';
+      for (let d = 1; d <= appState.examSettings.daysCount; d++) {
+        dayHeaders += `<th class="py-2.5 px-3 border-l border-slate-100 text-center whitespace-nowrap">${d}일차</th>`;
+      }
+
       let rowsHtml = '';
       const maxTotal = Math.max(...Object.values(res.teacherStats).map(s => s.total)) || 1;
 
       appState.teachers.forEach(t => {
         const stats = res.teacherStats[t.id] || { total: 0, main: 0, assistant: 0 };
         const percent = (stats.total / maxTotal) * 100;
+        const assigned = res.slots.filter(s => s.mainProctorId === t.id || s.assistantProctorId === t.id);
+
+        // Group allocations by day
+        const dayAllocations = {};
+        for (let d = 1; d <= appState.examSettings.daysCount; d++) {
+          dayAllocations[d] = [];
+        }
+
+        assigned.forEach(s => {
+          const isMain = s.mainProctorId === t.id;
+          const roleBadge = isMain 
+            ? '<span class="text-[9px] px-1 rounded bg-sky-50 text-sky-600 border border-sky-100 font-bold ml-1 select-none">정</span>'
+            : '<span class="text-[9px] px-1 rounded bg-indigo-50 text-indigo-600 border border-indigo-100 font-bold ml-1 select-none">부</span>';
+          
+          dayAllocations[s.day].push(`
+            <span class="inline-flex items-center bg-slate-50 border border-slate-150 rounded px-1.5 py-0.5 m-0.5 text-[10px] font-semibold text-slate-700 shadow-sm">
+              ${s.period}교시: ${s.className}${roleBadge}
+            </span>
+          `);
+        });
+
+        let allocationCells = '';
+        for (let d = 1; d <= appState.examSettings.daysCount; d++) {
+          const list = dayAllocations[d];
+          const content = list.length > 0 ? list.join('') : '<span class="text-slate-400 text-[10px] font-medium">-</span>';
+          allocationCells += `<td class="py-2 px-2 border-l border-slate-100 text-center">${content}</td>`;
+        }
 
         rowsHtml += `
           <tr class="hover:bg-slate-50/50">
@@ -2105,8 +2137,9 @@
             <td class="py-2.5 px-4 text-center font-bold text-sky-600">${stats.main}회</td>
             <td class="py-2.5 px-4 text-center font-bold text-indigo-600">${stats.assistant}회</td>
             <td class="py-2.5 px-4 text-center font-extrabold text-amber-600 text-sm font-outfit">${stats.total}회</td>
+            ${allocationCells}
             <td class="py-2.5 px-4">
-              <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden flex border border-slate-200">
+              <div class="w-20 bg-slate-100 h-2.5 rounded-full overflow-hidden flex border border-slate-200">
                 <div class="bg-gradient-to-r from-sky-400 to-indigo-500 h-full transition-all duration-300" style="width: ${percent}%"></div>
               </div>
             </td>
@@ -2117,7 +2150,7 @@
       const statsHtml = `
         <h3 class="text-sm font-bold text-sky-600 flex items-center justify-between">
           <span><i class="fa-solid fa-chart-pie mr-2"></i> 교사별 감독 배정 수량 &amp; 업무량 공정성 통계</span>
-          <span class="text-xs font-normal text-slate-500">정감독 / 부감독 횟수 및 비율</span>
+          <span class="text-xs font-normal text-slate-500">정감독 / 부감독 횟수 및 일자별 상세 고실 배치 현황</span>
         </h3>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse text-xs">
@@ -2127,9 +2160,10 @@
                 <th class="py-2.5 px-4">성별</th>
                 <th class="py-2.5 px-4">과목</th>
                 <th class="py-2.5 px-4">담임</th>
-                <th class="py-2.5 px-4 text-center">정감독 횟수</th>
-                <th class="py-2.5 px-4 text-center">부감독 횟수</th>
-                <th class="py-2.5 px-4 text-center font-bold text-sky-600">총 감독 횟수</th>
+                <th class="py-2.5 px-4 text-center">정감독</th>
+                <th class="py-2.5 px-4 text-center">부감독</th>
+                <th class="py-2.5 px-4 text-center font-bold text-sky-600">총 감독</th>
+                ${dayHeaders}
                 <th class="py-2.5 px-4">업무량 게이지</th>
               </tr>
             </thead>
