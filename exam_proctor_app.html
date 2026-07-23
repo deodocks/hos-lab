@@ -2094,59 +2094,17 @@
 
       const totalPeriods = periodsPerDay || 3;
 
-      // 1. Header Row 1 (Days)
-      let headerRow1 = `
-        <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
-          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">교사명</th>
-          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">성별</th>
-          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">과목</th>
-          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">담임</th>
-          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">정감독</th>
-          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">부감독</th>
-          <th rowspan="4" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold text-sky-600 whitespace-nowrap">총 횟수</th>
-      `;
+      let dayColgroupHeaders = '';
+      let daySubHeaders = '';
       for (let d = 1; d <= daysCount; d++) {
-        headerRow1 += `<th colspan="${totalPeriods * 2}" class="py-2 px-2 border-r border-slate-200 text-center font-bold whitespace-nowrap">${d}일차</th>`;
-      }
-      headerRow1 += `<th rowspan="4" class="py-3 px-3 align-middle text-center font-bold no-print whitespace-nowrap">업무량 게이지</th></tr>`;
-
-      // 2. Header Row 2 (Periods)
-      let headerRow2 = `<tr class="bg-slate-50 text-slate-700 border-b border-slate-100 text-center font-bold">`;
-      for (let d = 1; d <= daysCount; d++) {
+        dayColgroupHeaders += `<th colspan="${totalPeriods * 2}" class="py-1.5 px-2 border-l border-slate-200 text-center whitespace-nowrap">${d}일차</th>`;
         for (let p = 1; p <= totalPeriods; p++) {
-          headerRow2 += `<th colspan="2" class="py-1 px-1 border-r border-slate-100 whitespace-nowrap">${p}교시</th>`;
-        }
-      }
-      headerRow2 += `</tr>`;
-
-      // 3. Header Row 3 (Subjects)
-      let headerRow3 = `<tr class="bg-slate-50 text-slate-650 border-b border-slate-100 text-center font-semibold">`;
-      for (let d = 1; d <= daysCount; d++) {
-        const daySchedule = scheduleMatrix[d] || {};
-        for (let p = 1; p <= totalPeriods; p++) {
-          const periodSubjects = daySchedule[p] || {};
-          const subs = [];
-          for (const g of grades) {
-            const s = (periodSubjects[g] || '').trim();
-            if (s && s !== '-' && s !== '미지정') subs.push(s);
-          }
-          const subText = subs.length > 0 ? Array.from(new Set(subs)).join('/') : '시험없음';
-          headerRow3 += `<th colspan="2" class="py-1 px-1 border-r border-slate-100 text-[10px] text-emerald-700 bg-emerald-50/20 whitespace-nowrap">${subText}</th>`;
-        }
-      }
-      headerRow3 += `</tr>`;
-
-      // 4. Header Row 4 (Roles: 정 / 부)
-      let headerRow4 = `<tr class="bg-slate-50 text-slate-650 border-b border-slate-200 text-center text-[10px]">`;
-      for (let d = 1; d <= daysCount; d++) {
-        for (let p = 1; p <= totalPeriods; p++) {
-          headerRow4 += `
-            <th class="py-1 px-1 border-r border-slate-100 font-bold text-sky-600 bg-sky-50/10 select-none">정</th>
-            <th class="py-1 px-1 border-r border-slate-200 font-bold text-indigo-600 bg-indigo-50/10 select-none">부</th>
+          daySubHeaders += `
+            <th class="py-1 px-1 border-l border-slate-100 text-center font-bold text-sky-600 bg-sky-50/20 select-none whitespace-nowrap">정</th>
+            <th class="py-1 px-1 border-l border-slate-100 text-center font-bold text-indigo-600 bg-indigo-50/20 select-none whitespace-nowrap">부</th>
           `;
         }
       }
-      headerRow4 += `</tr>`;
 
       let rowsHtml = '';
       const maxTotal = Math.max(...Object.values(res.teacherStats).map(s => s.total)) || 1;
@@ -2191,6 +2149,48 @@
         `;
       });
 
+      // 1. Header Row 1 (Days)
+      let headerRow1 = `
+        <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
+          <th rowspan="3" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">교사명</th>
+          <th rowspan="3" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">성별</th>
+          <th rowspan="3" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">과목</th>
+          <th rowspan="3" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">담임</th>
+          <th rowspan="3" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">정감독</th>
+          <th rowspan="3" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold whitespace-nowrap">부감독</th>
+          <th rowspan="3" class="py-3 px-3 border-r border-slate-200 align-middle text-center font-bold text-sky-600 whitespace-nowrap">총 횟수</th>
+          ${dayColgroupHeaders}
+          <th rowspan="3" class="py-3 px-3 align-middle text-center font-bold no-print whitespace-nowrap">업무량 게이지</th>
+        </tr>
+      `;
+
+      // 2. Header Row 2 (Periods with Subjects)
+      let headerRow2 = `<tr class="bg-slate-50 text-slate-700 border-b border-slate-100 text-center font-bold">`;
+      for (let d = 1; d <= daysCount; d++) {
+        const daySchedule = scheduleMatrix[d] || {};
+        for (let p = 1; p <= totalPeriods; p++) {
+          const periodSubjects = daySchedule[p] || {};
+          const subs = [];
+          for (const g of grades) {
+            const s = (periodSubjects[g] || '').trim();
+            if (s && s !== '-' && s !== '미지정') subs.push(s);
+          }
+          const subText = subs.length > 0 ? `(${Array.from(new Set(subs)).join('/')})` : '(시험없음)';
+          headerRow2 += `
+            <th colspan="2" class="py-1.5 px-1 border-r border-slate-100 whitespace-nowrap text-center align-middle">
+              <div>${p}교시</div>
+              <div class="text-[9px] text-emerald-700 font-medium">${subText}</div>
+            </th>
+          `;
+        }
+      }
+      headerRow2 += `</tr>`;
+
+      // 3. Header Row 3 (Roles: 정 / 부)
+      let headerRow3 = `<tr class="bg-slate-50 text-slate-655 border-b border-slate-200 text-center text-[10px]">
+        ${daySubHeaders}
+      </tr>`;
+
       const statsHtml = `
         <div class="flex justify-between items-center no-print">
           <div>
@@ -2210,7 +2210,6 @@
               ${headerRow1}
               ${headerRow2}
               ${headerRow3}
-              ${headerRow4}
             </thead>
             <tbody class="divide-y divide-slate-100">${rowsHtml}</tbody>
           </table>
