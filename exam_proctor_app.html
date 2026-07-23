@@ -71,7 +71,7 @@
     @media print {
       @page {
         size: A4 landscape;
-        margin: 10mm;
+        margin: 6mm;
       }
       body {
         background: #ffffff !important;
@@ -107,6 +107,17 @@
         color: #000000 !important;
         background: none !important;
         border-color: #cbd5e1 !important;
+      }
+      #view-container-stats table {
+        width: 100% !important;
+        font-size: 8px !important;
+        table-layout: auto !important;
+      }
+      #view-container-stats th, 
+      #view-container-stats td {
+        padding: 2px 1px !important;
+        min-width: unset !important;
+        width: auto !important;
       }
     }
   </style>
@@ -1945,15 +1956,15 @@
                       <!-- Left: Main -->
                       <div class="flex items-center space-x-0.5">
                         <span class="text-[10px] font-semibold text-sky-500">정:</span>
-                        <span class="font-bold ${main ? 'text-slate-800' : 'text-slate-400'}">${main ? main.name : '미배정'}</span>
-                        ${main ? `<span class="text-[9px] px-1 rounded-md ${main.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold">${main.gender}</span>` : ''}
+                        <span class="font-bold ${main ? 'text-slate-800' : 'text-slate-400'} whitespace-nowrap">${main ? main.name : '미배정'}</span>
+                        ${main ? `<span class="text-[9px] px-1 rounded-md ${main.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold whitespace-nowrap">${main.gender}</span>` : ''}
                       </div>
                       <span class="text-slate-400">|</span>
                       <!-- Right: Assistant -->
                       <div class="flex items-center space-x-0.5">
                         <span class="text-[10px] font-semibold text-indigo-500">부:</span>
-                        <span class="font-bold ${asst ? 'text-slate-800' : 'text-slate-400'}">${asst ? asst.name : '미배정'}</span>
-                        ${asst ? `<span class="text-[9px] px-1 rounded-md ${asst.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold">${asst.gender}</span>` : ''}
+                        <span class="font-bold ${asst ? 'text-slate-800' : 'text-slate-400'} whitespace-nowrap">${asst ? asst.name : '미배정'}</span>
+                        ${asst ? `<span class="text-[9px] px-1 rounded-md ${asst.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold whitespace-nowrap">${asst.gender}</span>` : ''}
                       </div>
                     </div>
                     ${hasWarning ? `<div class="text-[9px] text-rose-600 font-bold truncate">⚠️ 경고</div>` : ''}
@@ -2012,8 +2023,8 @@
                     <div class="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 inline-block">${slot.subject}</div>
                     <div class="flex items-center justify-center space-x-1 text-xs">
                       <span class="text-[10px] font-semibold text-sky-500">정:</span>
-                      <span class="font-bold ${main ? 'text-slate-800' : 'text-slate-400'}">${main ? main.name : '미배정'}</span>
-                      ${main ? `<span class="text-[9px] px-1 rounded-md ${main.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold">${main.gender}</span>` : ''}
+                      <span class="font-bold ${main ? 'text-slate-800' : 'text-slate-400'} whitespace-nowrap">${main ? main.name : '미배정'}</span>
+                      ${main ? `<span class="text-[9px] px-1 rounded-md ${main.gender==='남'?'bg-sky-50 text-sky-600 border border-sky-100':'bg-rose-50 text-rose-600 border border-rose-100'} font-bold whitespace-nowrap">${main.gender}</span>` : ''}
                     </div>
                     <div class="text-[9px] text-slate-400 italic">정감독 1인실</div>
                     ${hasWarning ? `<div class="text-[9px] text-rose-600 font-bold truncate">⚠️ 경고</div>` : ''}
