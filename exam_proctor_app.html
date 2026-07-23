@@ -2092,6 +2092,8 @@
       const statsContainer = document.getElementById('view-container-stats');
       statsContainer.innerHTML = '';
 
+      const settings = appState.examSettings;
+      const { daysCount, periodsPerDay, grades, classesPerGrade, scheduleMatrix } = settings;
       const totalPeriods = periodsPerDay || 3;
 
       let dayColgroupHeaders = '';
