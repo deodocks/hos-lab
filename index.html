@@ -3,218 +3,1819 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>슬기로운 교사생활 - 교사 업무 자동화 놀이터 🎒</title>
+  <title>지질학 탐구 동아리 학술 연구실 | 불공평한 지구?</title>
   
-  <!-- FontAwesome for cute icons -->
+  <!-- Font Awesome & Google Fonts -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Cute Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
   
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Gowun Dodum', 'Outfit', 'sans-serif'],
-            jua: ['Jua', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-  
+  <!-- Custom Vanilla CSS for Premium Lab Theme -->
   <style>
+    :root {
+      --bg-dark: #090d16;
+      --panel-bg: rgba(17, 24, 39, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      
+      --color-primary: #38bdf8; /* sky-400 */
+      --color-emerald: #34d399; /* emerald-400 */
+      --color-rose: #f43f5e; /* rose-500 */
+      --color-violet: #a78bfa; /* violet-400 */
+      --color-amber: #fbbf24; /* amber-400 */
+      
+      --font-outfit: 'Outfit', 'Noto Sans KR', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      background-color: #FCFBF7;
+      background-color: var(--bg-dark);
       background-image: 
-        radial-gradient(#F3E8FF 1.5px, transparent 1.5px), 
-        radial-gradient(#E0F2FE 1.5px, transparent 1.5px);
-      background-size: 40px 40px;
-      background-position: 0 0, 20px 20px;
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 0%, rgba(167, 139, 250, 0.06) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(52, 211, 153, 0.08) 0px, transparent 50%);
+      color: var(--text-main);
+      font-family: var(--font-outfit);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    
-    .pastel-card {
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
     }
-    
-    .pastel-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.02);
     }
-    
-    .blob {
-      position: absolute;
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    header {
+      background: rgba(9, 13, 22, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand i {
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-emerald));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4));
+    }
+
+    .brand h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .brand span {
+      font-size: 0.75rem;
+      color: var(--text-sub);
+      border-left: 1px solid var(--border-color);
+      padding-left: 0.75rem;
+      font-weight: 400;
+    }
+
+    .step-indicator {
+      display: flex;
+      gap: 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 0.5rem 1.25rem;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      transition: all 0.3s ease;
+    }
+
+    .step.active {
+      color: var(--color-primary);
+      text-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+    }
+
+    .step.completed {
+      color: var(--color-emerald);
+    }
+
+    .step-num {
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
-      filter: blur(40px);
-      z-index: -1;
-      opacity: 0.6;
-      animation: float 8s ease-in-out infinite alternate;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
     }
-    
-    @keyframes float {
-      0% { transform: translateY(0) scale(1); }
-      100% { transform: translateY(20px) scale(1.1); }
+
+    .step.active .step-num {
+      background: var(--color-primary);
+      color: #000;
     }
-    
-    /* Cute bounce effect on hover for icons */
-    .pastel-card:hover .card-icon {
-      animation: cute-bounce 0.8s ease-in-out infinite;
+
+    .step.completed .step-num {
+      background: var(--color-emerald);
+      color: #000;
     }
-    
-    @keyframes cute-bounce {
-      0%, 100% { transform: translateY(0) rotate(0deg); }
-      50% { transform: translateY(-6px) rotate(8deg); }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      height: calc(100vh - 65px);
+      overflow: hidden;
+    }
+
+    /* Left Workspace Panel */
+    .workspace {
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      background: rgba(13, 18, 30, 0.4);
+    }
+
+    .workspace-tabs {
+      display: flex;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text-sub);
+      padding: 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      background: rgba(56, 189, 248, 0.03);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-violet));
+      box-shadow: 0 -2px 10px rgba(56, 189, 248, 0.5);
+    }
+
+    .tab-content-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .tab-pane {
+      display: none;
+      height: 100%;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .tab-pane.active {
+      display: flex;
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+
+    .mineral-card {
+      background: var(--panel-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mineral-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: transparent;
+      transition: all 0.3s ease;
+    }
+
+    .mineral-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.15);
+      background: rgba(26, 36, 56, 0.6);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .mineral-card.selected {
+      border-color: var(--color-primary);
+      background: rgba(56, 189, 248, 0.05);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+    }
+
+    .mineral-card.selected::before {
+      background: var(--color-primary);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .mineral-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    .mineral-symbol {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      background: rgba(56, 189, 248, 0.1);
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+    }
+
+    .mineral-desc {
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      line-height: 1.4;
+    }
+
+    /* Secret Clue Card View */
+    .clue-panel {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px dashed var(--border-color);
+      border-radius: 20px;
+      padding: 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      min-height: 250px;
+      transition: all 0.3s ease;
+    }
+
+    .clue-panel.active {
+      background: radial-gradient(circle at 50% 50%, rgba(167, 139, 250, 0.05) 0%, rgba(13, 18, 30, 0.8) 100%);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      box-shadow: inset 0 0 30px rgba(167, 139, 250, 0.1);
+      text-align: left;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    .clue-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: rgba(167, 139, 250, 0.15);
+      border: 1px solid rgba(167, 139, 250, 0.3);
+      color: var(--color-violet);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      margin-bottom: 0.5rem;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.7; box-shadow: 0 0 0 0 rgba(167, 139, 250, 0.4); }
+      70% { opacity: 1; box-shadow: 0 0 0 10px rgba(167, 139, 250, 0); }
+      100% { opacity: 0.7; box-shadow: 0 0 0 0 rgba(167, 139, 250, 0); }
+    }
+
+    .clue-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    .clue-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 1rem;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .clue-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .clue-text {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    /* Map Overlay Lab Panel */
+    .map-container {
+      position: relative;
+      width: 100%;
+      background: #06090f;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      aspect-ratio: 16/9;
+    }
+
+    .map-header {
+      padding: 0.75rem 1.25rem;
+      background: rgba(0,0,0,0.4);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .map-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .map-legends {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .legend-line {
+      width: 16px;
+      height: 3px;
+    }
+
+    .canvas-wrapper {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .map-controls {
+      padding: 1rem 1.25rem;
+      background: rgba(0, 0, 0, 0.4);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .slider-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+      transition: transform 0.15s ease;
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .slider-val {
+      font-size: 0.75rem;
+      font-mono: true;
+      width: 32px;
+      text-align: right;
+    }
+
+    .map-tooltip {
+      position: absolute;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid var(--color-primary);
+      color: #fff;
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      pointer-events: none;
+      display: none;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      z-index: 50;
+      line-height: 1.4;
+    }
+
+    /* Right Chatbot Panel */
+    .chatbot {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      background: rgba(15, 23, 42, 0.35);
+    }
+
+    .chat-header {
+      padding: 1.25rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .proctor-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .proctor-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--color-violet), var(--color-primary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #000;
+      box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
+    }
+
+    .proctor-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .proctor-role {
+      font-size: 0.7rem;
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .progress-track-wrapper {
+      padding: 0.75rem 1.25rem;
+      background: rgba(255, 255, 255, 0.01);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 0.35rem;
+    }
+
+    .progress-bar-fill {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-emerald));
+      border-radius: 999px;
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-text {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-sub);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .message {
+      max-width: 80%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      animation: msgAppear 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+    }
+
+    @keyframes msgAppear {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.received {
+      align-self: flex-start;
+    }
+
+    .message.sent {
+      align-self: flex-end;
+    }
+
+    .msg-bubble {
+      padding: 0.85rem 1.1rem;
+      border-radius: 18px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    .message.received .msg-bubble {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: #e2e8f0;
+      border-top-left-radius: 4px;
+    }
+
+    .message.sent .msg-bubble {
+      background: linear-gradient(135deg, #0ea5e9, #0284c7);
+      color: #ffffff;
+      border-top-right-radius: 4px;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+    }
+
+    .msg-meta {
+      font-size: 0.65rem;
+      color: var(--text-sub);
+      align-self: flex-start;
+      margin-left: 0.4rem;
+    }
+
+    .message.sent .msg-meta {
+      align-self: flex-end;
+      margin-right: 0.4rem;
+    }
+
+    /* Interactive Options List inside Chat */
+    .chat-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .opt-chip {
+      background: rgba(167, 139, 250, 0.1);
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      color: var(--color-violet);
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .opt-chip:hover {
+      background: rgba(167, 139, 250, 0.2);
+      border-color: rgba(167, 139, 250, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .chat-input-area {
+      padding: 1.25rem;
+      background: rgba(0, 0, 0, 0.25);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 0.85rem 1.1rem;
+      color: #fff;
+      font-family: var(--font-outfit);
+      font-size: 0.85rem;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    .chat-input-area input:focus {
+      border-color: var(--color-primary);
+      background: rgba(56, 189, 248, 0.02);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+    }
+
+    .send-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-violet));
+      color: #000;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 800;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+      transition: all 0.25s ease;
+    }
+
+    .send-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px rgba(167, 139, 250, 0.4);
+    }
+
+    .send-btn:disabled {
+      background: rgba(255,255,255,0.05);
+      color: var(--text-sub);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* Final Report View / Submissions page */
+    .report-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(9, 13, 22, 0.95);
+      backdrop-filter: blur(16px);
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      animation: fadeIn 0.4s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .report-card {
+      background: rgba(26, 36, 56, 0.7);
+      border: 1px solid var(--color-emerald);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 600px;
+      padding: 2rem;
+      box-shadow: 0 10px 40px rgba(52, 211, 153, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      position: relative;
+    }
+
+    .report-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--color-emerald);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .report-info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--text-sub);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .report-data {
+      background: rgba(0,0,0,0.3);
+      padding: 1.25rem;
+      border-radius: 14px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      border: 1px solid var(--border-color);
+      max-height: 250px;
+      overflow-y: auto;
+    }
+
+    .report-summary-point {
+      margin-bottom: 0.75rem;
+    }
+
+    .report-summary-point strong {
+      color: var(--color-primary);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .report-btn {
+      flex: 1;
+      padding: 0.85rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .report-btn.primary {
+      background: linear-gradient(135deg, var(--color-emerald), #059669);
+      color: #000;
+      box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
+    }
+
+    .report-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 20px rgba(52, 211, 153, 0.45);
+    }
+
+    .report-btn.secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: #fff;
+    }
+
+    .report-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .success-badge {
+      position: absolute;
+      top: -30px;
+      right: 20px;
+      background: var(--color-emerald);
+      color: #000;
+      padding: 0.5rem 1.25rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      box-shadow: 0 4px 15px rgba(52, 211, 153, 0.3);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      border: 1px solid var(--color-primary);
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 150;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast i {
+      color: var(--color-primary);
+    }
+
+    /* Mobile Screen Alert overlay */
+    @media (max-width: 1024px) {
+      main {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow-y: auto;
+      }
+      header {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+      }
+      .step-indicator {
+        width: 100%;
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+      .chatbot {
+        height: 600px;
+        border-top: 1px solid var(--border-color);
+      }
     }
   </style>
 </head>
-<body class="min-h-screen text-slate-700 relative overflow-x-hidden flex flex-col justify-between">
-
-  <!-- BACKGROUND DECORATIONS -->
-  <div class="blob w-72 h-72 bg-pink-100 top-10 -left-20" style="animation-delay: 0s;"></div>
-  <div class="blob w-80 h-80 bg-blue-100 top-1/3 -right-20" style="animation-delay: 2s;"></div>
-  <div class="blob w-72 h-72 bg-yellow-100 bottom-10 left-10" style="animation-delay: 4s;"></div>
-  <div class="blob w-96 h-96 bg-purple-100 bottom-20 right-1/4" style="animation-delay: 1s;"></div>
+<body>
 
   <!-- HEADER -->
-  <header class="py-12 px-4 text-center max-w-4xl mx-auto space-y-4 font-sans">
-    <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-amber-100 border-4 border-amber-200 text-amber-500 shadow-md transform -rotate-6 hover:rotate-6 transition-all duration-300">
-      <i class="fa-solid fa-graduation-cap text-4xl"></i>
+  <header>
+    <div class="brand">
+      <i class="fa-solid fa-atom"></i>
+      <div>
+        <h1>지질학 탐구 동아리</h1>
+        <p style="font-size: 0.65rem; color: var(--text-sub); font-weight: 600;">학술 연구 포털</p>
+      </div>
+      <span>불공평한 지구? 자원 분포의 비밀과 우리의 미래</span>
     </div>
     
-    <h1 class="text-4xl md:text-5xl font-jua tracking-wide text-slate-800 drop-shadow-sm flex items-center justify-center gap-2">
-      슬기로운 교사생활 <span class="text-3xl md:text-4xl">🎒</span>
-    </h1>
-    
-    <p class="text-sm md:text-base text-slate-500 font-medium">
-      반복적이고 복잡한 행정 업무를 쉽고 재미있게 해결해 드리는 선생님 전용 업무 자동화 놀이터입니다.
-    </p>
+    <div class="step-indicator">
+      <div class="step active" id="step-0"><div class="step-num">0</div>도입</div>
+      <div class="step" id="step-1"><div class="step-num">1</div>미션 1</div>
+      <div class="step" id="step-2"><div class="step-num">2</div>미션 2</div>
+      <div class="step" id="step-3"><div class="step-num">3</div>미션 3</div>
+      <div class="step" id="step-4"><div class="step-num">4</div>최종</div>
+    </div>
   </header>
 
-  <!-- MAIN SERVICES GRID -->
-  <main class="max-w-6xl mx-auto px-6 py-6 flex-grow w-full font-sans">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+  <!-- MAIN APP AREA -->
+  <main>
+    
+    <!-- Left Workspace Panel -->
+    <section class="workspace">
+      <div class="workspace-tabs">
+        <button class="tab-btn active" onclick="switchTab('clues')">
+          <i class="fa-solid fa-folder-open"></i> 광물 탐구 & 단서
+        </button>
+        <button class="tab-btn" onclick="switchTab('map')">
+          <i class="fa-solid fa-map-location-dot"></i> 연구 지도 (Map Lab)
+        </button>
+      </div>
       
-      <!-- 1. 시험감독 자동 배정 (ACTIVE) -->
-      <a href="exam_proctor_app.html" class="pastel-card block bg-white rounded-[2rem] p-8 border-4 border-emerald-100 hover:border-emerald-200 shadow-sm relative overflow-hidden flex flex-col justify-between h-[280px]">
-        <div class="space-y-4">
-          <div class="flex justify-between items-start">
-            <div class="w-14 h-14 rounded-2xl bg-emerald-50 border-2 border-emerald-100 text-emerald-400 flex items-center justify-center card-icon">
-              <i class="fa-solid fa-clipboard-user text-2xl"></i>
+      <div class="tab-content-container">
+        
+        <!-- Tab 1: Mineral Clues -->
+        <div class="tab-pane active" id="tab-clues">
+          <div class="cards-grid">
+            
+            <div class="mineral-card" id="card-lithium" onclick="selectMineral('lithium')">
+              <div class="card-header">
+                <span class="mineral-name">리튬</span>
+                <span class="mineral-symbol">Li</span>
+              </div>
+              <p class="mineral-desc">하얀 석유라고 불리며 스마트폰과 전기차 배터리의 핵심 원료입니다.</p>
             </div>
-            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold">서비스 중 🚀</span>
+            
+            <div class="mineral-card" id="card-neodymium" onclick="selectMineral('neodymium')">
+              <div class="card-header">
+                <span class="mineral-name">네오디뮴</span>
+                <span class="mineral-symbol">Nd</span>
+              </div>
+              <p class="mineral-desc">스마트폰 진동 모터 및 친환경 터빈용 초강력 영구자석 제작에 쓰입니다.</p>
+            </div>
+            
+            <div class="mineral-card" id="card-coltan" onclick="selectMineral('coltan')">
+              <div class="card-header">
+                <span class="mineral-name">콜탄</span>
+                <span class="mineral-symbol">Ta</span>
+              </div>
+              <p class="mineral-desc">전자기기의 미세 전류를 조절하는 핵심 콘덴서 재료인 탄탈룸을 추출합니다.</p>
+            </div>
+            
+            <div class="mineral-card" id="card-cobalt" onclick="selectMineral('cobalt')">
+              <div class="card-header">
+                <span class="mineral-name">코발트</span>
+                <span class="mineral-symbol">Co</span>
+              </div>
+              <p class="mineral-desc">배터리의 안정성을 제어하고 수명을 획기적으로 연장시키는 조력자입니다.</p>
+            </div>
+            
           </div>
-          <div class="space-y-2">
-            <h3 class="text-xl font-jua text-slate-800">시험감독 자동 배정</h3>
-            <p class="text-xs text-slate-500 leading-relaxed">
-              교과목 제약, 성별 제약, 담임 종례 보장 등 다양한 규칙을 준수하여 공정하고 완벽하게 감독을 배정합니다.
+          
+          <!-- Clue view panel -->
+          <div class="clue-panel" id="clue-display">
+            <i class="fa-solid fa-lock-open" style="font-size: 2.5rem; color: var(--text-sub);"></i>
+            <p style="color: var(--text-sub); font-size: 0.85rem; margin-top: 1rem; font-weight: 500;">
+              탐구하고자 하는 광물 카드를 선택하시면 연구용 [비밀 단서 카드]가 해제됩니다.
             </p>
           </div>
         </div>
-        <div class="flex items-center text-xs font-bold text-emerald-600 mt-4">
-          도구 열기 <i class="fa-solid fa-arrow-right ml-1.5 transition-transform duration-300 group-hover:translate-x-1"></i>
-        </div>
-      </a>
-
-      <!-- 2. 고사성적 업무 자동화 (IN DEV) -->
-      <div onclick="alert('현재 열심히 개발 중인 서비스입니다! 조금만 기다려 주세요 🛠️')" class="pastel-card cursor-pointer bg-white rounded-[2rem] p-8 border-4 border-pink-50 hover:border-pink-100 shadow-sm relative overflow-hidden flex flex-col justify-between h-[280px]">
-        <div class="space-y-4">
-          <div class="flex justify-between items-start">
-            <div class="w-14 h-14 rounded-2xl bg-pink-50 border-2 border-pink-100 text-pink-300 flex items-center justify-center card-icon">
-              <i class="fa-solid fa-calculator text-2xl"></i>
+        
+        <!-- Tab 2: Map Lab -->
+        <div class="tab-pane" id="tab-map">
+          <div class="map-container">
+            <div class="map-header">
+              <div class="map-title">
+                <i class="fa-solid fa-earth-americas" style="color: var(--color-primary);"></i>
+                <span>지구 시스템 자원-지각판 연구 시뮬레이션</span>
+              </div>
+              <div class="map-legends">
+                <div class="legend-item">
+                  <div class="legend-line" style="background: var(--color-rose);"></div>
+                  <span>지각 판의 경계 (지진대/화산대)</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background: var(--color-emerald);"></div>
+                  <span>광물 생산지</span>
+                </div>
+                <div class="legend-item">
+                  <div class="legend-dot" style="background: var(--color-primary);"></div>
+                  <span>주요 자원 소비지</span>
+                </div>
+              </div>
             </div>
-            <span class="px-3 py-1 rounded-full bg-pink-50 text-pink-400 text-[11px] font-bold">개발 중 🛠️</span>
+            
+            <div class="canvas-wrapper">
+              <canvas id="mapCanvas"></canvas>
+              <div class="map-tooltip" id="mapTooltip"></div>
+            </div>
+            
+            <div class="map-controls">
+              <div class="control-row">
+                <div class="control-label">
+                  <i class="fa-solid fa-layer-group" style="color: var(--color-rose);"></i>
+                  <span>판의 경계 및 화산대 겹쳐보기 투명도</span>
+                </div>
+                <div class="slider-container">
+                  <input type="range" id="opacitySlider" min="0" max="100" value="70" oninput="drawMap()">
+                  <span class="slider-val" id="opacityVal">70%</span>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="space-y-2">
-            <h3 class="text-xl font-jua text-slate-800">고사성적 업무 자동화</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              성적 가채점 파일 업로드 시, 성적 통계 분석 및 석차 등급 분포도를 한눈에 확인할 수 있는 성적 분석기입니다.
-            </p>
+          <p style="font-size: 0.75rem; color: var(--text-sub); line-height: 1.5; margin-top: 0.5rem;">
+            <i class="fa-solid fa-circle-info" style="color: var(--color-primary); margin-right: 0.25rem;"></i>
+            <strong>오버레이 팁:</strong> 투명도 슬라이더를 올리면 붉은색 지각판 경계선이 선명해지며 녹색 자원 광상의 띠(예: 남미 안데스 산맥의 리튬 염호, 동아프리카 지구대의 분쟁 광상 등)가 판의 경계와 어떻게 일치하는지 확인할 수 있습니다.
+          </p>
+        </div>
+        
+      </div>
+    </section>
+    
+    <!-- Right AI Chatbot Proctor Panel -->
+    <section class="chatbot">
+      <div class="chat-header">
+        <div class="proctor-info">
+          <div class="proctor-avatar">
+            <i class="fa-solid fa-user-astronaut"></i>
+          </div>
+          <div>
+            <div class="proctor-name">Dr. 지오 (Geo)</div>
+            <div class="proctor-role">수석 연구원 & AI 튜터</div>
           </div>
         </div>
-        <div class="flex items-center text-xs font-bold text-pink-400 mt-4">
-          준비 중입니다 💤
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 0.25rem 0.6rem; font-size: 0.7rem; font-weight: 700; color: var(--color-primary);">
+          중2 과학 지질학 탐구
         </div>
       </div>
-
-      <!-- 3. 학생 생활기록부 작성기 (IN DEV) -->
-      <div onclick="alert('현재 열심히 개발 중인 서비스입니다! 조금만 기다려 주세요 🛠️')" class="pastel-card cursor-pointer bg-white rounded-[2rem] p-8 border-4 border-sky-50 hover:border-sky-100 shadow-sm relative overflow-hidden flex flex-col justify-between h-[280px]">
-        <div class="space-y-4">
-          <div class="flex justify-between items-start">
-            <div class="w-14 h-14 rounded-2xl bg-sky-50 border-2 border-sky-100 text-sky-300 flex items-center justify-center card-icon">
-              <i class="fa-solid fa-book-open-reader text-2xl"></i>
-            </div>
-            <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-400 text-[11px] font-bold">개발 중 🛠️</span>
-          </div>
-          <div class="space-y-2">
-            <h3 class="text-xl font-jua text-slate-800">생활기록부 도우미</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              관찰 기록과 키워드 단어 몇 개만 넣으면, 교육부 훈령 가이드에 맞추어 생활기록부용 행동특성 및 종합의견을 가다듬어 줍니다.
-            </p>
-          </div>
+      
+      <div class="progress-track-wrapper">
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="chatProgressBar"></div>
         </div>
-        <div class="flex items-center text-xs font-bold text-sky-400 mt-4">
-          준비 중입니다 💤
+        <div class="progress-text">
+          <span id="chatProgressStatus">대화 시작 전</span>
+          <span id="chatProgressPercent">0%</span>
         </div>
       </div>
-
-      <!-- 4. 학급 시간표 편성기 (IN DEV) -->
-      <div onclick="alert('현재 열심히 개발 중인 서비스입니다! 조금만 기다려 주세요 🛠️')" class="pastel-card cursor-pointer bg-white rounded-[2rem] p-8 border-4 border-yellow-50 hover:border-yellow-100 shadow-sm relative overflow-hidden flex flex-col justify-between h-[280px]">
-        <div class="space-y-4">
-          <div class="flex justify-between items-start">
-            <div class="w-14 h-14 rounded-2xl bg-yellow-50 border-2 border-yellow-100 text-yellow-400 flex items-center justify-center card-icon">
-              <i class="fa-solid fa-calendar-week text-2xl"></i>
-            </div>
-            <span class="px-3 py-1 rounded-full bg-yellow-50 text-yellow-400 text-[11px] font-bold">개발 중 🛠️</span>
-          </div>
-          <div class="space-y-2">
-            <h3 class="text-xl font-jua text-slate-800">학급 시간표 편성기</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              이동수업 및 특별실 사용 제약 조건을 고려하여 학급별, 교사별 최적의 수업 시간표를 자동으로 편성합니다.
-            </p>
-          </div>
-        </div>
-        <div class="flex items-center text-xs font-bold text-yellow-400 mt-4">
-          준비 중입니다 💤
-        </div>
+      
+      <div class="chat-messages" id="chatMessages">
+        <!-- Message list dynamically created here -->
       </div>
-
-      <!-- 5. 동아리 및 방과후 배정 (IN DEV) -->
-      <div onclick="alert('현재 열심히 개발 중인 서비스입니다! 조금만 기다려 주세요 🛠️')" class="pastel-card cursor-pointer bg-white rounded-[2rem] p-8 border-4 border-purple-50 hover:border-purple-100 shadow-sm relative overflow-hidden flex flex-col justify-between h-[280px]">
-        <div class="space-y-4">
-          <div class="flex justify-between items-start">
-            <div class="w-14 h-14 rounded-2xl bg-purple-50 border-2 border-purple-100 text-purple-300 flex items-center justify-center card-icon">
-              <i class="fa-solid fa-puzzle-piece text-2xl"></i>
-            </div>
-            <span class="px-3 py-1 rounded-full bg-purple-50 text-purple-400 text-[11px] font-bold">개발 중 🛠️</span>
-          </div>
-          <div class="space-y-2">
-            <h3 class="text-xl font-jua text-slate-800">동아리 & 방과후 배정</h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-              학생들의 희망 지망 순위와 인원 제한, 다자녀/성적 기준 등 우선순위에 맞추어 학생들을 동아리와 방과후 학교에 자동 배정합니다.
-            </p>
-          </div>
-        </div>
-        <div class="flex items-center text-xs font-bold text-purple-400 mt-4">
-          준비 중입니다 💤
-        </div>
+      
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Dr. 지오에게 답변을 전송해 보세요..." onkeydown="if(event.key==='Enter') sendMessage()" disabled>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+          <i class="fa-solid fa-arrow-up"></i>
+        </button>
       </div>
-
-    </div>
+    </section>
+    
   </main>
 
-  <!-- FOOTER -->
-  <footer class="py-8 px-4 text-center text-xs text-slate-400 border-t border-slate-100 mt-12 bg-white/40 backdrop-blur-sm font-sans">
-    <div class="max-w-4xl mx-auto space-y-1">
-      <p class="font-semibold text-slate-500">슬기로운 교사생활 &bull; Teacher Work Automation Playground</p>
-      <p>선생님들의 더 즐겁고 여유로운 교직 생활을 응원합니다. &copy; 2026. All rights reserved.</p>
+  <!-- Final Report Download Modal Panel -->
+  <div class="report-overlay" id="reportOverlay">
+    <div class="report-card">
+      <div class="success-badge"><i class="fa-solid fa-medal"></i> 수행평가 완료!</div>
+      <div class="report-title">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <span>지질학 탐구 동아리 최종 보고서</span>
+      </div>
+      
+      <div class="report-info-row">
+        <span>학술 팀장: 학생 (수행원)</span>
+        <span id="reportMineralName">탐구 광물: -</span>
+        <span id="reportDate">발행일: 2026. 07. 24</span>
+      </div>
+      
+      <div class="report-data" id="reportTextContent">
+        <!-- Summary populated here -->
+      </div>
+      
+      <div class="btn-group">
+        <button class="report-btn secondary" onclick="copyReport()">
+          <i class="fa-solid fa-copy"></i> 복사하기
+        </button>
+        <button class="report-btn primary" onclick="printReport()">
+          <i class="fa-solid fa-print"></i> 보고서 인쇄하기
+        </button>
+      </div>
+      
+      <button onclick="closeReportOverlay()" style="background:none; border:none; color:var(--text-sub); text-align:center; font-size:0.75rem; text-decoration:underline; cursor:pointer;">
+        돌아가서 대화 계속하기
+      </button>
     </div>
-  </footer>
+  </div>
 
+  <!-- Toast system -->
+  <div class="toast" id="toastBox">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toastMsg">복사되었습니다.</span>
+  </div>
+
+  <!-- Javascript Core Logic -->
+  <script>
+    // 1. Mineral Secrets & Clues Database
+    const MINERALS = {
+      lithium: {
+        name: "리튬",
+        symbol: "Li",
+        location: "남미 염호 지대 (칠레, 볼리비아 등)",
+        clues: {
+          use: "전기차 배터리 및 스마트폰 배터리 등 에너지 저장 핵심 소자",
+          geography: "남미의 건조한 안데스 수렴 경계 분지(염수 염호)에 한정 매장. 소비국은 북미, 유럽, 동아시아로 생산국과 매치되지 않음.",
+          origin: "화산 폭발 및 열수 마그마 활동으로 지표에 노출된 후, 기후로 인한 지표 암석의 풍화 및 강수 작용으로 씻겨 염호 분지에 증발식 퇴적 농축됨.",
+          problems: "염호 리튬 농축 과정에서 막대한 지하수 증발 유도로 인근 지하수 고갈, 토착 농업 황폐화, 정제 폐수 및 화학 물질 방류 환경 오염."
+        },
+        coordinates: [{x: 270, y: 310, label: "남미 리튬 삼각지대"}]
+      },
+      neodymium: {
+        name: "네오디뮴",
+        symbol: "Nd",
+        location: "중국 내몽골 바얀오보, 미얀마 등",
+        clues: {
+          use: "고출력 영구자석용 희토류 원소 (스마트폰 진동자, 풍력 발전기, 전기 모터)",
+          geography: "대부분 중국(내몽골) 및 일부 미얀마에서 생산. 전 세계 주요 소비지인 다국적 IT 선진국들과 지정학적 패권 대립을 초래.",
+          origin: "땅속 깊은 곳의 마그마가 서서히 상승하며 굳어지는 화성암 결정화 과정(카보나타이트)에서 희귀 광물 내에 농축되어 굳어짐.",
+          problems: "정제 공정 시 토륨, 우라늄 등 고농도 방사성 찌꺼기 방출로 인한 심각한 방사능 피폭 위험, 강산성 용액 처리로 인한 하천 오염 및 주민 질병."
+        },
+        coordinates: [{x: 580, y: 160, label: "중국 내몽골"}]
+      },
+      coltan: {
+        name: "콜탄",
+        symbol: "Ta",
+        location: "민주공화국 콩고 (DR 콩고)",
+        clues: {
+          use: "스마트폰, 노트북, 전자기기의 필수 전류 제어 소자인 탄탈룸 금속 추출",
+          geography: "동아프리카 지구대(판의 발산 경계)에 위치한 콩고 동부 열대우림에 집중. 대부분의 완제품은 선진 스마트 국가들에서 집중 소비됨.",
+          origin: "마그마 관입 활동으로 만들어진 거친 입자의 화성암(페그마타이트)에서 나오거나, 열대 우림 분지의 장기적인 풍화 및 수류 퇴적에 따른 사광상에서 채취.",
+          problems: "무장 단체의 자금 확보용 '분쟁 광물' 지정, 고릴라 서식지 파괴, 열악한 조건하에 벌어지는 극단적인 아동 노동 착취 잔혹사."
+        },
+        coordinates: [{x: 480, y: 240, label: "콩고 동부 지구대"}]
+      },
+      cobalt: {
+        name: "코발트",
+        symbol: "Co",
+        location: "민주공화국 콩고 (DR 콩고)",
+        clues: {
+          use: "리튬 이온 배터리의 안정성 및 에너지 밀도 증폭용 핵심 양극재 활물질",
+          geography: "전 세계 매장량의 70%가 아프리카 DR 콩고 구리-코발트 광상대에 집중. 선진국 중심의 배터리 산업에서 극도로 갈구하는 핵심 원소.",
+          origin: "지하 열수가 마그마 작용에 의한 구리/니켈이 농축된 암석(화성암)들과 상호작용하여 고체 코발트 광맥을 침전 및 농축하는 과정으로 탄생.",
+          problems: "기계 없이 손으로 캐는 비공식 광산에서 엄청난 수의 아동들이 수작업 채굴에 강제 노역, 독성 먼지 흡입에 의한 광산병 및 피부 괴사."
+        },
+        coordinates: [{x: 485, y: 245, label: "콩고 구리-코발트 광대"}]
+      }
+    };
+
+    // 2. Map Canvas Parameters
+    const mapData = {
+      continents: [
+        // 추상화된 대륙 패스
+        { name: "북아메리카", points: [[120, 80], [180, 80], [210, 110], [180, 150], [160, 160], [120, 120]] },
+        { name: "남아메리카", points: [[200, 200], [230, 200], [270, 260], [290, 310], [270, 340], [240, 260], [210, 220]] },
+        { name: "유라시아/유럽", points: [[350, 70], [420, 70], [540, 80], [640, 90], [670, 130], [630, 170], [520, 190], [460, 160], [380, 150], [330, 120]] },
+        { name: "아프리카", points: [[420, 180], [480, 180], [520, 220], [510, 270], [480, 310], [460, 280], [440, 220]] },
+        { name: "오스트레일리아", points: [[620, 260], [660, 250], [680, 280], [650, 310], [610, 290]] },
+        { name: "그린란드", points: [[230, 50], [270, 50], [260, 75], [240, 75]] }
+      ],
+      // 판의 경계선 좌표 (태평양 환태평양 경계, 동아프리카 지구대, 안데스 산맥 등)
+      plateBoundaries: [
+        // 환태평양 서부 (일본-필리핀)
+        [[640, 95], [660, 120], [670, 160], [680, 210], [660, 240]],
+        // 환태평양 동부 (안데스/북미 서부)
+        [[100, 80], [120, 110], [150, 170], [200, 200], [240, 260], [270, 340]],
+        // 알프스-히말라야
+        [[330, 125], [380, 135], [440, 150], [510, 160], [560, 175], [600, 195]],
+        // 동아프리카 지구대
+        [[480, 190], [490, 210], [500, 240], [505, 275]]
+      ],
+      // 소비 선진국들 중심점
+      consumers: [
+        { x: 170, y: 110, name: "북미 (소비)" },
+        { x: 380, y: 110, name: "유럽 (소비)" },
+        { x: 620, y: 130, name: "동아시아 (소비)" }
+      ]
+    };
+
+    // App State Management
+    let state = {
+      selectedMineral: null,
+      currentTab: 'clues',
+      currentMission: 0,
+      responses: {
+        mission1: "",
+        mission2: "",
+        mission3: "",
+        finalA: "",
+        finalB: "",
+        finalC: ""
+      }
+    };
+
+    // Chatbot context tracker
+    let chatHistory = [];
+
+    // Page Load Setup
+    window.addEventListener('load', () => {
+      initCanvas();
+      addBotMessage("안녕하세요, 학술 팀장님! 오늘 지질학 탐구 동아리 연구 포털에 잘 찾아오셨습니다. <br><br>먼저 우리 지구의 흥미로운 비밀을 파헤치기 위해 <strong>오늘 집중 탐구할 광물 하나를 왼쪽 [광물 탐구 & 단서] 탭에서 선택해 주시겠어요?</strong> (리튬, 네오디뮴, 콜탄, 코발트 중 1택)");
+      updateProgress();
+    });
+
+    // 3. Tab switching logic
+    function switchTab(tabId) {
+      state.currentTab = tabId;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+      
+      if (tabId === 'clues') {
+        document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+        document.getElementById('tab-clues').classList.add('active');
+      } else if (tabId === 'map') {
+        document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+        document.getElementById('tab-map').classList.add('active');
+        // Redraw canvas in active display mode
+        setTimeout(initCanvas, 50);
+      }
+    }
+
+    // 4. Mineral selection handler
+    function selectMineral(mineralId) {
+      if (state.currentMission !== 0) {
+        addBotMessage("이미 광물 탐구 미션을 진행 중입니다! 집중해서 현재 광물을 완성해 보죠.");
+        return;
+      }
+      
+      state.selectedMineral = mineralId;
+      
+      // Update selected class
+      document.querySelectorAll('.mineral-card').forEach(card => card.classList.remove('selected'));
+      document.getElementById(`card-${mineralId}`).classList.add('selected');
+      
+      // Unlock clue panel
+      const info = MINERALS[mineralId];
+      const clueDisplay = document.getElementById('clue-display');
+      clueDisplay.className = 'clue-panel active';
+      clueDisplay.innerHTML = `
+        <div class="clue-badge"><i class="fa-solid fa-key"></i> [비밀 단서 카드] - ${info.name}</div>
+        <h2 style="font-weight: 800; font-size: 1.25rem; color: var(--text-main); margin-bottom: 0.5rem;">${info.name} (${info.symbol})</h2>
+        <p style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 1rem;"><i class="fa-solid fa-map-pin"></i> 핵심 분포: ${info.location}</p>
+        
+        <div class="clue-grid">
+          <div class="clue-item">
+            <span class="clue-title"><i class="fa-solid fa-microchip"></i> 주 용도</span>
+            <span class="clue-text">${info.clues.use}</span>
+          </div>
+          <div class="clue-item">
+            <span class="clue-title"><i class="fa-solid fa-earth-americas"></i> 매장/소비 지리</span>
+            <span class="clue-text">${info.clues.geography}</span>
+          </div>
+          <div class="clue-item">
+            <span class="clue-title"><i class="fa-solid fa-volcano"></i> 지구 과학적 형성 작용</span>
+            <span class="clue-text">${info.clues.origin}</span>
+          </div>
+          <div class="clue-item">
+            <span class="clue-title"><i class="fa-solid fa-triangle-exclamation"></i> 채굴 현장의 위기</span>
+            <span class="clue-text">${info.clues.problems}</span>
+          </div>
+        </div>
+      `;
+
+      // Enable input box
+      document.getElementById('chatInput').disabled = false;
+      document.getElementById('sendBtn').disabled = false;
+      
+      // Trigger chatbot transition
+      addBotMessage(`좋습니다! <strong>${info.name}</strong>(을)를 선택하셨군요. 이 광물은 현대 스마트 모빌리티와 IT 기술에 필수적인 핵심 자원입니다. <br><br>이제 본격적인 연구를 위해 <strong>[미션 1] 지도의 교집합 찾기</strong>를 수행해 봅시다! <br><br>연구 지도(Map Lab) 탭에 생성된 <strong>자원 분포와 판의 경계(지진대/화산대)를 겹쳐보세요.</strong> 그리고 자원을 <u>생산하는 개발도상국과 소비하는 선진국의 지정학적 모순</u>에 대해 분석한 내용을 저에게 편하게 적어주시겠어요?`);
+      
+      state.currentMission = 1;
+      updateProgress();
+      
+      // Auto switch to Map tab to show overlay visually
+      setTimeout(() => switchTab('map'), 800);
+    }
+
+    // 5. Canvas Drawing & Flow Animations
+    let ctx;
+    let canvas;
+    let animationId;
+    let flowOffset = 0;
+
+    function initCanvas() {
+      canvas = document.getElementById('mapCanvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+      
+      // Resize to container scale
+      const rect = canvas.parentNode.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      
+      // Stop previous animation loop
+      if (animationId) cancelAnimationFrame(animationId);
+      
+      // Start flow line animation loop
+      function animate() {
+        flowOffset -= 0.3;
+        drawMap();
+        animationId = requestAnimationFrame(animate);
+      }
+      animate();
+    }
+
+    function drawMap() {
+      if (!ctx || !canvas) return;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Scale coordinates relative to canvas default width 800
+      const scaleX = canvas.width / 800;
+      const scaleY = canvas.height / 450;
+      
+      // 1. Draw Continents Outlines
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+      ctx.lineWidth = 1.5;
+      
+      mapData.continents.forEach(continent => {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.015)";
+        ctx.beginPath();
+        continent.points.forEach((p, idx) => {
+          const cx = p[0] * scaleX;
+          const cy = p[1] * scaleY;
+          if (idx === 0) ctx.moveTo(cx, cy);
+          else ctx.lineTo(cx, cy);
+        });
+        ctx.closePath();
+        ctx.stroke();
+        ctx.fill();
+      });
+
+      // 2. Draw Plate Boundaries (Overlay layer with opacity slider)
+      const opacity = document.getElementById('opacitySlider').value / 100;
+      document.getElementById('opacityVal').textContent = Math.round(opacity * 100) + "%";
+      
+      ctx.strokeStyle = `rgba(244, 63, 94, ${opacity * 0.85})`; // rose-500 neon style
+      ctx.lineWidth = 3.5;
+      ctx.shadowBlur = 8 * opacity;
+      ctx.shadowColor = "rgba(244, 63, 94, 0.8)";
+      
+      mapData.plateBoundaries.forEach(line => {
+        ctx.beginPath();
+        line.forEach((p, idx) => {
+          const cx = p[0] * scaleX;
+          const cy = p[1] * scaleY;
+          if (idx === 0) ctx.moveTo(cx, cy);
+          else ctx.lineTo(cx, cy);
+        });
+        ctx.stroke();
+      });
+      ctx.shadowBlur = 0; // reset shadow
+
+      // 3. Draw Resource Producers (Emerald pulsing dots)
+      if (state.selectedMineral) {
+        const mineralInfo = MINERALS[state.selectedMineral];
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = "var(--color-emerald)";
+        ctx.fillStyle = "var(--color-emerald)";
+        
+        mineralInfo.coordinates.forEach(c => {
+          const cx = c.x * scaleX;
+          const cy = c.y * scaleY;
+          
+          // Pulsing radius animation
+          const pulseRadius = 6 + Math.abs(Math.sin(Date.now() / 300)) * 4;
+          
+          ctx.beginPath();
+          ctx.arc(cx, cy, pulseRadius, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Outer neon circle
+          ctx.strokeStyle = "rgba(52, 211, 153, 0.4)";
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, pulseRadius + 6, 0, Math.PI * 2);
+          ctx.stroke();
+          
+          // Text label
+          ctx.fillStyle = "#fff";
+          ctx.font = "bold 10px var(--font-outfit)";
+          ctx.shadowBlur = 4;
+          ctx.shadowColor = "#000";
+          ctx.fillText(mineralInfo.name + " 생산지", cx + 15, cy + 4);
+        });
+        ctx.shadowBlur = 0;
+      }
+
+      // 4. Draw Consumers (Blue points)
+      mapData.consumers.forEach(consumer => {
+        const cx = consumer.x * scaleX;
+        const cy = consumer.y * scaleY;
+        
+        ctx.fillStyle = "var(--color-primary)";
+        ctx.shadowColor = "var(--color-primary)";
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        ctx.fillStyle = "var(--text-sub)";
+        ctx.font = "bold 9px var(--font-outfit)";
+        ctx.fillText(consumer.name, cx - 25, cy - 12);
+      });
+
+      // 5. Draw flow line arrows from Producer to Consumers (Geopolitical Flows)
+      if (state.selectedMineral) {
+        const mineralInfo = MINERALS[state.selectedMineral];
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.25)";
+        ctx.lineWidth = 1.25;
+        
+        mineralInfo.coordinates.forEach(prod => {
+          const px = prod.x * scaleX;
+          const py = prod.y * scaleY;
+          
+          mapData.consumers.forEach(cons => {
+            const cx = cons.x * scaleX;
+            const cy = cons.y * scaleY;
+            
+            // Draw flowing curved line
+            ctx.beginPath();
+            ctx.moveTo(px, py);
+            // Control points for bezier curve to look organic
+            const mx = (px + cx) / 2;
+            const my = (py + cy) / 2 - 50 * scaleY;
+            ctx.quadraticCurveTo(mx, my, cx, cy);
+            ctx.stroke();
+            
+            // Flowing dot animation
+            drawFlowParticles(px, py, mx, my, cx, cy);
+          });
+        });
+      }
+    }
+
+    function drawFlowParticles(x1, y1, mx, my, x2, y2) {
+      // Calculate a point along the quadratic bezier curve
+      // t flows from 0 to 1
+      const steps = 3;
+      for (let i = 0; i < steps; i++) {
+        let t = ((flowOffset / 100) + (i / steps)) % 1;
+        if (t < 0) t += 1;
+        
+        const ptX = (1 - t) * (1 - t) * x1 + 2 * (1 - t) * t * mx + t * t * x2;
+        const ptY = (1 - t) * (1 - t) * y1 + 2 * (1 - t) * t * my + t * t * y2;
+        
+        ctx.fillStyle = "rgba(56, 189, 248, 0.75)";
+        ctx.shadowColor = "rgba(56, 189, 248, 0.9)";
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(ptX, ptY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    // 6. Guided Chatbot Engine & Decision Matrix
+    function addBotMessage(text) {
+      const messagesContainer = document.getElementById('chatMessages');
+      
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message received';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.innerHTML = text;
+      
+      const meta = document.createElement('span');
+      meta.className = 'msg-meta';
+      meta.textContent = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+      
+      msgDiv.appendChild(bubble);
+      msgDiv.appendChild(meta);
+      messagesContainer.appendChild(msgDiv);
+      
+      // Auto Scroll
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function addStudentMessage(text) {
+      const messagesContainer = document.getElementById('chatMessages');
+      
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message sent';
+      
+      const bubble = document.createElement('div');
+      bubble.className = 'msg-bubble';
+      bubble.innerText = text;
+      
+      const meta = document.createElement('span');
+      meta.className = 'msg-meta';
+      meta.textContent = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+      
+      msgDiv.appendChild(bubble);
+      msgDiv.appendChild(meta);
+      messagesContainer.appendChild(msgDiv);
+      
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      addStudentMessage(text);
+      input.value = '';
+      
+      // Process input through local AI State machine
+      setTimeout(() => processResponse(text), 1000);
+    }
+
+    function processResponse(inputText) {
+      const cleanText = inputText.replace(/\s+/g, '').toLowerCase();
+      
+      // MISSION 1: Geological Plate Boundaries & Geopolitical gap
+      if (state.currentMission === 1) {
+        state.responses.mission1 = inputText;
+        
+        // 1) Plate Boundary keywords check
+        const hasPlateBoundary = /(판|경계|지진대|화산대|지진|화산|지각|수렴|발산|지구대|산맥)/.test(cleanText);
+        // 2) Geopolitical Gap (Producer vs Consumer) check
+        const hasGeopoliticalGap = /(소비|생산|다르다|선진국|개발도상국|불평등|모순|차이|유럽|북미|아시아|아프리카|남미)/.test(cleanText);
+        
+        if (hasPlateBoundary && hasGeopoliticalGap) {
+          addBotMessage(`<strong>정답입니다! 훌륭해요.</strong> 지구상의 지질학적 힘(판의 활동)이 광물 매장지를 결정하는 동시에, 문명이 누리는 혜택은 아주 불평등하게 유통되고 있음을 명확하게 포착해 주셨네요. <br><br>이제 다음 단계로 가봅시다! <strong>[미션 2] 지구의 레시피 밝히기</strong>입니다. <br><br>선택하신 <strong>${MINERALS[state.selectedMineral].name}</strong>이 지구 시스템 속에서 <u>어떻게 만들어졌는지(마그마, 화성암, 풍화, 퇴적 등의 과학 용어를 사용해 서술)</u>와, 이를 <u>추출할 때 어떤 심각한 환경/인권 위기</u>가 동반되는지 작성해 주세요.`);
+          state.currentMission = 2;
+          updateProgress();
+        } else {
+          // Provide specialized hint
+          if (!hasPlateBoundary) {
+            addBotMessage("자원 지도 and 지진/화산대 지도를 겹쳐보세요. 지진과 화산이 자주 일어나는 그 띠 모양의 지역을 우리가 과학 시간에 뭐라고 불렀었죠? 판의 구조적 특징과 연결해 말해 봅시다!");
+          } else {
+            addBotMessage("자원을 직접 땅에서 어렵게 캐내는 나라들과, 이를 완성품(스마트폰/전기차)으로 가장 많이 수입해 쓰는 부유한 나라들의 위치를 지도에서 비교해 볼까요? 어떤 불공평한 모순이 있나요?");
+          }
+        }
+      }
+      
+      // MISSION 2: Science Cycle & Mining side effects
+      else if (state.currentMission === 2) {
+        state.responses.mission2 = inputText;
+        
+        const mInfo = MINERALS[state.selectedMineral];
+        
+        // 1) Geological Process keywords check
+        const hasSciWords = /(마그마|화성암|풍화|퇴적|식어|식는|암석|열수|증발|염호|광상)/.test(cleanText);
+        
+        // 2) Extraction side-effect check
+        let hasProblems = false;
+        if (state.selectedMineral === 'lithium') {
+          hasProblems = /(물|지하수|고갈|화학|정제|오염)/.test(cleanText);
+        } else if (state.selectedMineral === 'neodymium') {
+          hasProblems = /(방사능|토륨|우라늄|오염|강산|암|질병)/.test(cleanText);
+        } else if (state.selectedMineral === 'coltan') {
+          hasProblems = /(분쟁|전쟁|아동|노동|고릴라|생태계|서식지)/.test(cleanText);
+        } else if (state.selectedMineral === 'cobalt') {
+          hasProblems = /(아동|노동|중금속|독성|호흡기|괴사|사망)/.test(cleanText);
+        }
+        
+        if (hasSciWords && hasProblems) {
+          addBotMessage(`<strong>정답입니다! 아주 훌륭해요.</strong> 과학적인 암석 형성 작용과 정교한 환경/사회학적 모순을 완벽하게 조합해 주셨습니다. 학술 팀장님다운 예리함입니다. <br><br>이제 지구의 생태와 인간 사회를 구하기 위한 <strong>[미션 3] 지구 생존 제언서 작성</strong> 단계입니다. <br><br>이 자원을 대체하거나, 이미 사용하고 버린 스마트폰 등을 활용하는 <u>창의적이고 과학적인 대안(국제법, 순환 자원 재활용 기술 등)</u>을 한 문장으로 강력히 제안해 주세요.`);
+          state.currentMission = 3;
+          updateProgress();
+        } else {
+          if (!hasSciWords) {
+            addBotMessage("단서 카드에 있는 내용을 우리가 수업 시간에 배운 '암석의 순환' 과정으로 설명해 볼까요? 뜨거운 물질이 식어 굳어진 암석이나, 비바람에 깎여 씻겨 나가는 작용을 표현하는 과학 용어가 단서 카드에 있었을 텐데요!");
+          } else {
+            addBotMessage(`이 광물을 순수하게 분리하고 채취해 내기 위해서, 주변 지역의 환경 생태계나 광부(특히 아이들)에게 어떤 비극적이고 끔찍한 일들이 생기는지 단서 카드에서 명확히 짚어주세요.`);
+          }
+        }
+      }
+      
+      // MISSION 3: Practical Scientific Solutions
+      else if (state.currentMission === 3) {
+        state.responses.mission3 = inputText;
+        
+        // Scientific solutions checking
+        const hasSciSolution = /(도시광산|도시|광산|재활용|리사이클|대체|대체물질|협약|수거|폐배터리|배터리회수)/.test(cleanText);
+        
+        if (hasSciSolution) {
+          addBotMessage(`<strong>정답입니다! 훌륭해요.</strong> 지속가능한 문명을 만들기 위한 아주 예리한 방안을 도출해 주셨네요. <br><br>자, 드디어 대망의 <strong>최종 미션</strong>입니다! <br><br>우리가 탐구한 지구 시스템과 인류 문명의 깊은 연계 관계를 단 하나의 명제로 일반화하고자 합니다. <strong>아래 문장의 빈칸 세 개(A, B, C)를 순서대로 저에게 알려주세요!</strong> <br><br><i>"지구 시스템의 <strong>( A )</strong>은/는 암석과 토양을 변화시켜 자원을 만들며, 이 자원의 <strong>( B )</strong> 방법에 따라 우리 문명의 <strong>( C )</strong>이/가 결정된다."</i> <br><br><u>예시 답안 형식: 'A=OOO, B=OO, C=OOOOO'</u>`);
+          state.currentMission = 4;
+          updateProgress();
+        } else {
+          addBotMessage("도덕적인 다짐(아껴 쓴다, 전기를 끈다)도 가치가 있지만, 학술 팀장으로서 더욱 과학적이고 구체적인 대안이 필요해요. 우리가 이미 쓰고 버린 수억 대의 스마트폰과 폐배터리 속에 잠든 광물들을 다시 뽑아내는 환경 순환 기술(도시 광산 등)이나 물리적 대안을 응용해 볼까요?");
+        }
+      }
+      
+      // FINAL MISSION: Core Generalization Fill-in-the-blank
+      else if (state.currentMission === 4) {
+        const checkA = cleanText.includes('상호작용');
+        const checkB = cleanText.includes('활용');
+        const checkC = cleanText.includes('지속가능성');
+        
+        if (checkA && checkB && checkC) {
+          state.responses.finalA = "상호작용";
+          state.responses.finalB = "활용";
+          state.responses.finalC = "지속가능성";
+          
+          addBotMessage(`<strong>정답입니다! 모든 미션을 마침내 해결하셨습니다!</strong> <br><br>지구 시스템 구성원(지권, 외권, 생물권 등) 간의 <strong>상호작용</strong>은 끊임없이 자원의 뼈대를 형성하고, 인류가 그것을 조화롭게 <strong>활용</strong>하는 자세에 따라 우리 후손과 자연의 <strong>지속가능성</strong>이 결정된다는 이 핵심 법칙을 마음에 새겨 주시길 바랍니다. <br><br>팀장님께서 훌륭히 작성하신 <strong>연구 수행평가 종합 보고서가 우측 연구실 채널에 활성화되었습니다.</strong> 확인 후 선생님께 완벽히 제출해 주세요!`);
+          
+          state.currentMission = 5;
+          updateProgress();
+          showReportOverlay();
+        } else {
+          let errorFeedback = "일부 빈칸의 개념 설정이 흔들린 것 같습니다. <br>";
+          if (!checkA) errorFeedback += "- <strong>A</strong>는 지구 시스템의 지권, 수권, 생물권이 서로 영향을 주고받는 현상을 나타내는 과학적 단어입니다. (ㅅㅎㅈㅇ)<br>";
+          if (!checkB) errorFeedback += "- <strong>B</strong>는 우리가 자원을 생산성 있게 다루고 쓰는 행동을 말합니다. (ㅎㅇ)<br>";
+          if (!checkC) errorFeedback += "- <strong>C</strong>는 문명과 지구가 미래에도 영원히 공존할 수 있는 능력을 말합니다. (ㅈㅅㄱㄴㅅ)<br>";
+          
+          addBotMessage(errorFeedback + "<br>포기하지 말고 다시 한 번 정확하게 적어주세요!");
+        }
+      }
+    }
+
+    // 7. Core UI Updates
+    function updateProgress() {
+      // Progress indicators classes
+      for (let i = 0; i <= 4; i++) {
+        const stepEl = document.getElementById(`step-${i}`);
+        if (state.currentMission > i) {
+          stepEl.className = 'step completed';
+        } else if (state.currentMission === i) {
+          stepEl.className = 'step active';
+        } else {
+          stepEl.className = 'step';
+        }
+      }
+
+      // Progress bar fill & status
+      const barFill = document.getElementById('chatProgressBar');
+      const textStatus = document.getElementById('chatProgressStatus');
+      const textPercent = document.getElementById('chatProgressPercent');
+      
+      const pct = (state.currentMission / 5) * 100;
+      barFill.style.width = pct + "%";
+      textPercent.textContent = pct + "%";
+
+      if (state.currentMission === 0) textStatus.textContent = "광물 탐구 주제 설정 중";
+      else if (state.currentMission === 1) textStatus.textContent = "미션 1: 지각판 & 불평등 겹쳐보기 진행 중";
+      else if (state.currentMission === 2) textStatus.textContent = "미션 2: 지구의 레시피 분석 진행 중";
+      else if (state.currentMission === 3) textStatus.textContent = "미션 3: 생존 제언 대안 도출 진행 중";
+      else if (state.currentMission === 4) textStatus.textContent = "최종 미션: 지구 법칙 일반화 진행 중";
+      else if (state.currentMission === 5) textStatus.textContent = "지질학 탐구 수행평가 이수 완료!";
+    }
+
+    // 8. Final Report Generator
+    function showReportOverlay() {
+      const minfo = MINERALS[state.selectedMineral];
+      
+      document.getElementById('reportOverlay').style.display = 'flex';
+      document.getElementById('reportMineralName').textContent = `탐구 광물: ${minfo.name} (${minfo.symbol})`;
+      
+      const reportContent = `
+        <div class="report-summary-point">
+          <strong>1. 지각 변동과 지정학적 자원 분포 (미션 1):</strong><br>
+          ${state.responses.mission1}
+        </div>
+        <div class="report-summary-point">
+          <strong>2. 지구 과학적 광물 형성 레시피 및 현장의 모순 (미션 2):</strong><br>
+          ${state.responses.mission2}
+        </div>
+        <div class="report-summary-point">
+          <strong>3. 인류 문명 보존을 위한 과학적 제언 (미션 3):</strong><br>
+          ${state.responses.mission3}
+        </div>
+        <div class="report-summary-point" style="background: rgba(56, 189, 248, 0.05); padding: 0.75rem; border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.2); margin-top: 1rem;">
+          <strong>4. 지구 시스템 일반화 명제 (최종 성찰):</strong><br>
+          지구 시스템의 <u><strong>${state.responses.finalA}</strong></u>은/는 암석과 토양을 변화시켜 자원을 만들며, 이 자원의 <u><strong>${state.responses.finalB}</strong></u> 방법에 따라 우리 문명의 <u><strong>${state.responses.finalC}</strong></u>이/가 결정된다.
+        </div>
+      `;
+      
+      document.getElementById('reportTextContent').innerHTML = reportContent;
+    }
+
+    function closeReportOverlay() {
+      document.getElementById('reportOverlay').style.display = 'none';
+    }
+
+    // 9. Utilities & Print
+    function showToast(msg) {
+      const toast = document.getElementById('toastBox');
+      document.getElementById('toastMsg').textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function copyReport() {
+      const text = document.getElementById('reportTextContent').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast("보고서 내용이 클립보드에 복사되었습니다.");
+      });
+    }
+
+    function printReport() {
+      const minfo = MINERALS[state.selectedMineral];
+      const printWindow = window.open('', '_blank');
+      
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>지질학 탐구 수행평가 보고서 - ${minfo.name}</title>
+          <style>
+            body { font-family: 'Noto Sans KR', sans-serif; padding: 30px; line-height: 1.6; color: #111; }
+            .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+            .meta { display: flex; justify-content: space-between; font-size: 0.9em; color: #666; margin-bottom: 30px; }
+            .section { margin-bottom: 25px; }
+            .section-title { font-weight: bold; font-size: 1.1em; color: #000; margin-bottom: 8px; border-left: 4px solid #10b981; padding-left: 10px; }
+            .content { background: #f9f9f9; padding: 15px; border: 1px solid #ddd; border-radius: 6px; white-space: pre-line; }
+            .footer { text-align: center; margin-top: 50px; font-size: 0.85em; color: #888; border-top: 1px solid #eee; padding-top: 15px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h2>지질학 탐구 동아리 수행평가 결과 리포트</h2>
+            <p>불공평한 지구? 자원 분포의 비밀과 우리의 미래</p>
+          </div>
+          <div class="meta">
+            <span><strong>제출 학생:</strong> 학술 팀장 (동아리원)</span>
+            <span><strong>탐구 광물:</strong> ${minfo.name} (${minfo.symbol})</span>
+            <span><strong>발행일:</strong> ${new Date().toLocaleDateString('ko-KR')}</span>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">1. 지각 변동과 지정학적 자원 분포 (미션 1)</div>
+            <div class="content">${state.responses.mission1}</div>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">2. 지구 과학적 광물 형성 레시피 및 현장의 모순 (미션 2)</div>
+            <div class="content">${state.responses.mission2}</div>
+          </div>
+          
+          <div class="section">
+            <div class="section-title">3. 인류 문명 보존을 위한 과학적 제언 (미션 3)</div>
+            <div class="content">${state.responses.mission3}</div>
+          </div>
+          
+          <div class="section" style="background:#f0fdf4; border: 1px solid #bbf7d0; border-radius:6px; padding:15px;">
+            <div class="section-title" style="border-left-color:#16a34a;">4. 최종 명제 일반화</div>
+            <p>지구 시스템의 <strong>${state.responses.finalA}</strong>은/는 암석과 토양을 변화시켜 자원을 만들며, 이 자원의 <strong>${state.responses.finalB}</strong> 방법에 따라 우리 문명의 <strong>${state.responses.finalC}</strong>이/가 결정된다.</p>
+          </div>
+          
+          <div class="footer">
+            본 보고서는 AI 수석 연구원 Dr.지오와 심층 과학적 탐구 및 검증 하에 성실하게 완수되었습니다.
+          </div>
+          <script>
+            window.onload = function() { window.print(); }
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  </script>
 </body>
 </html>
